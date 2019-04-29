@@ -30,11 +30,6 @@ void reset_leds()
 	{
 		pixels.setPixelColor(i, pixels.Color(0, 0, 20));
 	}
-
-	for (int i = 42; i < 48; i++)
-	{
-		pixels.setPixelColor(i, pixels.Color(50, 50, 0));
-	}
 }
 
 void setup()
@@ -85,18 +80,6 @@ void loop()
 	pixels.setPixelColor(seconden, pixels.Color(150, 0, 150));
 	pixels.setPixelColor((minuten), pixels.Color(200, 0, 0));
 	pixels.setPixelColor(uren + 30, pixels.Color(200, 200, 200));
-
-	// Set fun lights.
-	for (int i = 42; i < (42 + led_count); i++)
-	{
-		pixels.setPixelColor(i, pixels.Color(0, 50, 50));
-	}
-
-	led_count++;
-	if (led_count > 5)
-	{
-		led_count = 0;
-	}
 
 	pixels.show();
 
