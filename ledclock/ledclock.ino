@@ -10,13 +10,17 @@
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 // Time (in milliseconds) to pause between pixels
-#define DELAYVAL 50				 
+#define DELAYVAL 998			 
 
 int seconden = 30;
 int minuten = 15;
 int uren = 6;
 
 int led_count = 6;
+
+unsigned long startMillis;  //some global variables available anywhere in the program
+unsigned long currentMillis;
+unsigned long endMillis;
 
 void reset_leds()
 {
@@ -35,6 +39,9 @@ void reset_leds()
 void setup()
 {
 
+	Serial.begin(115200);  //start Serial in case we need to print debugging info
+	startMillis = millis();  //initial start time
+
 	pixels.begin();
 	for (int i = 0; i < 30; i++)
 	{
@@ -46,6 +53,9 @@ void setup()
 
 void loop()
 {
+
+	// get the current "time" (actually the number of milliseconds since the program started)
+	startMillis = millis();
 
 	if (seconden < 29)
 	{
@@ -83,5 +93,14 @@ void loop()
 
 	pixels.show();
 
+	// Get Duration of code.
+	endMillis = millis();  //get the current "time" (actually the number of milliseconds since the program started)
+	int loop_time = (endMillis - startMillis);
+
 	delay(DELAYVAL);
+
+	char output[100];
+	sprintf(output, "loop time %d\n", loop_time);
+
+	Serial.write(output); 
 }
