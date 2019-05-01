@@ -7,11 +7,11 @@
     - https://www.ikea.com/nl/nl/catalog/products/00378403/
     - https://www.aliexpress.com/item/32809169128.html?productId=32809169128&productSubject=Addressable-pixel-WS2812B-Ring-1-8-12-16-24-32-40-48-60-93-241-LEDs&spm=a2g0s.9042311.0.0.38f94c4dSoYWRi
     - https://www.adafruit.com/product/1787
-    - ws8212b connecters : https://www.aliexpress.com/popular/connector-ws2812b.html
-
+   
 - Documentation :
   - Markdown syntax : https://guides.github.com/features/mastering-markdown/
   - https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf
+  - ws8212b connecters : https://www.aliexpress.com/popular/connector-ws2812b.html
   - Voltage regulator : https://www.youtube.com/watch?v=GSzVs7_aW-Y
   - Powering NeoPixels : https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels
   - Kicad :
