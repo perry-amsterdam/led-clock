@@ -9,6 +9,7 @@
 - Documentation :
   - https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf
   - Voltage regulator : https://www.youtube.com/watch?v=GSzVs7_aW-Y
+  - Powering NeoPixels : https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels
 
 - Kicad :
   - Reference designator : https://en.wikipedia.org/wiki/Reference_designator
