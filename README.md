@@ -9,3 +9,4 @@ Led clock build with arduino and ws2812b.
 
 - Kicad
   - Reference designator : https://en.wikipedia.org/wiki/Reference_designator
+  - An Intro to KiCad : https://www.youtube.com/watch?v=vaCVh2SAZY4
