@@ -7,6 +7,7 @@
     - https://www.adafruit.com/product/1787
 
 - Documentation :
+  - Markdown syntax : https://guides.github.com/features/mastering-markdown/
   - https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf
   - Voltage regulator : https://www.youtube.com/watch?v=GSzVs7_aW-Y
   - Powering NeoPixels : https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels
@@ -43,5 +44,5 @@ Things to get :
 
 * **Perry Couprie** - *Initial work* - [perry-amsterdam](https://github.com/perry-amsterdam)
 
-Markdown syntax : https://www.makeareadme.com/
+
 
