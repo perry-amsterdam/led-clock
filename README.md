@@ -28,6 +28,8 @@ Adding a 300 to 500 Ohm resistor between your microcontroller's data pin and the
 
 Use a logic level shifter to step up the signal from the microcontroller to the first pixel.
 
+ws8212b connecters : https://www.aliexpress.com/popular/connector-ws2812b.html
+
 Things to get : 
 - large capacitor (1000 µF, 6.3V or higher
 - 300 to 500 Ohm resistor
