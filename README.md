@@ -1,6 +1,6 @@
 # Led clock build with wemos d1 mini and ws2812b.
 
-I am building a led clock from ws2812b leds, picture frame from ikea, some laser cutting, 3d printing, a wemos d1 and some code. This project is to leard to code arduino, lasercutting and some 3d printing. The face of the clock wil be simple, later when the clock is finished i wil ask a groep of people that make art, to do something with the clock face.
+I am building a led clock from ws2812b leds, picture frame from ikea, some laser cutting, 3d printing, a wemos d1 and some code. This project is to learn to code arduino, lasercutting and some 3d printing. The face of the clock wil be simple, later when the clock is finished i wil ask a groep of people that make art, to do something with the clock face.
 
 
 ![GitHub Logo](images/led-clock-face.svg)
