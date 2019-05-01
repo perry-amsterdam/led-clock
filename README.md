@@ -1,5 +1,7 @@
 # Led clock build with arduino and ws2812b.
 
+![GitHub Logo](images/clock-face.jpeg)
+
 - parts : 
     - https://wiki.wemos.cc/products:d1:d1_mini
     - https://www.ikea.com/nl/nl/catalog/products/00378403/
@@ -44,5 +46,7 @@ Things to get :
 
 * **Perry Couprie** - *Initial work* - [perry-amsterdam](https://github.com/perry-amsterdam)
 
+![GitHub Logo](https://www.ikea.com/nl/nl/images/products/ribba-fotolijst-wit__0638327_PE698851_S4.JPG)
+![GitHub Logo](images/ws2812b-leds.jpeg)
 
 
