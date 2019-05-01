@@ -38,9 +38,11 @@ void reset_leds()
 
 void setup()
 {
-
-	Serial.begin(115200);  //start Serial in case we need to print debugging info
-	startMillis = millis();  //initial start time
+	//start Serial in case we need to print debugging info
+	Serial.begin(115200);
+	
+	// get the current "time" (actually the number of milliseconds since the program started)
+	startMillis = millis();
 
 	pixels.begin();
 	for (int i = 0; i < 30; i++)
@@ -54,7 +56,6 @@ void setup()
 void loop()
 {
 
-	// get the current "time" (actually the number of milliseconds since the program started)
 	startMillis = millis();
 
 	if (seconden < 29)
@@ -94,7 +95,7 @@ void loop()
 	pixels.show();
 
 	// Get Duration of code.
-	endMillis = millis();  //get the current "time" (actually the number of milliseconds since the program started)
+	endMillis = millis();
 	int loop_time = (endMillis - startMillis);
 
 	delay(DELAYVAL);
