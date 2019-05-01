@@ -33,7 +33,8 @@ I am building a led clock from ws2812b leds, picture frame from ikea, some laser
  - Wemos example code :
     - Soft access point : https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/soft-access-point-examples.html
     - Scans for available WiFi networks : https://www.arduino.cc/en/Reference/WiFiScanNetworks
-    - 
+    - An Arduino library for ESP8266/ESP32 WLAN configuration at runtime with the Web interface
+
 ## Some misc bla bla : 
 
 Before connecting a NeoPixel strip to ANY source of power, we very strongly recommend adding a large capacitor (1000 µF, 6.3V or higher) across the + and – terminals. This prevents the initial onrush of current from damaging the pixels.
