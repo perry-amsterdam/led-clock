@@ -46,7 +46,7 @@ Things to get :
 
 * **Perry Couprie** - *Initial work* - [perry-amsterdam](https://github.com/perry-amsterdam)
 
-![GitHub Logo](images/picture-frame.jpeg)
+![GitHub Logo](https://www.ikea.com/nl/nl/images/products/ribba-fotolijst-wit__0638327_PE698851_S4.JPG)
 ![GitHub Logo](images/ws2812b-leds.jpeg)
 
 
