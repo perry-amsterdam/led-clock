@@ -1,5 +1,4 @@
-# led-clock
-Led clock build with arduino and ws2812b.
+# Led clock build with arduino and ws2812b.
 
 - parts : 
     - https://wiki.wemos.cc/products:d1:d1_mini
@@ -15,7 +14,8 @@ Led clock build with arduino and ws2812b.
   - Reference designator : https://en.wikipedia.org/wiki/Reference_designator
   - An Intro to KiCad : https://www.youtube.com/watch?v=vaCVh2SAZY4
 
-- Some misc bla bla :-)
+
+## Some misc bla bla :-)
 
 Before connecting a NeoPixel strip to ANY source of power, we very strongly recommend adding a large capacitor (1000 µF, 6.3V or higher) across the + and – terminals. This prevents the initial onrush of current from damaging the pixels.
 
