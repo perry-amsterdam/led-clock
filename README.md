@@ -33,7 +33,7 @@ I am building a led clock from ws2812b leds, picture frame from ikea, some laser
  - Wemos example code :
     - Soft access point : https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/soft-access-point-examples.html
     - Scans for available WiFi networks : https://www.arduino.cc/en/Reference/WiFiScanNetworks
-    - An Arduino library for ESP8266/ESP32 WLAN configuration at runtime with the Web interface
+    - [An Arduino library for ESP8266/ESP32 WLAN configuration at runtime with the Web interface](https://github.com/Hieromon/AutoConnect)
 
 ## Some misc bla bla : 
 
