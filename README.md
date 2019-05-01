@@ -15,6 +15,7 @@
   - LibreCAD : https://librecad.org/
   - Openscad : https://www.openscad.org/
   - Kicad EDA :http://kicad-pcb.org/ 
+  - Arduino Software (IDE) : https://www.arduino.cc/en/Main/Software
 
 - Kicad :
   - Reference designator : https://en.wikipedia.org/wiki/Reference_designator
