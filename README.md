@@ -10,17 +10,15 @@
   - https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf
   - Voltage regulator : https://www.youtube.com/watch?v=GSzVs7_aW-Y
   - Powering NeoPixels : https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels
-  
+  - Kicad :
+    - Reference designator : https://en.wikipedia.org/wiki/Reference_designator
+    - An Intro to KiCad : https://www.youtube.com/watch?v=vaCVh2SAZY4
+    
 - Software used :
   - LibreCAD : https://librecad.org/
   - Openscad : https://www.openscad.org/
   - Kicad EDA :http://kicad-pcb.org/ 
   - Arduino Software (IDE) : https://www.arduino.cc/en/Main/Software
-
-- Kicad :
-  - Reference designator : https://en.wikipedia.org/wiki/Reference_designator
-  - An Intro to KiCad : https://www.youtube.com/watch?v=vaCVh2SAZY4
-
 
 ## Some misc bla bla :-)
 
