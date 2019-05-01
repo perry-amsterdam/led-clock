@@ -1,5 +1,7 @@
 # Led clock build with arduino and ws2812b.
 
+![GitHub Logo](images/clock-face.jpeg)
+![GitHub Logo](images/picture-frame.jpeg)
 ![GitHub Logo](images/ws2812b-leds.jpeg)
 
 - parts : 
