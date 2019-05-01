@@ -7,3 +7,5 @@ Led clock build with arduino and ws2812b.
 - https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf
 - Voltage regulator : https://www.youtube.com/watch?v=GSzVs7_aW-Y
 
+- Kicad
+  - Reference designator : https://en.wikipedia.org/wiki/Reference_designator
