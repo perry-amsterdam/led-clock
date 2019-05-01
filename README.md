@@ -1,6 +1,6 @@
 # Led clock build with arduino and ws2812b.
 
-![GitHub Logo](images/clock-face.jpeg)
+![GitHub Logo](images/clock-face.svg)
 
 - parts : 
     - https://wiki.wemos.cc/products:d1:d1_mini
