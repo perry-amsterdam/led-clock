@@ -22,3 +22,8 @@ Before connecting a NeoPixel strip to ANY source of power, we very strongly reco
 Adding a 300 to 500 Ohm resistor between your microcontroller's data pin and the data input on the first NeoPixel can help prevent voltage spikes that might otherwise damage your first pixel. Please add one between your micro and NeoPixels!
 
 Use a logic level shifter to step up the signal from the microcontroller to the first pixel.
+
+## Authors
+
+* **Perry Couprie** - *Initial work* - [perry-amsterdam](https://github.com/perry-amsterdam)
+
