@@ -23,6 +23,12 @@ Adding a 300 to 500 Ohm resistor between your microcontroller's data pin and the
 
 Use a logic level shifter to step up the signal from the microcontroller to the first pixel.
 
+Things to get : 
+- large capacitor (1000 µF, 6.3V or higher
+- 300 to 500 Ohm resistor
+- logic level shifter 
+- Wemos D1 mini
+
 ## Authors
 
 * **Perry Couprie** - *Initial work* - [perry-amsterdam](https://github.com/perry-amsterdam)
