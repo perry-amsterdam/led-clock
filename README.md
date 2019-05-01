@@ -43,3 +43,5 @@ Things to get :
 
 * **Perry Couprie** - *Initial work* - [perry-amsterdam](https://github.com/perry-amsterdam)
 
+Markdown syntax : https://www.makeareadme.com/
+
