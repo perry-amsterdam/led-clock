@@ -21,9 +21,9 @@
   - Arduino Software (IDE) : https://www.arduino.cc/en/Main/Software
   
  - Github links:
-   - d1_mini_kicad : 
+   - d1_mini_kicad : https://github.com/jerome-labidurie/d1_mini_kicad
 
-## Some misc bla bla : https://github.com/jerome-labidurie/d1_mini_kicad
+## Some misc bla bla : 
 
 Before connecting a NeoPixel strip to ANY source of power, we very strongly recommend adding a large capacitor (1000 µF, 6.3V or higher) across the + and – terminals. This prevents the initial onrush of current from damaging the pixels.
 
