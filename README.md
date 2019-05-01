@@ -15,6 +15,7 @@ Led clock build with arduino and ws2812b.
   - Reference designator : https://en.wikipedia.org/wiki/Reference_designator
   - An Intro to KiCad : https://www.youtube.com/watch?v=vaCVh2SAZY4
 
+- Some misc bla bla :-)
 
 Before connecting a NeoPixel strip to ANY source of power, we very strongly recommend adding a large capacitor (1000 µF, 6.3V or higher) across the + and – terminals. This prevents the initial onrush of current from damaging the pixels.
 
