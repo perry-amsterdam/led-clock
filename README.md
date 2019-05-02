@@ -34,6 +34,7 @@ I am building a led clock from ws2812b leds, picture frame from ikea, some laser
     - Soft access point : https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/soft-access-point-examples.html
     - Scans for available WiFi networks : https://www.arduino.cc/en/Reference/WiFiScanNetworks
     - [An Arduino library for ESP8266/ESP32 WLAN configuration at runtime with the Web interface](https://github.com/Hieromon/AutoConnect)
+    -[Connect Your ESP8266 To Any Available Wi-Fi network](https://ubidots.com/blog/connect-your-esp8266-to-any-available-wi-fi-network/)
 
 ## Some misc bla bla : 
 
