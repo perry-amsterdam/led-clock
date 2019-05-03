@@ -13,14 +13,14 @@ I am building a led clock from ws2812b leds, picture frame from ikea, some laser
     - [carton from van der linden](https://www.vanderlindewebshop.com/nl (clock face))
     
 - Documentation :
-  - Markdown syntax : https://guides.github.com/features/mastering-markdown/
-  - https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf
-  - ws8212b connecters : https://www.aliexpress.com/popular/connector-ws2812b.html
-  - Voltage regulator : https://www.youtube.com/watch?v=GSzVs7_aW-Y
-  - Powering NeoPixels : https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels
+  - [Markdown syntax](https://guides.github.com/features/mastering-markdown/)
+  - [ws2812b](https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf)
+  - [ws8212b connecters](https://www.aliexpress.com/popular/connector-ws2812b.html)
+  - [Voltage regulator](https://www.youtube.com/watch?v=GSzVs7_aW-Y)
+  - [Powering NeoPixels](https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels)
   - Kicad :
-    - Reference designator : https://en.wikipedia.org/wiki/Reference_designator
-    - An Intro to KiCad : https://www.youtube.com/watch?v=vaCVh2SAZY4
+    - [Reference designator](https://en.wikipedia.org/wiki/Reference_designator)
+    - [An Intro to KiCad](https://www.youtube.com/watch?v=vaCVh2SAZY4)
     
 - Software used :
   - LibreCAD : https://librecad.org/
