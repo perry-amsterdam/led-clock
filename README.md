@@ -23,17 +23,17 @@ I am building a led clock from ws2812b leds, picture frame from ikea, some laser
     - [An Intro to KiCad](https://www.youtube.com/watch?v=vaCVh2SAZY4)
     
 - Software used :
-  - LibreCAD : https://librecad.org/
-  - Openscad : https://www.openscad.org/
-  - Kicad EDA :http://kicad-pcb.org/ 
-  - Arduino Software (IDE) : https://www.arduino.cc/en/Main/Software
+  - [LibreCAD](https://librecad.org/)
+  - [Openscad](https://www.openscad.org/)
+  - [Kicad EDA](http://kicad-pcb.org/)
+  - [Arduino Software (IDE)](https://www.arduino.cc/en/Main/Software)
   
  - Github links :
-   - d1_mini_kicad : https://github.com/jerome-labidurie/d1_mini_kicad
+   - [d1_mini_kicad](https://github.com/jerome-labidurie/d1_mini_kicad)
    
  - Wemos example code :
-    - Soft access point : https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/soft-access-point-examples.html
-    - Scans for available WiFi networks : https://www.arduino.cc/en/Reference/WiFiScanNetworks
+    - [Soft access point](https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/soft-access-point-examples.html)
+    - [Scans for available WiFi networks](https://www.arduino.cc/en/Reference/WiFiScanNetworks)
     - [An Arduino library for ESP8266/ESP32 WLAN configuration at runtime with the Web interface](https://github.com/Hieromon/AutoConnect)
     - [Connect Your ESP8266 To Any Available Wi-Fi network](https://ubidots.com/blog/connect-your-esp8266-to-any-available-wi-fi-network/)
 
