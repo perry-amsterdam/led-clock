@@ -35,6 +35,7 @@ I am building a led clock from ws2812b leds, picture frame from ikea, some laser
  - Github links :
    - [d1_mini_kicad](https://github.com/jerome-labidurie/d1_mini_kicad)
    - [ESP8266 Wifi connection and configuration manager](https://github.com/mariacarlinahernandez/ConfigManager)
+   - [Ping library for ESP8266 Arduino core](https://github.com/dancol90/ESP8266Ping)
    
  - Wemos example code :
     - [Soft access point](https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/soft-access-point-examples.html)
