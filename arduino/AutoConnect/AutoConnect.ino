@@ -9,6 +9,7 @@
 
 #if defined(ARDUINO_ARCH_ESP8266)
 #include <ESP8266WiFi.h>
+#include <ESP8266Ping.h>
 #include <ESP8266WebServer.h>
 #elif defined(ARDUINO_ARCH_ESP32)
 #include <WiFi.h>
@@ -16,6 +17,8 @@
 #endif
 #include <time.h>
 #include <AutoConnect.h>
+
+const IPAddress remote_ip(8,8,8,8);
 
 static const char AUX_TIMEZONE[] PROGMEM = R"(
 {
@@ -196,5 +199,22 @@ void setup()
 
 void loop()
 {
+
 	Portal.handleClient();
+
+		Serial.println();
+		Serial.print("WiFi connected with ip ");
+		Serial.println(WiFi.localIP());
+
+		Serial.print("Pinging ip ");
+		Serial.println(remote_ip);
+
+		if(Ping.ping(remote_ip))
+	{
+		Serial.println("Success!!");
+	}
+	else
+	{
+		Serial.println("Error :(");
+	}
 }
