@@ -21,9 +21,10 @@ I am building a led clock from ws2812b leds, picture frame from ikea, some laser
   - Kicad :
     - [Reference designator](https://en.wikipedia.org/wiki/Reference_designator)
     - [An Intro to KiCad](https://www.youtube.com/watch?v=vaCVh2SAZY4)
-  - Bookmarks :
-    - [Thingivers](https://www.thingiverse.com/)
-    - [Hackster IO](https://www.hackster.io/)
+
+- Bookmarks :
+  - [Thingivers](https://www.thingiverse.com/)
+  - [Hackster IO](https://www.hackster.io/)
     
 - Software used :
   - [LibreCAD](https://librecad.org/)
