@@ -10,7 +10,8 @@ I am building a led clock from ws2812b leds, picture frame from ikea, some laser
     - https://www.ikea.com/nl/nl/catalog/products/00378403/
     - https://www.aliexpress.com/item/32809169128.html?productId=32809169128&productSubject=Addressable-pixel-WS2812B-Ring-1-8-12-16-24-32-40-48-60-93-241-LEDs&spm=a2g0s.9042311.0.0.38f94c4dSoYWRi
     - Level-Shifter (3V to 5V) https://www.adafruit.com/product/1787
-   
+    - carton from https://www.vanderlindewebshop.com/nl (clock face)
+    
 - Documentation :
   - Markdown syntax : https://guides.github.com/features/mastering-markdown/
   - https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf
