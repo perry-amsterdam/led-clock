@@ -13,7 +13,6 @@ The clock must be connected to internet to retrieve time information from a ntp 
     - [Picture frame ikea 23x23cm](https://www.ikea.com/nl/nl/catalog/products/00378403/)
     - [RGB LED Ring WS2811 ic Built-in RGB DC5V](https://www.aliexpress.com/item/32809169128.html?productId=32809169128&productSubject=Addressable-pixel-WS2812B-Ring-1-8-12-16-24-32-40-48-60-93-241-LEDs&spm=a2g0s.9042311.0.0.38f94c4dSoYWRi)
     - [Carton from van der linden](https://www.vanderlindewebshop.com/nl (clock face))
-    
 - Software used :
   - [LibreCAD](https://librecad.org/)
   - [Openscad](https://www.openscad.org/)
@@ -22,7 +21,6 @@ The clock must be connected to internet to retrieve time information from a ntp 
   - Libaries :
     - [Ping library for ESP8266 Arduino core](https://github.com/dancol90/ESP8266Ping)
     - [ESP8266 Wifi connection and configuration manager](https://github.com/mariacarlinahernandez/ConfigManager)
-    
 - Documentation :
   - [Markdown syntax](https://guides.github.com/features/mastering-markdown/)
   - [ws2812b](https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf)
@@ -40,7 +38,6 @@ The clock must be connected to internet to retrieve time information from a ntp 
  - Github links :
    - [d1_mini_kicad](https://github.com/jerome-labidurie/d1_mini_kicad)
    - [An Arduino library for ESP8266/ESP32 WLAN configuration at runtime with the Web interface](https://github.com/Hieromon/AutoConnect)
-   
  - Wemos example code :
     - [Soft access point](https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/soft-access-point-examples.html)
     - [Scans for available WiFi networks](https://www.arduino.cc/en/Reference/WiFiScanNetworks)
