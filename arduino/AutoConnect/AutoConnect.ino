@@ -59,8 +59,8 @@ static const char AUX_TIMEZONE[] PROGMEM = R"(
 typedef struct
 {
 	const char* zone;
-		const char* ntpServer;
-		int8_t      tzoff;
+	const char* ntpServer;
+	int8_t      tzoff;
 } Timezone_t;
 
 static const Timezone_t TZ[] =
@@ -98,7 +98,7 @@ WebServer Server;
 #endif
 
 AutoConnect       Portal(Server);
-AutoConnectConfig Config;		 // Enable autoReconnect supported on v0.9.4
+AutoConnectConfig Config;
 AutoConnectAux    Timezone;
 
 void rootPage()
@@ -115,19 +115,18 @@ void rootPage()
 		"<p></p><p style=\"padding-top:15px;text-align:center\">" AUTOCONNECT_LINK(COG_24) "</p>"
 		"</body>"
 		"</html>";
-		static const char *wd[7] = { "Sun","Mon","Tue","Wed","Thr","Fri","Sat" };
-	struct tm *tm;
-		time_t  t;
-		char    dateTime[26];
 
-		t = time(NULL);
-		tm = localtime(&t);
-		sprintf(dateTime, "%04d/%02d/%02d(%s) %02d:%02d:%02d.",
-		tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-		wd[tm->tm_wday],
-		tm->tm_hour, tm->tm_min, tm->tm_sec);
-		content.replace("{{DateTime}}", String(dateTime));
-		Server.send(200, "text/html", content);
+	static const char *wd[7] = { "Sun","Mon","Tue","Wed","Thr","Fri","Sat" };
+
+	struct tm *tm;
+	time_t  t;
+	char    dateTime[26];
+
+	t = time(NULL);
+	tm = localtime(&t);
+	sprintf(dateTime, "%04d/%02d/%02d(%s) %02d:%02d:%02d.", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, wd[tm->tm_wday], tm->tm_hour, tm->tm_min, tm->tm_sec);
+	content.replace("{{DateTime}}", String(dateTime));
+	Server.send(200, "text/html", content);
 }
 
 
@@ -137,60 +136,64 @@ void startPage()
 	// Values are accessible with the element name.
 	String  tz = Server.arg("timezone");
 
-		for (uint8_t n = 0; n < sizeof(TZ) / sizeof(Timezone_t); n++)
+	for (uint8_t n = 0; n < sizeof(TZ) / sizeof(Timezone_t); n++)
 	{
 		String  tzName = String(TZ[n].zone);
-			if (tz.equalsIgnoreCase(tzName))
+		if (tz.equalsIgnoreCase(tzName))
 		{
 			configTime(TZ[n].tzoff * 3600, 0, TZ[n].ntpServer);
-				Serial.println("Time zone: " + tz);
-				Serial.println("ntp server: " + String(TZ[n].ntpServer));
-				break;
+			Serial.println("Time zone: " + tz);
+			Serial.println("ntp server: " + String(TZ[n].ntpServer));
+			break;
 		}
 	}
 
 	// The /start page just constitutes timezone,
 	// it redirects to the root page without the content response.
 	Server.sendHeader("Location", String("http://") + Server.client().localIP().toString() + String("/"));
-		Server.send(302, "text/plain", "");
-		Server.client().flush();
-		Server.client().stop();
+	Server.send(302, "text/plain", "");
+	Server.client().flush();
+	Server.client().stop();
 }
 
 
 void setup()
 {
 	delay(1000);
-		Serial.begin(115200);
-		Serial.println();
+	Serial.begin(115200);
+	Serial.println();
 
 	// Enable saved past credential by autoReconnect option,
 	// even once it is disconnected.
-		Config.autoReconnect = true;
-		Portal.config(Config);
+	Config.autoReconnect = true;
+	Portal.config(Config);
 
 	// Load aux. page
-		Timezone.load(AUX_TIMEZONE);
+	Timezone.load(AUX_TIMEZONE);
+
 	// Retrieve the select element that holds the time zone code and
 	// register the zone mnemonic in advance.
-		AutoConnectSelect&  tz = Timezone["timezone"].as<AutoConnectSelect>();
-		for (uint8_t n = 0; n < sizeof(TZ) / sizeof(Timezone_t); n++)
+	AutoConnectSelect&  tz = Timezone["timezone"].as<AutoConnectSelect>();
+	for (uint8_t n = 0; n < sizeof(TZ) / sizeof(Timezone_t); n++)
 	{
 		tz.add(String(TZ[n].zone));
 	}
 
-	Portal.join(				 // Register aux. page
+
+	// Register aux. page
+	Portal.join(	
 	{
 		Timezone
 	});
 
 	// Behavior a root path of ESP8266WebServer.
-		Server.on("/", rootPage);
-								 // Set NTP server trigger handler
-		Server.on("/start", startPage);
+	Server.on("/", rootPage);
+
+	// Set NTP server trigger handler
+	Server.on("/start", startPage);
 
 	// Establish a connection with an autoReconnect option.
-		if (Portal.begin())
+	if (Portal.begin())
 	{
 		Serial.println("WiFi connected: " + WiFi.localIP().toString());
 	}
@@ -202,14 +205,14 @@ void loop()
 
 	Portal.handleClient();
 
-		Serial.println();
-		Serial.print("WiFi connected with ip ");
-		Serial.println(WiFi.localIP());
+	Serial.println();
+	Serial.print("WiFi connected with ip ");
+	Serial.println(WiFi.localIP());
 
-		Serial.print("Pinging ip ");
-		Serial.println(remote_ip);
+	Serial.print("Pinging ip ");
+	Serial.println(remote_ip);
 
-		if(Ping.ping(remote_ip))
+	if(Ping.ping(remote_ip))
 	{
 		Serial.println("Success!!");
 	}
