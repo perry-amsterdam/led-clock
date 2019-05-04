@@ -12,7 +12,6 @@ The clock must be connected to internet to retrieve time information from a ntp 
     - [Wemos d1 mini](https://wiki.wemos.cc/products:d1:d1_mini)
     - [Picture frame ikea 23x23cm](https://www.ikea.com/nl/nl/catalog/products/00378403/)
     - [RGB LED Ring WS2811 ic Built-in RGB DC5V](https://www.aliexpress.com/item/32809169128.html?productId=32809169128&productSubject=Addressable-pixel-WS2812B-Ring-1-8-12-16-24-32-40-48-60-93-241-LEDs&spm=a2g0s.9042311.0.0.38f94c4dSoYWRi)
-    - [Level-Shifter (3V to 5V)]( https://www.adafruit.com/product/1787)
     - [Carton from van der linden](https://www.vanderlindewebshop.com/nl (clock face))
     
 - Documentation :
