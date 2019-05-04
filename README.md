@@ -19,8 +19,9 @@ The clock must be connected to internet to retrieve time information from a ntp 
   - [Openscad](https://www.openscad.org/)
   - [Kicad EDA](http://kicad-pcb.org/)
   - [Arduino Software (IDE)](https://www.arduino.cc/en/Main/Software)
-  - [Ping library for ESP8266 Arduino core](https://github.com/dancol90/ESP8266Ping)
-  - [ESP8266 Wifi connection and configuration manager](https://github.com/mariacarlinahernandez/ConfigManager)
+  - Libaries :
+    - [Ping library for ESP8266 Arduino core](https://github.com/dancol90/ESP8266Ping)
+    - [ESP8266 Wifi connection and configuration manager](https://github.com/mariacarlinahernandez/ConfigManager)
     
 - Documentation :
   - [Markdown syntax](https://guides.github.com/features/mastering-markdown/)
