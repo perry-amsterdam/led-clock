@@ -14,6 +14,14 @@ The clock must be connected to internet to retrieve time information from a ntp 
     - [RGB LED Ring WS2811 ic Built-in RGB DC5V](https://www.aliexpress.com/item/32809169128.html?productId=32809169128&productSubject=Addressable-pixel-WS2812B-Ring-1-8-12-16-24-32-40-48-60-93-241-LEDs&spm=a2g0s.9042311.0.0.38f94c4dSoYWRi)
     - [Carton from van der linden](https://www.vanderlindewebshop.com/nl (clock face))
     
+- Software used :
+  - [LibreCAD](https://librecad.org/)
+  - [Openscad](https://www.openscad.org/)
+  - [Kicad EDA](http://kicad-pcb.org/)
+  - [Arduino Software (IDE)](https://www.arduino.cc/en/Main/Software)
+  - [Ping library for ESP8266 Arduino core](https://github.com/dancol90/ESP8266Ping)
+  - [ESP8266 Wifi connection and configuration manager](https://github.com/mariacarlinahernandez/ConfigManager)
+    
 - Documentation :
   - [Markdown syntax](https://guides.github.com/features/mastering-markdown/)
   - [ws2812b](https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf)
@@ -27,14 +35,6 @@ The clock must be connected to internet to retrieve time information from a ntp 
 - Bookmarks :
   - [Thingivers](https://www.thingiverse.com/)
   - [Hackster IO](https://www.hackster.io/)
-    
-- Software used :
-  - [LibreCAD](https://librecad.org/)
-  - [Openscad](https://www.openscad.org/)
-  - [Kicad EDA](http://kicad-pcb.org/)
-  - [Arduino Software (IDE)](https://www.arduino.cc/en/Main/Software)
-  - [Ping library for ESP8266 Arduino core](https://github.com/dancol90/ESP8266Ping)
-  - [ESP8266 Wifi connection and configuration manager](https://github.com/mariacarlinahernandez/ConfigManager)
   
  - Github links :
    - [d1_mini_kicad](https://github.com/jerome-labidurie/d1_mini_kicad)
