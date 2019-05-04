@@ -33,11 +33,11 @@ The clock must be connected to internet to retrieve time information from a ntp 
   - [Openscad](https://www.openscad.org/)
   - [Kicad EDA](http://kicad-pcb.org/)
   - [Arduino Software (IDE)](https://www.arduino.cc/en/Main/Software)
+  - [Ping library for ESP8266 Arduino core](https://github.com/dancol90/ESP8266Ping)
+  - [ESP8266 Wifi connection and configuration manager](https://github.com/mariacarlinahernandez/ConfigManager)
   
  - Github links :
    - [d1_mini_kicad](https://github.com/jerome-labidurie/d1_mini_kicad)
-   - [ESP8266 Wifi connection and configuration manager](https://github.com/mariacarlinahernandez/ConfigManager)
-   - [Ping library for ESP8266 Arduino core](https://github.com/dancol90/ESP8266Ping)
    - [An Arduino library for ESP8266/ESP32 WLAN configuration at runtime with the Web interface](https://github.com/Hieromon/AutoConnect)
    
  - Wemos example code :
