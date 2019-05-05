@@ -44,6 +44,8 @@ The clock must be connected to internet to retrieve time information from a ntp 
   - [Contiki: The Open Source OS for the Internet of Things](http://www.contiki-os.org/)
   - [Riot-os: The friendly Operating System for the Internet of Things](http://www.riot-os.org/)
   - [CoAP RFC 7252 Constrained Application Protocol](https://coap.technology/)
+  - [How to sniff Zigbee traffic](http://www.zigbee2mqtt.io/how_tos/how_to_sniff_zigbee_traffic.html)
+  - [Wireshark ZigBee Sniffer](https://www.cd-jackson.com/downloads/ZigBeeWiresharkSniffer.pdf)
   
  - Github links :
    - [d1_mini_kicad](https://github.com/jerome-labidurie/d1_mini_kicad)
