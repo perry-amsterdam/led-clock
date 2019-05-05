@@ -46,6 +46,7 @@ The clock must be connected to internet to retrieve time information from a ntp 
   - [CoAP RFC 7252 Constrained Application Protocol](https://coap.technology/)
   - [How to sniff Zigbee traffic](http://www.zigbee2mqtt.io/how_tos/how_to_sniff_zigbee_traffic.html)
   - [Wireshark ZigBee Sniffer](https://www.cd-jackson.com/downloads/ZigBeeWiresharkSniffer.pdf)
+  - [wireless analysis of 868 mhz traffic with an rtl-sdr and the traffic detective software[(https://www.rtl-sdr.com/wireless-analysis-of-868-mhz-traffic-with-an-rtl-sdr-and-the-traffic-detective-software/)
   
  - Github links :
    - [d1_mini_kicad](https://github.com/jerome-labidurie/d1_mini_kicad)
