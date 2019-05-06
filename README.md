@@ -44,7 +44,7 @@ The clock must be connected to internet to retrieve time information from a ntp 
     - [Soft access point](https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/soft-access-point-examples.html)
     - [Scans for available WiFi networks](https://www.arduino.cc/en/Reference/WiFiScanNetworks)
     - [Connect Your ESP8266 To Any Available Wi-Fi network](https://ubidots.com/blog/connect-your-esp8266-to-any-available-wi-fi-network/)
-   - Bookmarks :
+- Bookmarks :
   - [Thingivers](https://www.thingiverse.com/)
   - [Hackster IO](https://www.hackster.io/)
   - [ Arduino, ESP8266 & Raspberry Pi stuff : MQTT for beginners](https://arduinodiy.wordpress.com/2017/11/24/mqtt-for-beginners/)
