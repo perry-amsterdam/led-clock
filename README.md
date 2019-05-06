@@ -36,8 +36,15 @@ The clock must be connected to internet to retrieve time information from a ntp 
   - Kicad :
     - [Reference designator](https://en.wikipedia.org/wiki/Reference_designator)
     - [An Intro to KiCad](https://www.youtube.com/watch?v=vaCVh2SAZY4)
-
-- Bookmarks :
+  
+ - Github links :
+   - [d1_mini_kicad](https://github.com/jerome-labidurie/d1_mini_kicad)
+   - [An Arduino library for ESP8266/ESP32 WLAN configuration at runtime with the Web interface](https://github.com/Hieromon/AutoConnect)
+ - Wemos example code :
+    - [Soft access point](https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/soft-access-point-examples.html)
+    - [Scans for available WiFi networks](https://www.arduino.cc/en/Reference/WiFiScanNetworks)
+    - [Connect Your ESP8266 To Any Available Wi-Fi network](https://ubidots.com/blog/connect-your-esp8266-to-any-available-wi-fi-network/)
+   - Bookmarks :
   - [Thingivers](https://www.thingiverse.com/)
   - [Hackster IO](https://www.hackster.io/)
   - [ Arduino, ESP8266 & Raspberry Pi stuff : MQTT for beginners](https://arduinodiy.wordpress.com/2017/11/24/mqtt-for-beginners/)
@@ -47,15 +54,7 @@ The clock must be connected to internet to retrieve time information from a ntp 
   - Zigbee
     - [How to sniff Zigbee traffic](http://www.zigbee2mqtt.io/how_tos/how_to_sniff_zigbee_traffic.html)
     - [Wireshark ZigBee Sniffer](https://www.cd-jackson.com/downloads/ZigBeeWiresharkSniffer.pdf)
-    - [CC2531 stick](https://nl.aliexpress.com/af/cc2531.html?d=y&origin=n&spm=a2g0z.search0604.8.7.784a2a7043niRm&jump=afs&productId=32982628286&SearchText=cc2531&initiative_id=QRW_20190505060041&isViewCP=y)
-  
- - Github links :
-   - [d1_mini_kicad](https://github.com/jerome-labidurie/d1_mini_kicad)
-   - [An Arduino library for ESP8266/ESP32 WLAN configuration at runtime with the Web interface](https://github.com/Hieromon/AutoConnect)
- - Wemos example code :
-    - [Soft access point](https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/soft-access-point-examples.html)
-    - [Scans for available WiFi networks](https://www.arduino.cc/en/Reference/WiFiScanNetworks)
-    - [Connect Your ESP8266 To Any Available Wi-Fi network](https://ubidots.com/blog/connect-your-esp8266-to-any-available-wi-fi-network/)
+    - [CC2531 stick](https://nl.aliexpress.com/af/cc2531.html?d=y&origin=n&spm=a2g0z.search0604.8.7.784a2a7043niRm&jump=afs&productId=32982628286&SearchText=cc2531&initiative_id=QRW_20190505060041&isViewCP=y) 
 
 ## Some misc bla bla : 
 
