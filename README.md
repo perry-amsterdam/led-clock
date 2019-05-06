@@ -48,10 +48,10 @@ The clock must be connected to internet to retrieve time information from a ntp 
   - [Thingivers](https://www.thingiverse.com/)
   - [Hackster IO](https://www.hackster.io/)
   - [ Arduino, ESP8266 & Raspberry Pi stuff : MQTT for beginners](https://arduinodiy.wordpress.com/2017/11/24/mqtt-for-beginners/)
+  - [CoAP RFC 7252 Constrained Application Protocol](https://coap.technology/)
   - Embedded OS
     - [Contiki: The Open Source OS for the Internet of Things](http://www.contiki-os.org/)
     - [Riot-os: The friendly Operating System for the Internet of Things](http://www.riot-os.org/)
-  - [CoAP RFC 7252 Constrained Application Protocol](https://coap.technology/)
   - Zigbee
     - [How to sniff Zigbee traffic](http://www.zigbee2mqtt.io/how_tos/how_to_sniff_zigbee_traffic.html)
     - [Wireshark ZigBee Sniffer](https://www.cd-jackson.com/downloads/ZigBeeWiresharkSniffer.pdf)
