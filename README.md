@@ -6,9 +6,6 @@ I am building a led clock from ws2812b leds, picture frame from ikea, some laser
 
 The clock must be connected to internet to retrieve time information from a ntp (time server). To connect to the interet the clock must connect to a wifi ap. When the clock starts up for the first time, it can not connect to a wifi network. When the clock can not connect to a wifi network itself wil become a wireless acces point, the clock wil also become captive portal. A website to setup the clock, connect to internet an set a time zone. To do that you connect to de clock wifi AP with a phone/table/latop, after connecting to the AP you can browse to www.clocksetup to setup the clock.
 
-Software :
-- Install arduino libary : NTPClient
-
 ![GitHub Logo](images/led-clock-face.svg)
 
 - Parts used and link to where you can buy it: 
@@ -59,6 +56,10 @@ Software :
     - [How to sniff Zigbee traffic](http://www.zigbee2mqtt.io/how_tos/how_to_sniff_zigbee_traffic.html)
     - [Wireshark ZigBee Sniffer](https://www.cd-jackson.com/downloads/ZigBeeWiresharkSniffer.pdf)
     - [CC2531 stick](https://nl.aliexpress.com/af/cc2531.html?d=y&origin=n&spm=a2g0z.search0604.8.7.784a2a7043niRm&jump=afs&productId=32982628286&SearchText=cc2531&initiative_id=QRW_20190505060041&isViewCP=y) 
+    
+  
+Software :
+- Install arduino libary : NTPClient
 
 ## Some misc bla bla : 
 
