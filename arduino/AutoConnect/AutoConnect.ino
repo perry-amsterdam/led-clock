@@ -1,8 +1,7 @@
 /*
-  Simple.ino, Example for the AutoConnect library.
-  Copyright (c) 2018, Hieromon Ikasamo
-  https://github.com/Hieromon/AutoConnect
-
+  led-clock.ino
+  Copyright (c) 2019, Perry Couprie
+  https://github.com/perry-amsterdam/led-clock
   This software is released under the MIT License.
   https://opensource.org/licenses/MIT
 */
@@ -22,8 +21,6 @@
 int hours = 12;
 int minutes = 0;
 int seconds = 0;
-
-//unsigned long lastDraw = 0;
 
 // Create ntp client opject.
 WiFiUDP ntpUDP;
