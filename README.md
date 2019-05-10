@@ -25,6 +25,8 @@ The clock must be connected to internet to retrieve time information from a ntp 
   - Libaries :
     - [Ping library for ESP8266 Arduino core](https://github.com/dancol90/ESP8266Ping)
     - [ESP8266 Wifi connection and configuration manager](https://github.com/mariacarlinahernandez/ConfigManager)
+    - [Time library for Arduino](https://github.com/PaulStoffregen/Time)
+    - [Arduino library to facilitate time zone conversions and automatic daylight saving (summer) time adjustments.](https://github.com/JChristensen/Timezone)
 - Documentation :
   - [Markdown syntax](https://guides.github.com/features/mastering-markdown/)
   - [ws2812b](https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf)
