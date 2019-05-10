@@ -122,10 +122,12 @@ AutoConnectAux Timezone;
 // and hours if necessary.
 void updateTime()
 {
-  if (timeClient.update()) {
+  if (timeClient.update()) 
+  {
     hours = timeClient.getHours();
     minutes = timeClient.getMinutes();
     seconds = timeClient.getSeconds();
+    Serial.print("Update time called : ");
     Serial.println(timeClient.getFormattedTime());
     time_ready = true;
   }
@@ -250,18 +252,26 @@ void loop()
 	}
  
   // Check if we need to update seconds, minutes, hours:
-  if (lastDraw + CLOCK_SPEED < millis())
+  if ((lastDraw + (CLOCK_SPEED * 5 * 60)) < millis())
   {
     
     lastDraw = millis();
     
     // Add a second, update minutes/hours if necessary:
     updateTime();
-    if (time_ready) 
-    {
-      char buffer[100];
-      sprintf(buffer, "Time hour %d, minuts %d, seconds %d", hours, minutes, seconds);
-      Serial.println(buffer);
-    }
-  } 
+  }
+   
+  struct tm *tm;
+  time_t t;
+  char dateTime[26];
+  static const char *wd[7] = { "Sun","Mon","Tue","Wed","Thr","Fri","Sat" };
+
+  // Local time info.
+  t = time(NULL);
+  tm = localtime(&t);
+  sprintf(dateTime, "####### %04d/%02d/%02d(%s) %02d:%02d:%02d.", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, wd[tm->tm_wday], tm->tm_hour, tm->tm_min, tm->tm_sec);
+  Serial.println(dateTime);
+  //  char buffer[100];
+  //  sprintf(buffer, "Time hour %d, minutes %d, seconds %d", hours, minutes, seconds);
+  //  Serial.println(buffer); 
 }
