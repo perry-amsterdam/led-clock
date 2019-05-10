@@ -15,25 +15,17 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #endif
-#include <time.h>
 #include <AutoConnect.h>
 #include <NTPClient.h>
-//#include <timezone.h>
-
-const IPAddress remote_ip(8,8,8,8);
 
 // Use these variables to set the initial time
 int hours = 12;
 int minutes = 0;
 int seconds = 0;
-bool time_ready = false;
 
-unsigned long lastDraw = 0;
+//unsigned long lastDraw = 0;
 
-// How fast do you want the clock to spin? Set this to 1 for fun.
-// Set this to 1000 to get _about_ 1 second timing.
-const int CLOCK_SPEED = 1000;
-
+// Create ntp client opject.
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "sg.pool.ntp.org", 2*60*60, 15*60*1000);  // offset +2 hours, update every 15 min.
 
@@ -69,8 +61,6 @@ static const char AUX_TIMEZONE[] PROGMEM = R"(
 	}
 	]
 }
-
-
 )";
 
 typedef struct
@@ -117,21 +107,6 @@ WebServer Server;
 AutoConnect Portal(Server);
 AutoConnectConfig Config;
 AutoConnectAux Timezone;
-
-// Simple function to increment seconds and then increment minutes
-// and hours if necessary.
-void updateTime()
-{
-  if (timeClient.update()) 
-  {
-    hours = timeClient.getHours();
-    minutes = timeClient.getMinutes();
-    seconds = timeClient.getSeconds();
-    Serial.print("Update time called : ");
-    Serial.println(timeClient.getFormattedTime());
-    time_ready = true;
-  }
-}
 
 void rootPage()
 {
@@ -211,7 +186,7 @@ void setup()
 		tz.add(String(TZ[n].zone));
 	}
 
-  // Register aux. page
+	// Register aux. page
 	Portal.join(	
 	{
 		Timezone
@@ -230,7 +205,6 @@ void setup()
 	}
 }
 
-
 void loop()
 {
 	Portal.handleClient();
@@ -239,39 +213,18 @@ void loop()
 	Serial.print("WiFi connected with ip ");
 	Serial.println(WiFi.localIP());
 
-	Serial.print("Pinging ip ");
-	Serial.println(remote_ip);
-
-	if(Ping.ping(remote_ip))
-	{
-		Serial.println("Success!!");
-	}
-	else
-	{
-		Serial.println("Error :(");
-	}
- 
-  // Check if we need to update seconds, minutes, hours:
-  if ((lastDraw + (CLOCK_SPEED * 5 * 60)) < millis())
+  // Add a second, update minutes/hours if necessary:
+  if (timeClient.update())
   {
-    
-    lastDraw = millis();
-    
-    // Add a second, update minutes/hours if necessary:
-    updateTime();
-  }
-   
-  struct tm *tm;
-  time_t t;
-  char dateTime[26];
-  static const char *wd[7] = { "Sun","Mon","Tue","Wed","Thr","Fri","Sat" };
 
-  // Local time info.
-  t = time(NULL);
-  tm = localtime(&t);
-  sprintf(dateTime, "####### %04d/%02d/%02d(%s) %02d:%02d:%02d.", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, wd[tm->tm_wday], tm->tm_hour, tm->tm_min, tm->tm_sec);
-  Serial.println(dateTime);
-  //  char buffer[100];
-  //  sprintf(buffer, "Time hour %d, minutes %d, seconds %d", hours, minutes, seconds);
-  //  Serial.println(buffer); 
+    // Get time info.
+    hours = timeClient.getHours();
+    minutes = timeClient.getMinutes();
+    seconds = timeClient.getSeconds();
+
+    // Display time info.
+    Serial.print("Clock time : ");
+    Serial.println(timeClient.getFormattedTime());
+  }
+  delay(600);
 }
