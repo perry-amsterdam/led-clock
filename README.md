@@ -15,8 +15,6 @@ The clock must be connected to internet to retrieve time information from a ntp 
     - [x] [Carton from van der linden](https://www.vanderlindewebshop.com/nl (clock face))
     Things to get : 
     - [x] large capacitor (1000 µF, 6.3V or higher
-    - [ ] [Electrolytic Capacitor 1000uf 16v](https://www.aliexpress.com/item/A1-free-shipping-50pcs-Aluminum-electrolytic-capacitor-1000uf-16v-8-16-Electrolytic-capacitor/32418323423.html?spm=2114.search0104.3.1.7ac44ff0z6KCGE&ws_ab_test=searchweb0_0,searchweb201602_1_10065_5729911_10068_319_317_10696_5728811_453_10084_454_10083_10618_10304_10307_10820_10301_10821_537_536_5730811_10843_5733211_328_5733311_10059_10884_5733411_10887_5730011_100031_5731011_321_322_10103_5729011_5733611_5733111_5733511-5729911,searchweb201603_55,ppcSwitch_0&algo_expid=30318461-2622-44fb-a704-914d5081f388-0&algo_pvid=30318461-2622-44fb-a704-914d5081f388)
-
     - [x] 300 to 500 Ohm resistor
     - [ ] logic level shifter 74AHCT125 - Quad Level-Shifter (3V to 5V)   
 - Software used :
