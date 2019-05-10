@@ -126,7 +126,7 @@ void rootPage()
 	time_t t;
 	char dateTime[26];
 
-  // Local time info.
+	// Local time info.
 	t = time(NULL);
 	tm = localtime(&t);
 	sprintf(dateTime, "%04d/%02d/%02d(%s) %02d:%02d:%02d.", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, wd[tm->tm_wday], tm->tm_hour, tm->tm_min, tm->tm_sec);
