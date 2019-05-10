@@ -11,12 +11,10 @@ The clock must be connected to internet to retrieve time information from a ntp 
 - Parts used and link to where you can buy it: 
     - [x] [Wemos d1 mini](https://wiki.wemos.cc/products:d1:d1_mini)
     - [x] [Picture frame ikea 23x23cm](https://www.ikea.com/nl/nl/catalog/products/00378403/)
-    - [ ] [RGB LED Ring WS2811 ic Built-in RGB DC5V](https://www.aliexpress.com/item/32809169128.html?productId=32809169128&productSubject=Addressable-pixel-WS2812B-Ring-1-8-12-16-24-32-40-48-60-93-241-LEDs&spm=a2g0s.9042311.0.0.38f94c4dSoYWRi)
+    - [x] [RGB LED Ring WS2811 ic Built-in RGB DC5V](https://www.aliexpress.com/item/32809169128.html?productId=32809169128&productSubject=Addressable-pixel-WS2812B-Ring-1-8-12-16-24-32-40-48-60-93-241-LEDs&spm=a2g0s.9042311.0.0.38f94c4dSoYWRi)
     - [x] [Carton from van der linden](https://www.vanderlindewebshop.com/nl (clock face))
     Things to get : 
     - [x] large capacitor (1000 µF, 6.3V or higher
-    - [ ] [Electrolytic Capacitor 1000uf 16v](https://www.aliexpress.com/item/A1-free-shipping-50pcs-Aluminum-electrolytic-capacitor-1000uf-16v-8-16-Electrolytic-capacitor/32418323423.html?spm=2114.search0104.3.1.7ac44ff0z6KCGE&ws_ab_test=searchweb0_0,searchweb201602_1_10065_5729911_10068_319_317_10696_5728811_453_10084_454_10083_10618_10304_10307_10820_10301_10821_537_536_5730811_10843_5733211_328_5733311_10059_10884_5733411_10887_5730011_100031_5731011_321_322_10103_5729011_5733611_5733111_5733511-5729911,searchweb201603_55,ppcSwitch_0&algo_expid=30318461-2622-44fb-a704-914d5081f388-0&algo_pvid=30318461-2622-44fb-a704-914d5081f388)
-
     - [x] 300 to 500 Ohm resistor
     - [ ] logic level shifter 74AHCT125 - Quad Level-Shifter (3V to 5V)   
 - Software used :
@@ -27,6 +25,8 @@ The clock must be connected to internet to retrieve time information from a ntp 
   - Libaries :
     - [Ping library for ESP8266 Arduino core](https://github.com/dancol90/ESP8266Ping)
     - [ESP8266 Wifi connection and configuration manager](https://github.com/mariacarlinahernandez/ConfigManager)
+    - [Time library for Arduino](https://github.com/PaulStoffregen/Time)
+    - [Arduino library to facilitate time zone conversions and automatic daylight saving (summer) time adjustments.](https://github.com/JChristensen/Timezone)
 - Documentation :
   - [Markdown syntax](https://guides.github.com/features/mastering-markdown/)
   - [ws2812b](https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf)
