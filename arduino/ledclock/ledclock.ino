@@ -27,7 +27,7 @@ unsigned long startMillis;  //some global variables available anywhere in the pr
 unsigned long currentMillis;
 unsigned long endMillis;
 
-void reset_leds()
+void clock_background_leds()
 {
 	for (int i = 0; i < 84; i++)
 	{
@@ -89,7 +89,7 @@ void loop()
 	}
 
 	// Set background leds.
-	reset_leds();
+	clock_background_leds();
 
 	// set clock seconds, minutes, hours.
 	pixels.setPixelColor(seconden + 24, pixels.Color(0, 20, 0));
@@ -110,3 +110,4 @@ void loop()
 
 	delay(DELAYVAL);
 }
+
