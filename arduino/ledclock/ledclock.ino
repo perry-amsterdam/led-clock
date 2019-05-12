@@ -1,3 +1,10 @@
+ /*
+  led-clock.ino
+  Copyright (c) 2019, Perry Couprie
+  https://github.com/perry-amsterdam/led-clock
+  This software is released under the MIT License.
+  https://opensource.org/licenses/MIT
+*/
 
 #include <Adafruit_NeoPixel.h>
 
@@ -5,7 +12,7 @@
 #define PIN        6		
 
 // How many NeoPixels are attached to the Arduino?
-#define NUMPIXELS 48			 
+#define NUMPIXELS 84			 
 
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -16,23 +23,23 @@ int seconden = 30;
 int minuten = 15;
 int uren = 6;
 
-int led_count = 6;
-
 unsigned long startMillis;  //some global variables available anywhere in the program
 unsigned long currentMillis;
 unsigned long endMillis;
 
 void reset_leds()
 {
-
-	for (int i = 0; i < 30; i++)
+	for (int i = 0; i < 84; i++)
 	{
-		pixels.setPixelColor(i, pixels.Color(0, 20, 0));
+		pixels.setPixelColor(i, pixels.Color(0,0,0));
 	}
-
-	for (int i = 30; i < 42; i++)
+	for (int i = 0; i < 24; i=i+3)
 	{
-		pixels.setPixelColor(i, pixels.Color(0, 0, 20));
+		pixels.setPixelColor(i, pixels.Color(5,0,0));
+	}
+	for (int i = 0; i < 60; i=i+5)
+	{
+		pixels.setPixelColor(i+24, pixels.Color(5,0,0));
 	}
 }
 
@@ -45,27 +52,24 @@ void setup()
 	startMillis = millis();
 
 	pixels.begin();
-	for (int i = 0; i < 30; i++)
-	{
-		pixels.setPixelColor(i, pixels.Color(0, 0, 0));
-	}
-	pixels.show();
 }
 
 
 void loop()
 {
 
+	// Get start time in mili seconds.
 	startMillis = millis();
 
-	if (seconden < 29)
+	// Do clock calculation, wil be replaced by ntp code.
+	if (seconden < 59)
 	{
 		seconden++;
 	}
 	else
 	{
 		seconden = 0;
-		if (minuten < 29)
+		if (minuten < 59)
 		{
 			minuten++;
 
@@ -73,7 +77,7 @@ void loop()
 		else
 		{
 			minuten = 0;
-			if (uren < 11)
+			if (uren < 24)
 			{
 				uren++;
 			}
@@ -84,24 +88,25 @@ void loop()
 		}
 	}
 
-	// Set background color.
+	// Set background leds.
 	reset_leds();
 
-	// set clock leds.
-	pixels.setPixelColor(seconden, pixels.Color(150, 0, 150));
-	pixels.setPixelColor((minuten), pixels.Color(200, 0, 0));
-	pixels.setPixelColor(uren + 30, pixels.Color(200, 200, 200));
+	// set clock seconds, minutes, hours.
+	pixels.setPixelColor(seconden + 24, pixels.Color(0, 20, 0));
+	pixels.setPixelColor(minuten + 24, pixels.Color(0, 20, 0));
+	pixels.setPixelColor(uren, pixels.Color(0, 20, 0));
 
+	// Display all leds.
 	pixels.show();
 
 	// Get Duration of code.
 	endMillis = millis();
 	int loop_time = (endMillis - startMillis);
 
-	delay(DELAYVAL);
-
+	// Display time duration of loop code.
 	char output[100];
 	sprintf(output, "loop time %d\n", loop_time);
-
 	Serial.write(output); 
+
+	delay(DELAYVAL);
 }

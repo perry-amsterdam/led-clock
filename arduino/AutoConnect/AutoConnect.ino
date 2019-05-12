@@ -1,4 +1,4 @@
-/*
+ /*
   led-clock.ino
   Copyright (c) 2019, Perry Couprie
   https://github.com/perry-amsterdam/led-clock
@@ -24,7 +24,7 @@ int seconds = 0;
 
 // Create ntp client opject.
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "sg.pool.ntp.org", 2*60*60, 15*60*1000);  // offset +2 hours, update every 15 min.
+NTPClient timeClient(ntpUDP, "nl.pool.ntp.org", 2*60*60, 15*60*1000);  // offset +2 hours, update every 15 min.
 
 static const char AUX_TIMEZONE[] PROGMEM = R"(
 {
@@ -126,7 +126,11 @@ void rootPage()
 	time_t t;
 	char dateTime[26];
 
+<<<<<<< HEAD
+  	// Local time info.
+=======
 	// Local time info.
+>>>>>>> 21588ffd1d7974b2a4c119dc3be9aabf71538a47
 	t = time(NULL);
 	tm = localtime(&t);
 	sprintf(dateTime, "%04d/%02d/%02d(%s) %02d:%02d:%02d.", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, wd[tm->tm_wday], tm->tm_hour, tm->tm_min, tm->tm_sec);
@@ -209,19 +213,20 @@ void loop()
 	Serial.println();
 	Serial.print("WiFi connected with ip ");
 	Serial.println(WiFi.localIP());
-
-  // Add a second, update minutes/hours if necessary:
-  if (timeClient.update())
-  {
-
-    // Get time info.
-    hours = timeClient.getHours();
-    minutes = timeClient.getMinutes();
-    seconds = timeClient.getSeconds();
-
-    // Display time info.
-    Serial.print("Clock time : ");
-    Serial.println(timeClient.getFormattedTime());
-  }
-  delay(600);
+	
+	// Add a second, update minutes/hours if necessary:
+	if (timeClient.update())
+	{
+	
+		// Get time info.
+		hours = timeClient.getHours();
+		minutes = timeClient.getMinutes();
+		seconds = timeClient.getSeconds();
+	
+		// Display time info.
+		Serial.print("Clock time : ");
+		Serial.println(timeClient.getFormattedTime());
+	}
+	delay(600);
 }
+
