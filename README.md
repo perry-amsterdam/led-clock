@@ -38,7 +38,7 @@ The clock must be connected to internet to retrieve time information from a ntp 
       - [An Intro to KiCad – Part 1: How PCBs Are Made | DigiKey](https://www.youtube.com/watch?v=vaCVh2SAZY4)
       - [An Intro to KiCad – Part 2: Create a Schematic Symbol | DigiKey](https://www.youtube.com/watch?v=c2niS9ZRBHo)
       - [An Intro to KiCad – Part 3: Schematic Capture | DigiKey](https://www.youtube.com/watch?v=4Gtd7xY6zS4)
-      - []()
+      - [An Intro to KiCad – Part 4: Create a Footprint | DigiKey](https://www.youtube.com/watch?v=ZHH4G_EWhm0)
       - []()
       - []()
   
