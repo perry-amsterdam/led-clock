@@ -62,6 +62,7 @@ The clock must be connected to internet to retrieve time information from a ntp 
     - [How to sniff Zigbee traffic](http://www.zigbee2mqtt.io/how_tos/how_to_sniff_zigbee_traffic.html)
     - [Wireshark ZigBee Sniffer](https://www.cd-jackson.com/downloads/ZigBeeWiresharkSniffer.pdf)
     - [CC2531 stick](https://nl.aliexpress.com/af/cc2531.html?d=y&origin=n&spm=a2g0z.search0604.8.7.784a2a7043niRm&jump=afs&productId=32982628286&SearchText=cc2531&initiative_id=QRW_20190505060041&isViewCP=y) 
+    - https://www.instructables.com/id/Solar-Powered-WiFi-Weather-Station/?utm_content=buffera44cb&utm_medium=social&utm_source=pinterest.com&utm_campaign=buffer
     
   
 Software :
