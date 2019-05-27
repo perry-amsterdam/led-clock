@@ -63,6 +63,7 @@ The clock must be connected to internet to retrieve time information from a ntp 
     - [Wireshark ZigBee Sniffer](https://www.cd-jackson.com/downloads/ZigBeeWiresharkSniffer.pdf)
     - [CC2531 stick](https://nl.aliexpress.com/af/cc2531.html?d=y&origin=n&spm=a2g0z.search0604.8.7.784a2a7043niRm&jump=afs&productId=32982628286&SearchText=cc2531&initiative_id=QRW_20190505060041&isViewCP=y) 
     - https://www.instructables.com/id/Solar-Powered-WiFi-Weather-Station/?utm_content=buffera44cb&utm_medium=social&utm_source=pinterest.com&utm_campaign=buffer
+    - https://www.switchdoc.com/2015/10/iot-esp8266-timer-tutorial-arduino-ide/
     
   
 Software :
