@@ -34,14 +34,7 @@ The clock must be connected to internet to retrieve time information from a ntp 
   - [Powering NeoPixels](https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels)
   - Kicad :
     - [Reference designator](https://en.wikipedia.org/wiki/Reference_designator)
-    - An Intro to KiCad
-      - [An Intro to KiCad – Part 1: How PCBs Are Made | DigiKey](https://www.youtube.com/watch?v=vaCVh2SAZY4)
-      - [An Intro to KiCad – Part 2: Create a Schematic Symbol | DigiKey](https://www.youtube.com/watch?v=c2niS9ZRBHo)
-      - [An Intro to KiCad – Part 3: Schematic Capture | DigiKey](https://www.youtube.com/watch?v=4Gtd7xY6zS4)
-      - [An Intro to KiCad – Part 4: Create a Footprint | DigiKey](https://www.youtube.com/watch?v=ZHH4G_EWhm0)
-      - []()
-      - []()
-  
+      
  - Github links :
    - [d1_mini_kicad](https://github.com/jerome-labidurie/d1_mini_kicad)
    - [An Arduino library for ESP8266/ESP32 WLAN configuration at runtime with the Web interface](https://github.com/Hieromon/AutoConnect)
