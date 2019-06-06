@@ -17,6 +17,7 @@ The clock must be connected to internet to retrieve time information from a ntp 
     - [x] 300 to 500 Ohm resistor
     - [ ] [logic level shifter](https://www.aliexpress.com/item/32690305593.html?scm=1007.22893.125764.0&pvid=18a7fa26-fe89-4671-9f94-3089decc64a8&onelink_thrd=0.0&onelink_page_from=ITEM_DETAIL&onelink_item_to=32690305593&onelink_duration=0.855963&onelink_status=noneresult&onelink_item_from=32690305593&onelink_page_to=ITEM_DETAIL&aff_platform=link-c-tool&cpt=1559000965592&sk=B2vRnAe&aff_trace_key=cfd080f5559840aa8140893bf65e942c-1559000965592-03480-B2vRnAe&terminal_id=7269e94812514d06b6235e744390b183)
     - [ ] [barrel jack](https://nl.aliexpress.com/af/barrel-jack.html?SearchText=barrel+jack&d=y&initiative_id=SB_20190605015720&origin=n&catId=0&isViewCP=y&jump=afs)
+    - [ ] https://learn.sparkfun.com/tutorials/connector-basics/power-connectors
 - Software used :
   - [LibreCAD](https://librecad.org/)
   - [Openscad](https://www.openscad.org/)
