@@ -15,7 +15,9 @@ The clock must be connected to internet to retrieve time information from a ntp 
     - [x] [Carton from van der linden](https://www.vanderlindewebshop.com/nl (clock face))
     - [x] large capacitor (1000 µF, 6.3V or higher
     - [x] 300 to 500 Ohm resistor
-    - [ ] logic level shifter 74AHCT125 - Quad Level-Shifter (3V to 5V)   
+    - [ ] [logic level shifter](https://www.aliexpress.com/item/32690305593.html?scm=1007.22893.125764.0&pvid=18a7fa26-fe89-4671-9f94-3089decc64a8&onelink_thrd=0.0&onelink_page_from=ITEM_DETAIL&onelink_item_to=32690305593&onelink_duration=0.855963&onelink_status=noneresult&onelink_item_from=32690305593&onelink_page_to=ITEM_DETAIL&aff_platform=link-c-tool&cpt=1559000965592&sk=B2vRnAe&aff_trace_key=cfd080f5559840aa8140893bf65e942c-1559000965592-03480-B2vRnAe&terminal_id=7269e94812514d06b6235e744390b183)
+    - [ ] [barrel jack](https://nl.aliexpress.com/af/barrel-jack.html?SearchText=barrel+jack&d=y&initiative_id=SB_20190605015720&origin=n&catId=0&isViewCP=y&jump=afs)
+    - [ ] https://learn.sparkfun.com/tutorials/connector-basics/power-connectors
 - Software used :
   - [LibreCAD](https://librecad.org/)
   - [Openscad](https://www.openscad.org/)
@@ -34,14 +36,7 @@ The clock must be connected to internet to retrieve time information from a ntp 
   - [Powering NeoPixels](https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels)
   - Kicad :
     - [Reference designator](https://en.wikipedia.org/wiki/Reference_designator)
-    - An Intro to KiCad
-      - [An Intro to KiCad – Part 1: How PCBs Are Made | DigiKey](https://www.youtube.com/watch?v=vaCVh2SAZY4)
-      - [An Intro to KiCad – Part 2: Create a Schematic Symbol | DigiKey](https://www.youtube.com/watch?v=c2niS9ZRBHo)
-      - [An Intro to KiCad – Part 3: Schematic Capture | DigiKey](https://www.youtube.com/watch?v=4Gtd7xY6zS4)
-      - [An Intro to KiCad – Part 4: Create a Footprint | DigiKey](https://www.youtube.com/watch?v=ZHH4G_EWhm0)
-      - []()
-      - []()
-  
+      
  - Github links :
    - [d1_mini_kicad](https://github.com/jerome-labidurie/d1_mini_kicad)
    - [An Arduino library for ESP8266/ESP32 WLAN configuration at runtime with the Web interface](https://github.com/Hieromon/AutoConnect)
@@ -52,6 +47,7 @@ The clock must be connected to internet to retrieve time information from a ntp 
 - Bookmarks :
   - [Thingivers](https://www.thingiverse.com/)
   - [Hackster IO](https://www.hackster.io/)
+  - [Instructables is a community for people who like to make things. ](https://www.instructables.com/)
   - [ Arduino, ESP8266 & Raspberry Pi stuff : MQTT for beginners](https://arduinodiy.wordpress.com/2017/11/24/mqtt-for-beginners/)
   - [CoAP RFC 7252 Constrained Application Protocol](https://coap.technology/)
   - Embedded OS
@@ -61,6 +57,8 @@ The clock must be connected to internet to retrieve time information from a ntp 
     - [How to sniff Zigbee traffic](http://www.zigbee2mqtt.io/how_tos/how_to_sniff_zigbee_traffic.html)
     - [Wireshark ZigBee Sniffer](https://www.cd-jackson.com/downloads/ZigBeeWiresharkSniffer.pdf)
     - [CC2531 stick](https://nl.aliexpress.com/af/cc2531.html?d=y&origin=n&spm=a2g0z.search0604.8.7.784a2a7043niRm&jump=afs&productId=32982628286&SearchText=cc2531&initiative_id=QRW_20190505060041&isViewCP=y) 
+    - https://www.instructables.com/id/Solar-Powered-WiFi-Weather-Station/?utm_content=buffera44cb&utm_medium=social&utm_source=pinterest.com&utm_campaign=buffer
+    - https://www.switchdoc.com/2015/10/iot-esp8266-timer-tutorial-arduino-ide/
     
   
 Software :
