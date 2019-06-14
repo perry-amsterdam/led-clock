@@ -1,9 +1,9 @@
- /*
-  led-clock.ino
-  Copyright (c) 2019, Perry Couprie
-  https://github.com/perry-amsterdam/led-clock
-  This software is released under the MIT License.
-  https://opensource.org/licenses/MIT
+/*
+ led-clock.ino
+ Copyright (c) 2019, Perry Couprie
+ https://github.com/perry-amsterdam/led-clock
+ This software is released under the MIT License.
+ https://opensource.org/licenses/MIT
 */
 
 #if defined(ARDUINO_ARCH_ESP8266)
@@ -13,9 +13,23 @@
 #elif defined(ARDUINO_ARCH_ESP32)
 #include <WiFi.h>
 #include <WebServer.h>
+#include <SPIFFS.h>
 #endif
+#include <FS.h>
 #include <AutoConnect.h>
 #include <NTPClient.h>
+
+#include <Adafruit_NeoPixel.h>
+
+// Which pin on the Arduino is connected to the NeoPixels?
+#define PIN        6		
+
+// How many NeoPixels are attached to the Arduino?
+#define NUMPIXELS 84			 
+
+Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
+#define PARAM_FILE      "/elements.json"
 
 // Use these variables to set the initial time
 int hours = 12;
@@ -24,40 +38,79 @@ int seconds = 0;
 
 // Create ntp client opject.
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "nl.pool.ntp.org", 2*60*60, 15*60*1000);  // offset +2 hours, update every 15 min.
+
+// offset +2 hours, update every 15 min.
+//NTPClient timeClient(ntpUDP, "nl.pool.ntp.org", 2*60*60, 15*60*1000);
+NTPClient timeClient(ntpUDP);
 
 static const char AUX_TIMEZONE[] PROGMEM = R"(
 {
 	"title": "TimeZone",
-		"uri": "/timezone",
-		"menu": true,
-		"element": [
+	"uri": "/timezone",
+	"menu": true,
+	"element": [
 	{
 		"name": "caption",
-			"type": "ACText",
-			"value": "Sets the time zone to get the current local time.",
-			"style": "font-family:Arial;font-weight:bold;text-align:center;margin-bottom:10px;color:DarkSlateBlue"
+		"type": "ACText",
+		"value": "Sets the time zone to get the current local time.",
+		"style": "font-family:Arial;font-weight:bold;text-align:center;margin-bottom:10px;color:DarkSlateBlue"
 	},
 	{
 		"name": "timezone",
-			"type": "ACSelect",
-			"label": "Select TZ name",
-			"option": [],
-			"selected": 10
+		"type": "ACSelect",
+		"label": "Select TZ name",
+		"option": [],
+		"selected": 10
 	},
 	{
 		"name": "newline",
-			"type": "ACElement",
-			"value": "<br>"
+		"type": "ACElement",
+		"value": "<br>"
 	},
 	{
 		"name": "start",
-			"type": "ACSubmit",
-			"value": "OK",
-			"uri": "/start"
+		"type": "ACSubmit",
+		"value": "OK",
+		"uri": "/save"
 	}
 	]
 }
+
+
+)";
+
+static const char PAGE_SAVE[] PROGMEM = R"(
+{
+	"uri": "/save",
+	"title": "TimeZoneSave",
+	"menu": false,
+	"element": [
+	{
+		"name": "caption",
+		"type": "ACText",
+		"format": "Elements have been saved to %s",
+		"style": "font-family:Arial;font-size:18px;font-weight:400;color:#191970"
+	},
+	{
+		"name": "validated",
+		"type": "ACText",
+		"style": "color:red"
+	},
+	{
+		"name": "echo",
+		"type": "ACText",
+		"style": "font-family:monospace;font-size:small;white-space:pre;"
+	},
+	{
+		"name": "ok",
+		"type": "ACSubmit",
+		"value": "OK",
+		"uri": "/_ac"
+	}
+	]
+}
+
+
 )";
 
 typedef struct
@@ -101,10 +154,6 @@ ESP8266WebServer Server;
 WebServer Server;
 #endif
 
-AutoConnect Portal(Server);
-AutoConnectConfig Config;
-AutoConnectAux Timezone;
-
 void rootPage()
 {
 	String  content =
@@ -126,17 +175,14 @@ void rootPage()
 	time_t t;
 	char dateTime[26];
 
-<<<<<<< HEAD
-  	// Local time info.
-=======
 	// Local time info.
->>>>>>> 21588ffd1d7974b2a4c119dc3be9aabf71538a47
 	t = time(NULL);
 	tm = localtime(&t);
 	sprintf(dateTime, "%04d/%02d/%02d(%s) %02d:%02d:%02d.", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, wd[tm->tm_wday], tm->tm_hour, tm->tm_min, tm->tm_sec);
 	content.replace("{{DateTime}}", String(dateTime));
 	Server.send(200, "text/html", content);
 }
+
 
 void startPage()
 {
@@ -165,6 +211,11 @@ void startPage()
 }
 
 
+AutoConnect Portal(Server);
+AutoConnectConfig Config;
+AutoConnectAux Timezone;
+AutoConnectAux  saveAux;
+
 void setup()
 {
 	delay(1000);
@@ -179,6 +230,38 @@ void setup()
 	// Load aux. page
 	Timezone.load(AUX_TIMEZONE);
 
+	saveAux.load(FPSTR(PAGE_SAVE));
+
+	saveAux.on([] (AutoConnectAux& aux, PageArgument& arg)
+	{
+
+		// The following line sets only the value, but it is HTMLified as
+		// formatted text using the format attribute.
+		aux["caption"].value = PARAM_FILE;
+
+		SPIFFS.begin();
+		File param = SPIFFS.open(PARAM_FILE, "w");
+		if (param)
+		{
+
+			// Save as a loadable set for parameters.
+			Timezone.saveElement(param, { "timezone" });
+			param.close();
+
+			// Read the saved elements again to display.
+			param = SPIFFS.open(PARAM_FILE, "r");
+			aux["echo"].value = param.readString();
+			param.close();
+		}
+		else
+		{
+			aux["echo"].value = "<styleSPIFFS failed to open.";
+		}
+
+		SPIFFS.end();
+		return String();
+	});
+
 	// Retrieve the select element that holds the time zone code and
 	// register the zone mnemonic in advance.
 	AutoConnectSelect& tz = Timezone["timezone"].as<AutoConnectSelect>();
@@ -188,9 +271,9 @@ void setup()
 	}
 
 	// Register aux. page
-	Portal.join(	
+	Portal.join(
 	{
-		Timezone
+		Timezone, saveAux
 	});
 
 	// Behavior a root path of ESP8266WebServer.
@@ -206,6 +289,7 @@ void setup()
 	}
 }
 
+
 void loop()
 {
 	Portal.handleClient();
@@ -213,20 +297,19 @@ void loop()
 	Serial.println();
 	Serial.print("WiFi connected with ip ");
 	Serial.println(WiFi.localIP());
-	
+
 	// Add a second, update minutes/hours if necessary:
 	if (timeClient.update())
 	{
-	
+
 		// Get time info.
 		hours = timeClient.getHours();
 		minutes = timeClient.getMinutes();
 		seconds = timeClient.getSeconds();
-	
+
 		// Display time info.
 		Serial.print("Clock time : ");
 		Serial.println(timeClient.getFormattedTime());
 	}
-	delay(600);
+	delay(800);
 }
-
