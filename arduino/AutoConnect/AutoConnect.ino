@@ -21,6 +21,11 @@
 
 #include <Adafruit_NeoPixel.h>
 
+#include <ArduinoJson.h>
+
+#include <iostream>
+#include <string>
+
 // Which pin on the Arduino is connected to the NeoPixels?
 #define PIN        6		
 
@@ -41,7 +46,9 @@ WiFiUDP ntpUDP;
 
 // offset +2 hours, update every 15 min.
 //NTPClient timeClient(ntpUDP, "nl.pool.ntp.org", 2*60*60, 15*60*1000);
-NTPClient timeClient(ntpUDP);
+NTPClient timeClient(ntpUDP, "nl.pool.ntp.org");
+
+String Tijdzone;
 
 static const char AUX_TIMEZONE[] PROGMEM = R"(
 {
@@ -243,7 +250,6 @@ void setup()
 		File param = SPIFFS.open(PARAM_FILE, "w");
 		if (param)
 		{
-
 			// Save as a loadable set for parameters.
 			Timezone.saveElement(param, { "timezone" });
 			param.close();
@@ -252,6 +258,8 @@ void setup()
 			param = SPIFFS.open(PARAM_FILE, "r");
 			aux["echo"].value = param.readString();
 			param.close();
+	
+			Serial.println("Stored value 11111 : " + aux["echo"].value);
 		}
 		else
 		{
@@ -298,6 +306,32 @@ void loop()
 	Serial.print("WiFi connected with ip ");
 	Serial.println(WiFi.localIP());
 
+	// Read the saved elements again to display.
+	SPIFFS.begin();
+	File param = SPIFFS.open(PARAM_FILE, "r");
+	if (param)
+	{
+		String json = param.readString();
+	
+		const size_t capacity = JSON_ARRAY_SIZE(24) + JSON_OBJECT_SIZE(5) + json.length() + 10;
+		DynamicJsonDocument doc(capacity);
+		
+		deserializeJson(doc, json.c_str());
+		
+		int selected = doc["selected"];
+
+		int8_t tzoff = TZ[selected - 1].tzoff;
+		char output[300];
+		sprintf(output, "Selected : %d, tzoff : %d\n, ntpserver : %s", selected, tzoff, TZ[selected].ntpServer);
+		Serial.println(output);
+	
+		// Set time offset.
+		timeClient.setTimeOffset(3600 * tzoff);
+		//timeClient.setPoolServerName(TZ[selected].ntpserver);
+	}
+	param.close();
+	SPIFFS.end();
+
 	// Add a second, update minutes/hours if necessary:
 	if (timeClient.update())
 	{
@@ -307,9 +341,11 @@ void loop()
 		minutes = timeClient.getMinutes();
 		seconds = timeClient.getSeconds();
 
-		// Display time info.
-		Serial.print("Clock time : ");
-		Serial.println(timeClient.getFormattedTime());
 	}
-	delay(800);
+
+	// Display time info.
+	Serial.print("Clock time : ");
+	Serial.println(timeClient.getFormattedTime());
+
+	delay(1000);
 }
