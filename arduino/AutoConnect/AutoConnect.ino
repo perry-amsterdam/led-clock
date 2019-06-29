@@ -44,7 +44,6 @@ int seconds = 0;
 // Create ntp client opject.
 WiFiUDP ntpUDP;
 
-// offset +2 hours, update every 15 min.
 //NTPClient timeClient(ntpUDP, "nl.pool.ntp.org", 2*60*60, 15*60*1000);
 NTPClient timeClient(ntpUDP, "nl.pool.ntp.org");
 
@@ -258,8 +257,6 @@ void setup()
 			param = SPIFFS.open(PARAM_FILE, "r");
 			aux["echo"].value = param.readString();
 			param.close();
-	
-			Serial.println("Stored value 11111 : " + aux["echo"].value);
 		}
 		else
 		{
@@ -268,6 +265,9 @@ void setup()
 
 		SPIFFS.end();
 		return String();
+	
+		// Set config ntpclient.
+		init_ntp_client();
 	});
 
 	// Retrieve the select element that holds the time zone code and
@@ -295,17 +295,14 @@ void setup()
 	{
 		Serial.println("WiFi connected: " + WiFi.localIP().toString());
 	}
+
+	// Set config ntpclient.
+	init_ntp_client();
 }
 
-
-void loop()
+// Read config info and init ntp server time config.
+void init_ntp_client()
 {
-	Portal.handleClient();
-
-	Serial.println();
-	Serial.print("WiFi connected with ip ");
-	Serial.println(WiFi.localIP());
-
 	// Read the saved elements again to display.
 	SPIFFS.begin();
 	File param = SPIFFS.open(PARAM_FILE, "r");
@@ -331,16 +328,20 @@ void loop()
 	}
 	param.close();
 	SPIFFS.end();
+}
+
+void loop()
+{
+	Portal.handleClient();
+
+	Serial.println();
+	Serial.print("WiFi connected with ip ");
+	Serial.println(WiFi.localIP());
 
 	// Add a second, update minutes/hours if necessary:
 	if (timeClient.update())
 	{
-
-		// Get time info.
-		hours = timeClient.getHours();
-		minutes = timeClient.getMinutes();
-		seconds = timeClient.getSeconds();
-
+		Serial.println("Time update event :-)");
 	}
 
 	// Display time info.
@@ -349,3 +350,4 @@ void loop()
 
 	delay(1000);
 }
+
