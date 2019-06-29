@@ -34,7 +34,7 @@
 
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
-#define PARAM_FILE      "/elements.json"
+#define PARAM_FILE	"/elements.json"
 
 // Use these variables to set the initial time
 int hours = 12;
@@ -81,8 +81,6 @@ static const char AUX_TIMEZONE[] PROGMEM = R"(
 	}
 	]
 }
-
-
 )";
 
 static const char PAGE_SAVE[] PROGMEM = R"(
@@ -115,8 +113,6 @@ static const char PAGE_SAVE[] PROGMEM = R"(
 	}
 	]
 }
-
-
 )";
 
 typedef struct
@@ -338,11 +334,7 @@ void loop()
 	Serial.print("WiFi connected with ip ");
 	Serial.println(WiFi.localIP());
 
-	// Add a second, update minutes/hours if necessary:
-	if (timeClient.update())
-	{
-		Serial.println("Time update event :-)");
-	}
+	timeClient.update();
 
 	// Display time info.
 	Serial.print("Clock time : ");
