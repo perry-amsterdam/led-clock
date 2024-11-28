@@ -34,9 +34,7 @@ The clock must be connected to internet to retrieve time information from a ntp 
   - [ws8212b connecters](https://www.aliexpress.com/popular/connector-ws2812b.html)
   - [Voltage regulator](https://www.youtube.com/watch?v=GSzVs7_aW-Y)
   - [Powering NeoPixels](https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels)
-  - Kicad :
-    - [Reference designator](https://en.wikipedia.org/wiki/Reference_designator)
-      
+  
  - Github links :
    - [d1_mini_kicad](https://github.com/jerome-labidurie/d1_mini_kicad)
    - [An Arduino library for ESP8266/ESP32 WLAN configuration at runtime with the Web interface](https://github.com/Hieromon/AutoConnect)
