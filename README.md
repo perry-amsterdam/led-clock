@@ -50,17 +50,17 @@ Software :
 
 To ensure the longevity and reliable performance of your NeoPixel strip, follow these essential precautions:
 
-## 1. Add a Capacitor
+1. Add a Capacitor
 Before connecting the NeoPixel strip to any power source, it is crucial to include a large capacitor across the **+** and **–** terminals.  
 - **Recommended specification**: 1000 µF, 6.3V or higher.  
 - **Purpose**: This prevents the initial surge of current from damaging the LEDs during power-up.
 
-## 2. Install a Resistor on the Data Line
+2. Install a Resistor on the Data Line
 Protect the data input of your first NeoPixel by adding a resistor between the microcontroller’s data pin and the data input of the strip.  
 - **Recommended value**: 300 to 500 Ohms.  
 - **Purpose**: This helps suppress voltage spikes, which could otherwise harm the first pixel.
 
-## 3. Use a Logic Level Shifter
+3. Use a Logic Level Shifter
 If your microcontroller operates at a lower voltage (e.g., 3.3V), use a logic level shifter to step up the signal to the required level for NeoPixels (typically 5V).  
 - **Purpose**: Ensures proper communication and prevents signal issues with the first pixel.
 
