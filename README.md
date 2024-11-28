@@ -20,7 +20,7 @@ If the clock cannot connect to a Wi-Fi network during its initial setup, it will
 
 Once configured, the clock will switch back to its normal mode and sync time from the NTP server.
 
-# Clock face
+# Clock front:
 
 ![GitHub Logo](images/led-clock-face.svg)
 
