@@ -58,9 +58,6 @@ Once configured, the clock will switch back to its normal mode and sync time fro
     - [Scans for available WiFi networks](https://www.arduino.cc/en/Reference/WiFiScanNetworks)
     - [Connect Your ESP8266 To Any Available Wi-Fi network](https://ubidots.com/blog/connect-your-esp8266-to-any-available-wi-fi-network/)
 
-Software :
-- Install arduino libary : NTPClient
-  
 # Important Guidelines for Connecting NeoPixel Strips
 
 To ensure the longevity and reliable performance of your NeoPixel strip, follow these essential precautions:
