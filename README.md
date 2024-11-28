@@ -1,10 +1,24 @@
-# Led clock build with wemos d1 mini and ws2812b leds.
+# LED Clock Build with Wemos D1 Mini and WS2812B LEDs
 
-I am building a led clock from ws2812b leds, picture frame from ikea, some laser cutting, 3d printing, a wemos d1 mini and some arduino code. This project is to learn to code arduino, lasercutting and some 3d printing. The face of the clock wil be simple, later when the clock is finished i wil ask a groep of creative people that make art, to do something nice with the clock face.
+I am creating an LED clock using WS2812B LEDs, a picture frame from IKEA, some laser cutting, 3D printing, a Wemos D1 Mini, and Arduino code. This project serves as a way to learn Arduino programming, laser cutting, and 3D printing.  
 
-## Clock setup
+The clock face will initially have a simple design. Once the clock is complete, I plan to collaborate with a group of creative artists to enhance the clock face with an artistic touch.
 
-The clock must be connected to internet to retrieve time information from a ntp (time server). To connect to the interet the clock must connect to a wifi ap. When the clock starts up for the first time, it can not connect to a wifi network. When the clock can not connect to a wifi network itself wil become a wireless acces point, the clock wil also become captive portal. A website to setup the clock, connect to internet an set a time zone. To do that you connect to de clock wifi AP with a phone/table/latop, after connecting to the AP you can browse to www.clocksetup to setup the clock.
+## Clock Setup
+
+The clock will connect to the internet to retrieve time information from an NTP (Network Time Protocol) server. To do this, it needs to connect to a Wi-Fi access point (AP).  
+
+### First-Time Setup
+If the clock cannot connect to a Wi-Fi network during its initial setup, it will automatically act as a wireless access point and captive portal. A setup webpage will allow users to configure the clock's connection to the internet and set the time zone.  
+
+### How to Configure:
+1. Connect your phone, tablet, or laptop to the clock's Wi-Fi AP.  
+2. Open a browser and navigate to **www.clocksetup**.  
+3. Use the setup page to:
+   - Connect the clock to your Wi-Fi network.  
+   - Configure the time zone.  
+
+Once configured, the clock will switch back to its normal mode and sync time from the NTP server.
 
 ![GitHub Logo](images/led-clock-face.svg)
 
