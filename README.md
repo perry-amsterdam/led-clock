@@ -11,7 +11,7 @@ The clock must be connected to internet to retrieve time information from a ntp 
 - Parts used and link to where you can buy it: 
     - [x] [Wemos d1 mini](https://wiki.wemos.cc/products:d1:d1_mini)
     - [x] [Picture frame ikea 23x23cm](https://www.ikea.com/nl/nl/p/sannahed-fotolijst-wit-00459116/)
-    - [x] [RGB LED Ring WS2811 ic Built-in RGB DC5V](https://www.aliexpress.com/item/32809169128.html?productId=32809169128&productSubject=Addressable-pixel-WS2812B-Ring-1-8-12-16-24-32-40-48-60-93-241-LEDs&spm=a2g0s.9042311.0.0.38f94c4dSoYWRi)
+    - [x] [RGB LED Ring WS2811 ic Built-in RGB DC5V](https://nl.aliexpress.com/item/32808302785.html?spm=a2g0o.productlist.main.3.611d6920dI6tu2&algo_pvid=460d9791-20b6-4035-93b0-249b08dbe596&algo_exp_id=460d9791-20b6-4035-93b0-249b08dbe596-1&pdp_npi=4%40dis%21EUR%218.02%215.29%21%21%218.27%215.45%21%40211b664d17327929306932519eff7c%2112000038357392441%21sea%21NL%213900209338%21ABX&curPageLogUid=iWddPClHIu3S&utparam-url=scene%3Asearch%7Cquery_from%3A)
     - [x] [Carton from van der linden](https://www.vanderlindewebshop.com/nl (clock face))
     - [x] large capacitor (1000 µF, 6.3V or higher
     - [x] 300 to 500 Ohm resistor
