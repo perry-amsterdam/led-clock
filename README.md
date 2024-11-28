@@ -1,9 +1,10 @@
 # LED Clock Build with Wemos D1 Mini and WS2812B LEDs
 
-I am creating an LED clock using WS2812B LEDs, a picture frame from IKEA, some laser cutting, 3D printing, a Wemos D1 Mini, and Arduino code. This project serves as a way to learn Arduino programming, laser cutting, and 3D printing.  
+I’m building an LED clock using WS2812B LEDs, a picture frame from IKEA, laser cutting, 3D printing, a Wemos D1 Mini, and Arduino programming. This project is not only about creating a functional clock but also serves as a hands-on way to learn and experiment with Arduino programming, laser cutting, and 3D printing techniques.
 
-The clock face will initially have a simple design. Once the clock is complete, I plan to collaborate with a group of creative artists to enhance the clock face with an artistic touch.
+The clock face will start with a simple, functional design. Once the initial build is complete, I plan to collaborate with a group of talented artists to give the clock face an artistic makeover.
 
+The software behind the clock is designed to be flexible, allowing programmers to modify it and change the clock’s behavior. This opens up possibilities for customization and unique features, making the clock as much a platform for creativity as it is a timepiece.
 ## Clock Setup
 
 The clock will connect to the internet to retrieve time information from an NTP (Network Time Protocol) server. To do this, it needs to connect to a Wi-Fi access point (AP).  
