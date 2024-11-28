@@ -10,7 +10,7 @@ The clock must be connected to internet to retrieve time information from a ntp 
 
 - Parts used and link to where you can buy it: 
     - [x] [Wemos d1 mini](https://wiki.wemos.cc/products:d1:d1_mini)
-    - [x] [Picture frame ikea 23x23cm](https://www.ikea.com/nl/nl/catalog/products/00378403/)
+    - [x] [Picture frame ikea 23x23cm](https://www.ikea.com/nl/nl/p/sannahed-fotolijst-wit-00459116/)
     - [x] [RGB LED Ring WS2811 ic Built-in RGB DC5V](https://www.aliexpress.com/item/32809169128.html?productId=32809169128&productSubject=Addressable-pixel-WS2812B-Ring-1-8-12-16-24-32-40-48-60-93-241-LEDs&spm=a2g0s.9042311.0.0.38f94c4dSoYWRi)
     - [x] [Carton from van der linden](https://www.vanderlindewebshop.com/nl (clock face))
     - [x] large capacitor (1000 µF, 6.3V or higher
