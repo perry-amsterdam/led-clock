@@ -44,23 +44,7 @@ The clock must be connected to internet to retrieve time information from a ntp 
     - [Soft access point](https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/soft-access-point-examples.html)
     - [Scans for available WiFi networks](https://www.arduino.cc/en/Reference/WiFiScanNetworks)
     - [Connect Your ESP8266 To Any Available Wi-Fi network](https://ubidots.com/blog/connect-your-esp8266-to-any-available-wi-fi-network/)
-- Bookmarks :
-  - [Thingivers](https://www.thingiverse.com/)
-  - [Hackster IO](https://www.hackster.io/)
-  - [Instructables is a community for people who like to make things. ](https://www.instructables.com/)
-  - [ Arduino, ESP8266 & Raspberry Pi stuff : MQTT for beginners](https://arduinodiy.wordpress.com/2017/11/24/mqtt-for-beginners/)
-  - [CoAP RFC 7252 Constrained Application Protocol](https://coap.technology/)
-  - Embedded OS
-    - [Contiki: The Open Source OS for the Internet of Things](http://www.contiki-os.org/)
-    - [Riot-os: The friendly Operating System for the Internet of Things](http://www.riot-os.org/)
-  - Zigbee
-    - [How to sniff Zigbee traffic](http://www.zigbee2mqtt.io/how_tos/how_to_sniff_zigbee_traffic.html)
-    - [Wireshark ZigBee Sniffer](https://www.cd-jackson.com/downloads/ZigBeeWiresharkSniffer.pdf)
-    - [CC2531 stick](https://nl.aliexpress.com/af/cc2531.html?d=y&origin=n&spm=a2g0z.search0604.8.7.784a2a7043niRm&jump=afs&productId=32982628286&SearchText=cc2531&initiative_id=QRW_20190505060041&isViewCP=y) 
-    - https://www.instructables.com/id/Solar-Powered-WiFi-Weather-Station/?utm_content=buffera44cb&utm_medium=social&utm_source=pinterest.com&utm_campaign=buffer
-    - https://www.switchdoc.com/2015/10/iot-esp8266-timer-tutorial-arduino-ide/
-    
-  
+
 Software :
 - Install arduino libary : NTPClient
 
