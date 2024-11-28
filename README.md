@@ -45,14 +45,25 @@ The clock must be connected to internet to retrieve time information from a ntp 
 
 Software :
 - Install arduino libary : NTPClient
+# Important Guidelines for Connecting NeoPixel Strips
 
-## Some misc bla bla : 
+To ensure the longevity and reliable performance of your NeoPixel strip, follow these essential precautions:
 
-Before connecting a NeoPixel strip to ANY source of power, we very strongly recommend adding a large capacitor (1000 µF, 6.3V or higher) across the + and – terminals. This prevents the initial onrush of current from damaging the pixels.
+## 1. Add a Capacitor
+Before connecting the NeoPixel strip to any power source, it is crucial to include a large capacitor across the **+** and **–** terminals.  
+- **Recommended specification**: 1000 µF, 6.3V or higher.  
+- **Purpose**: This prevents the initial surge of current from damaging the LEDs during power-up.
 
-Adding a 300 to 500 Ohm resistor between your microcontroller's data pin and the data input on the first NeoPixel can help prevent voltage spikes that might otherwise damage your first pixel. Please add one between your micro and NeoPixels!
+## 2. Install a Resistor on the Data Line
+Protect the data input of your first NeoPixel by adding a resistor between the microcontroller’s data pin and the data input of the strip.  
+- **Recommended value**: 300 to 500 Ohms.  
+- **Purpose**: This helps suppress voltage spikes, which could otherwise harm the first pixel.
 
-Use a logic level shifter to step up the signal from the microcontroller to the first pixel.
+## 3. Use a Logic Level Shifter
+If your microcontroller operates at a lower voltage (e.g., 3.3V), use a logic level shifter to step up the signal to the required level for NeoPixels (typically 5V).  
+- **Purpose**: Ensures proper communication and prevents signal issues with the first pixel.
+
+By following these guidelines, you can protect your NeoPixel strip and improve its reliability in your projects.
 
 ## Authors
 
