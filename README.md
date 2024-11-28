@@ -45,6 +45,7 @@ The clock must be connected to internet to retrieve time information from a ntp 
 
 Software :
 - Install arduino libary : NTPClient
+  
 # Important Guidelines for Connecting NeoPixel Strips
 
 To ensure the longevity and reliable performance of your NeoPixel strip, follow these essential precautions:
