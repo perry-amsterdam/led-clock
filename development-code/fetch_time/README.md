@@ -1,4 +1,3 @@
-```markdown
 # Fetch Time
 
 This program fetches the user's timezone from an external API, calculates the GMT and daylight savings time (DST) offsets, and displays the local time adjusted for these offsets.
