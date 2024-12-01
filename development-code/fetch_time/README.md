@@ -33,10 +33,11 @@ This program fetches the user's timezone from an external API, calculates the GM
    ```
 
 3. **Compile the Code**:
-   Use `g++` or a compatible compiler:
+   A `Makefile` is provided for easy compilation. Simply run:
    ```bash
-   g++ -o fetch_time main.cpp -lcurl
+   make
    ```
+   This will create an executable named `fetch_time`.
 
 ## Usage
 
@@ -78,4 +79,3 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 ---
 
 Happy coding! 🎉
-```
