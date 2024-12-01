@@ -46,8 +46,7 @@ Once configured, the clock will switch back to its normal mode and sync time fro
   - [Powering NeoPixels](https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels)
   
  - Github links :
-   - [d1_mini_kicad](https://github.com/jerome-labidurie/d1_mini_kicad)
-   - [An Arduino library for ESP8266/ESP32 WLAN configuration at runtime with the Web interface](https://github.com/Hieromon/AutoConnect)
+      - [An Arduino library for ESP8266/ESP32 WLAN configuration at runtime with the Web interface](https://github.com/Hieromon/AutoConnect)
  
 # Important Guidelines for Connecting NeoPixel Strips
 
