@@ -38,8 +38,7 @@ Once configured, the clock will switch back to its normal mode and sync time fro
   - [Openscad](https://www.openscad.org/)
   - [Kicad EDA](https://www.kicad.org/)
   - [Arduino Software (IDE)](https://www.arduino.cc/en/Main/Software)
-  - Libaries :
-    
+ 
 https://github.com/JChristensen/Timezone)
 - Documentation :
   - [Markdown syntax](https://guides.github.com/features/mastering-markdown/)
