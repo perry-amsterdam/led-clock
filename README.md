@@ -53,11 +53,7 @@ Once configured, the clock will switch back to its normal mode and sync time fro
  - Github links :
    - [d1_mini_kicad](https://github.com/jerome-labidurie/d1_mini_kicad)
    - [An Arduino library for ESP8266/ESP32 WLAN configuration at runtime with the Web interface](https://github.com/Hieromon/AutoConnect)
- - Wemos example code :
-    - [Soft access point](https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/soft-access-point-examples.html)
-    - [Scans for available WiFi networks](https://www.arduino.cc/en/Reference/WiFiScanNetworks)
-    - [Connect Your ESP8266 To Any Available Wi-Fi network](https://ubidots.com/blog/connect-your-esp8266-to-any-available-wi-fi-network/)
-
+ 
 # Important Guidelines for Connecting NeoPixel Strips
 
 To ensure the longevity and reliable performance of your NeoPixel strip, follow these essential precautions:
