@@ -39,7 +39,6 @@ Once configured, the clock will switch back to its normal mode and sync time fro
   - [Kicad EDA](https://www.kicad.org/)
   - [Arduino Software (IDE)](https://www.arduino.cc/en/Main/Software)
  
-https://github.com/JChristensen/Timezone)
 - Documentation :
   - [Markdown syntax](https://guides.github.com/features/mastering-markdown/)
   - [ws2812b](https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf)
