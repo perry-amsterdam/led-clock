@@ -22,14 +22,11 @@ This program fetches the user's timezone from an external API, calculates the GM
    git clone <repository-url>
    cd <repository-name>
    ```
+
 2. **Install Dependencies**:
-   Ensure `libcurl` and `nlohmann/json` are installed. On Ubuntu, you can install them with:
+   On Ubuntu, install the required libraries with:
    ```bash
-   sudo apt-get install libcurl4-openssl-dev
-   ```
-   For `nlohmann/json`, include the single-header file in your project:
-   ```bash
-   wget https://github.com/nlohmann/json/releases/latest/download/json.hpp -P include/
+   sudo apt-get install libcurl4-openssl-dev nlohmann-json3-dev
    ```
 
 3. **Compile the Code**:
