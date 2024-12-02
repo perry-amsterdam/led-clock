@@ -130,6 +130,7 @@ void extractTimeDetails(const std::string& timeData, const std::string& timezone
 		}
 
 		// Apply the time zone offset
+								 // Adjust for DST or winter time
 		hour = (hour + offset) % 24;
 		std::cout << "Adjusted Local Time: " << hour << ":" << minute << ":" << second << std::endl;
 	}
