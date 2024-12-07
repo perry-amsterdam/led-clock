@@ -39,12 +39,12 @@ class TimeInfo
 		}
 
 		// Function to get the public IP address using an API
-		std::string getPublicIP()
+		void getPublicIP()
 		{
 			debugLog("Initializing cURL for public IP retrieval...");
 			CURL *curl;
 			CURLcode res;
-			std::string ip;
+			publicIP.clear();	 // Clear any previous IP
 
 			curl = curl_easy_init();
 			if (curl)
@@ -52,7 +52,7 @@ class TimeInfo
 				debugLog("Fetching public IP from https://api.ipify.org/...");
 				curl_easy_setopt(curl, CURLOPT_URL, "https://api.ipify.org/");
 				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ip);
+				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &publicIP);
 				res = curl_easy_perform(curl);
 				if (res != CURLE_OK)
 				{
@@ -61,6 +61,7 @@ class TimeInfo
 				else
 				{
 					debugLog("Public IP retrieved successfully.");
+					std::cout << "[INFO] Public IP Address: " << publicIP << std::endl;
 				}
 				curl_easy_cleanup(curl);
 			}
@@ -68,19 +69,16 @@ class TimeInfo
 			{
 				std::cerr << "[ERROR] cURL initialization failed for public IP retrieval." << std::endl;
 			}
-
-			return ip;
 		}
 
 		// Function to get timezone and DST information using IP address
-		void getTimezoneAndDST(const std::string &ip, std::string &timezone, bool &dst)
+		void getTimezoneAndDST()
 		{
 			debugLog("Initializing cURL for timezone and DST retrieval...");
-
 			CURL *curl;
 			CURLcode res;
 			std::string response;
-			std::string url = "http://ip-api.com/json/" + ip + "?fields=status,message,country,countryCode,city,timezone,offset,query";
+			std::string url = "http://ip-api.com/json/" + publicIP + "?fields=status,message,country,countryCode,city,timezone,offset,query";
 
 			debugLog("cURL URL set to: " + url);
 
@@ -127,13 +125,14 @@ class TimeInfo
 				{
 					timezone = jsonData["timezone"].asString();
 					dst = jsonData["dst"].asBool();
+					offset = jsonData["offset"].asInt();
+            				offsetInHours = offset / 3600;
 					debugLog("Parsed response successfully.");
-					debugLog("Timezone: " + timezone + ", DST: " + (dst ? "Yes" : "No"));
+            				debugLog("Timezone: " + timezone + ", DST: " + (dst ? "Yes" : "No") + ", Offset: " + std::to_string(offsetInHours) + " hours");
 				}
 				else
 				{
 					std::cerr << "[ERROR] Failed to parse timezone and DST information." << std::endl;
-								 // Show the JSON parsing error if any
 					std::cerr << "[DEBUG] Parsing errors: " << errs << std::endl;
 				}
 			}
@@ -144,12 +143,12 @@ class TimeInfo
 		}
 
 		// Function to get the current time from an NTP server
-		std::string getCurrentTimeFromNTP()
+		void getCurrentTimeFromNTP()
 		{
 			debugLog("Initializing cURL for NTP time retrieval...");
 			CURL *curl;
 			CURLcode res;
-			std::string timeData;
+			timeData.clear();	 // Clear any previous time data
 
 			curl = curl_easy_init();
 			if (curl)
@@ -169,12 +168,10 @@ class TimeInfo
 				}
 				curl_easy_cleanup(curl);
 			}
-
-			return timeData;
 		}
 
 		// Function to extract and adjust time details
-		void extractTimeDetails(const std::string &timeData, const std::string &timezone, bool dst)
+		void extractTimeDetails()
 		{
 			debugLog("Parsing time data for details...");
 			Json::CharReaderBuilder readerBuilder;
@@ -194,17 +191,12 @@ class TimeInfo
 				debugLog("Current UTC Time: " + time);
 				debugLog("Extracted Hour: " + std::to_string(hour) + ", Minute: " + std::to_string(minute) + ", Second: " + std::to_string(second));
 
-				int offset = 0;
-				if (timezone == "Europe/Paris" || timezone == "America/New_York")
-				{
-					offset = dst ? 2 : 1;
-				}
-				hour = (hour + offset) % 24;
+				hour = (hour + offsetInHours + dst) % 24;
 
 				debugLog("Adjusted Local Time: " + std::to_string(hour) + ":" + std::to_string(minute) + ":" + std::to_string(second));
 
 				// Print formatted output
-				printFormattedOutput(date, time, timezone, dst, hour, minute, second);
+				printFormattedOutput(date, time, hour, minute, second);
 			}
 			else
 			{
@@ -213,11 +205,12 @@ class TimeInfo
 		}
 
 		// Function to print formatted output
-		void printFormattedOutput(const std::string &date, const std::string &time, const std::string &timezone, bool dst, int hour, int minute, int second)
+		void printFormattedOutput(const std::string &date, const std::string &time, int hour, int minute, int second)
 		{
 			std::cout << "\n========== Information ==========\n";
-			std::cout << "Public IP Address: " << getPublicIP() << "\n";
+			std::cout << "Public IP Address: " << publicIP << "\n";
 			std::cout << "Timezone: " << timezone << "\n";
+			std::cout << "Offset: " << offset << "\n";
 			std::cout << "DST: " << (dst ? "Yes" : "No") << "\n";
 			std::cout << "\nUTC Time: " << date << " " << time << "\n";
 			std::cout << "Adjusted Local Time: " << date << " " << std::setw(2) << std::setfill('0') << hour << ":"
@@ -228,6 +221,12 @@ class TimeInfo
 	private:
 		bool debug;				 // Flag to enable or disable debug output
 		CURL *curl;
+		std::string publicIP;	 // Stores the public IP address
+		std::string timezone;	 // Stores the timezone
+		bool dst;				 // Stores whether daylight saving time is active
+		int offset;				 // Timezone offset
+		int offsetInHours; 
+		std::string timeData;	 // Stores the time data retrieved from the NTP server
 };
 
 int main()
@@ -239,19 +238,16 @@ int main()
 	// Pass the debug flag to the TimeInfo object
 	TimeInfo timeInfo(enableDebug);
 
-	std::string publicIP = timeInfo.getPublicIP();
-	std::cout << "[INFO] Public IP Address: " << publicIP << std::endl;
+	timeInfo.getPublicIP();
 
 	std::cout << "[DEBUG] Fetching timezone and DST information..." << std::endl;
-	std::string timezone;
-	bool dst;
-	timeInfo.getTimezoneAndDST(publicIP, timezone, dst);
+	timeInfo.getTimezoneAndDST();
 
 	std::cout << "[DEBUG] Fetching current time from NTP..." << std::endl;
-	std::string timeData = timeInfo.getCurrentTimeFromNTP();
+	timeInfo.getCurrentTimeFromNTP();
 
 	std::cout << "[DEBUG] Extracting and adjusting time details..." << std::endl;
-	timeInfo.extractTimeDetails(timeData, timezone, dst);
+	timeInfo.extractTimeDetails();
 
 	return 0;
 }
