@@ -1,98 +1,97 @@
-// Led clock example.
 #include <Adafruit_NeoPixel.h>
 
-// Which pin on the Arduino is connected to the NeoPixels?
-// On a Trinket or Gemma we suggest changing this to 1:
+// Pin and LED count configuration
 #define LED_PIN    6
-
-// How many NeoPixels are attached to the Arduino?
-#define LED_COUNT 84
+#define LED_COUNT  84
 
 unsigned long startMillis;
 unsigned long currentMillis;
 unsigned long endMillis;
 
-// Clock informatie.
+// Clock information
 int seconden = 30;
 int minuten = 15;
 int uren = 6;
 
-// Declare our NeoPixel strip object:
+// Declare the NeoPixel strip object
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
-// setup() function -- runs once at startup --------------------------------
-void setup()
-{
-
-	//start Serial in case we need to print debugging info
-	Serial.begin(115200);
-
-	strip.begin();
-	strip.show();
-	strip.setBrightness(50);
+// Setup function: runs once at startup
+void setup() {
+  Serial.begin(115200);  // Initialize Serial for debugging
+  strip.begin();         // Initialize NeoPixel strip
+  strip.show();          // Turn off all LEDs initially
+  strip.setBrightness(50); // Set brightness to a medium level
 }
 
+// Loop function: runs repeatedly as long as the board is on
+void loop() {
+  startMillis = millis();
 
-// loop() function -- runs repeatedly as long as board is on ---------------
-void loop()
-{
+  // Display the rainbow effect as the background
+  displayRainbow(10); // Pass delay in milliseconds
 
-	startMillis = millis();
+  // Retrieve and display the current time over the rainbow
+  retrieveTime();
+  updateClockDisplay();
 
-	rainbow(10);
-
-	// Get Duration of code.
-	endMillis = millis();
-	int loop_time = (endMillis - startMillis);
-
-	char output[100];
-	sprintf(output, "loop time %d\n", loop_time);
-	Serial.write(output);
+  // Calculate and display loop duration
+  endMillis = millis();
+  int loop_time = (endMillis - startMillis);
+  char output[100];
+  sprintf(output, "Loop time: %d ms\n", loop_time);
+  Serial.write(output);
 }
 
+// Function to display a rainbow effect across the strip
+void displayRainbow(int wait) {
+  static long firstPixelHue = 0;
 
-// Rainbow cycle along whole strip. Pass delay time (in ms) between frames.
-void rainbow(int wait)
-{
+  // Update the hue for the rainbow effect
+  for (int i = 0; i < strip.numPixels(); i++) {
+    int pixelHue = firstPixelHue + (i * 65536L / strip.numPixels());
+    strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(pixelHue, 255, 100))); // Reduced brightness (value = 100)
+  }
 
-	for (long firstPixelHue = 0; firstPixelHue < 5 * 65536; firstPixelHue += 256)
-	{
-								 // For each pixel in strip...
-		for (int i = 0; i < strip.numPixels(); i++)
-		{
+  // Send data to the strip
+  strip.show();
 
-			// Rainbow leds.
-			int pixelHue = firstPixelHue + (i * 65536L / strip.numPixels());
-			strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(pixelHue, 10, 59)));
+  // Increment the hue for the next frame
+  firstPixelHue += 128;
+  firstPixelHue %= 5 * 65536; // Wrap around after one full cycle
 
-			// Clock leds.
-			strip.setPixelColor(seconden + 24, strip.Color(0, 0, 255),10,255);
-			strip.setPixelColor(minuten + 24, strip.Color(0, 255, 0),10,255);
-			strip.setPixelColor(uren, strip.Color(255, 0, 0),10,255);
-		}
+  // Delay between frames
+  delay(wait);
+}
 
-		// Calculate seconden, minuten en uren.
-		if (seconden > 59)
-		{
-			seconden = 0;
-			minuten++;
-			if (minuten > 59)
-			{
-				minuten = 0;
-				uren++;
-				if (uren > 23)
-				{
-					uren = 0;
-				}
-			}
-		}
-		else
-		{
-		  seconden++;
-		}
+// Function to update the clock display on the strip
+void updateClockDisplay() {
+  // Overlay clock LEDs over the rainbow effect
+  strip.setPixelColor((seconden + 24) % LED_COUNT, strip.Color(0, 0, 255)); // Blue for seconds
+  strip.setPixelColor((minuten + 24) % LED_COUNT, strip.Color(0, 255, 0)); // Green for minutes
+  strip.setPixelColor(uren % LED_COUNT, strip.Color(255, 0, 0));           // Red for hours
+  strip.show();
+}
 
-		// Send led info to leds.
-		strip.show();			 // Update strip with new contents
-		delay(wait * 20);		 // Pause for a moment
-	}
+// Function to retrieve and update the current time
+void retrieveTime() {
+  static unsigned long lastSecondUpdate = 0;
+
+  // Check if a second has passed
+  if (millis() - lastSecondUpdate >= 1000) {
+    lastSecondUpdate += 1000; // Update the last second timestamp
+
+    seconden++;
+    if (seconden >= 60) {
+      seconden = 0;
+      minuten++;
+      if (minuten >= 60) {
+        minuten = 0;
+        uren++;
+        if (uren >= 24) {
+          uren = 0;
+        }
+      }
+    }
+  }
 }
