@@ -1,6 +1,6 @@
 # LED Clock Build with Wemos D1 Mini and WS2812B LEDs
 
-I’m building an LED clock using WS2812B LEDs, a picture frame from IKEA, laser cutting, 3D printing, a Wemos D1 Mini, and Arduino programming. This project is not only about creating a functional clock but also serves as a hands-on way to learn and experiment with Arduino programming, laser cutting, and 3D printing techniques.
+I’m building an LED clock using WS2812B LEDs, a picture frame from IKEA, laser cutting, 3D printing, an esp32 with zehpyr. This project is not only about creating a functional clock but also serves as a hands-on way to learn and experiment with esp32 programming, laser cutting, and 3D printing techniques.
 
 The clock face will start with a simple, functional design. Once the initial build is complete, I plan to collaborate with a group of talented artists to give the clock face an artistic makeover.
 
@@ -29,9 +29,7 @@ Once configured, the clock will switch back to its normal mode and sync time fro
     - [x] [Picture frame ikea 23x23cm](https://www.ikea.com/nl/nl/p/sannahed-fotolijst-wit-00459116/)
     - [x] [RGB LED Ring WS2811 ic Built-in RGB DC5V](https://nl.aliexpress.com/item/32808302785.html?spm=a2g0o.productlist.main.3.611d6920dI6tu2&algo_pvid=460d9791-20b6-4035-93b0-249b08dbe596&algo_exp_id=460d9791-20b6-4035-93b0-249b08dbe596-1&pdp_npi=4%40dis%21EUR%218.02%215.29%21%21%218.27%215.45%21%40211b664d17327929306932519eff7c%2112000038357392441%21sea%21NL%213900209338%21ABX&curPageLogUid=iWddPClHIu3S&utparam-url=scene%3Asearch%7Cquery_from%3A)
     - [x] [Carton from van der linden](https://www.vanderlindewebshop.com/nl (clock face))
-    - [x] large capacitor (1000 µF, 6.3V or higher
-    - [x] 300 to 500 Ohm resistor
-
+    
 - Software used :
   - [LibreCAD](https://librecad.org/)
   - [Openscad](https://www.openscad.org/)
@@ -42,13 +40,8 @@ Once configured, the clock will switch back to its normal mode and sync time fro
   - [Markdown syntax](https://guides.github.com/features/mastering-markdown/)
   - [ws2812b](https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf)
   - [ws8212b connecters](https://www.aliexpress.com/popular/connector-ws2812b.html)
-  - [Voltage regulator](https://www.youtube.com/watch?v=GSzVs7_aW-Y)
-  - [Powering NeoPixels](https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels)
-  
- - Github links :
-      - [An Arduino library for ESP8266/ESP32 WLAN configuration at runtime with the Web interface](https://github.com/Hieromon/AutoConnect)
- 
-# Important Guidelines for Connecting NeoPixel Strips
+
+ # Important Guidelines for Connecting NeoPixel Strips
 
 To ensure the longevity and reliable performance of your NeoPixel strip, follow these essential precautions:
 
