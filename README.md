@@ -28,8 +28,8 @@ De eerste hardware (klokfront, lasercut) is klaar ✅. De software en verdere in
 1. Clone de repo:
 
    ```bash
-   git clone https://github.com/<jouw-username>/<jouw-repo>.git
-   cd <jouw-repo>
+   git clone https://github.com/perry-amsterdam/led-clock.git
+   cd led-clock
    ```
 
 2. Voer het setup-script uit:
