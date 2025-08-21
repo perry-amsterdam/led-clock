@@ -8,7 +8,7 @@ export PATH := $(HOME)/.local/bin:$(PATH)
 
 # Basis paden
 ZEPHYR_DIR := $(CURDIR)/              # workspace root = zephyrproject/
-MANIFEST_DIR := $(ZEPHYR_DIR)/manifest
+MANIFEST_DIR := manifest
 APP_DIR := $(MANIFEST_DIR)/app
 
 BOARD ?= native_sim
