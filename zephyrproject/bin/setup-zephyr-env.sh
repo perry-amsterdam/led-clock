@@ -91,11 +91,17 @@ echo "✅ ZEPHYR_PYTHON set to $ZEPHYR_PYTHON"
 # Upgrade pip inside venv
 pip install --upgrade pip
 
+# Ensure west is installed in venv
+if ! command -v west >/dev/null 2>&1; then
+  echo "👉 Installing west inside virtual environment..."
+  pip install west
+fi
+
 # === INSTALL ESP32 TOOLCHAIN & DEPENDENCIES (ONLY IF NOT MINIMAL) ===
 if [ "$MODE" = "full" ]; then
   echo "👉 Installing ESP32 Python dependencies in venv..."
   pip install "esptool>=5.0.2"
-  $WEST packages pip --install
+  west packages pip --install
   echo "✅ esptool installed: $(esptool.py --version)"
 fi
 
