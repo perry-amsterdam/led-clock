@@ -6,9 +6,9 @@
 # Zorg dat 'west' altijd gevonden wordt
 export PATH := $(HOME)/.local/bin:$(PATH)
 
-# Basis paden
-ZEPHYR_DIR := $(CURDIR)/
-MANIFEST_DIR := manifest
+# Basis paden (zonder trailing slash om spaties te voorkomen)
+ZEPHYR_DIR := $(abspath $(CURDIR))
+MANIFEST_DIR := $(ZEPHYR_DIR)/manifest
 APP_DIR := $(MANIFEST_DIR)/app
 
 BOARD ?= native_sim
@@ -22,15 +22,15 @@ BUILD_DIR := $(ZEPHYR_DIR)/build/$(BOARD)
 
 help:
 	@echo "Available targets:"
-	@echo "  make setup-dev         Install software dependencies (Zephyr SDK, ESP-IDF, etc.)"
-	@echo "  make setup-dev-minimal Install only Zephyr (skip ESP32 toolchain)"
-	@echo "  make init              Initialize Zephyr workspace in ./zephyrproject"
 	@echo "  make build             Build app for $(BOARD) (default: native_sim)"
 	@echo "  make build-esp32       Build app for ESP32 DevkitC (WROOM)"
 	@echo "  make flash             Flash firmware to ESP32"
 	@echo "  make run               Run the app (only works for native_sim)"
 	@echo "  make clean             Remove build artifacts for current BOARD"
 	@echo "  make clean-all         Remove all build artifacts"
+	@echo "  make setup-dev         Install software dependencies (Zephyr SDK, ESP-IDF, etc.)"
+	@echo "  make setup-dev-minimal Install only Zephyr (skip ESP32 toolchain)"
+	@echo "  make init              Initialize Zephyr workspace in ./zephyrproject"
 
 setup-dev:
 	@echo "👉 Running setup script (full)..."
@@ -43,7 +43,7 @@ setup-dev-minimal:
 init:
 	@echo "👉 Initializing Zephyr workspace inside $(ZEPHYR_DIR)..."
 	mkdir -p $(ZEPHYR_DIR)
-	cd $(ZEPHYR_DIR) && $(WEST) init -l $(MANIFEST_DIR)
+	cd $(ZEPHYR_DIR) && $(WEST) init -l manifest
 	cd $(ZEPHYR_DIR) && $(WEST) update
 	cd $(ZEPHYR_DIR) && $(WEST) zephyr-export
 	@echo "✅ Zephyr workspace initialized in $(ZEPHYR_DIR)"
@@ -75,3 +75,4 @@ clean:
 clean-all:
 	@echo "🧹 Cleaning ALL build directories..."
 	rm -rf $(ZEPHYR_DIR)/build
+
