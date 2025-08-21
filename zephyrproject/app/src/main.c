@@ -3,7 +3,7 @@
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/mdns_responder.h>
 
-void main(void) {
+int main(void) {
     printk("🚀 LED Clock firmware started on Zephyr!\n");
 
     // Hier kun je later Wi-Fi connectie, mDNS en API server toevoegen

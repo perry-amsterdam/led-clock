@@ -5,7 +5,7 @@
 # Zorg dat 'west' altijd gevonden wordt
 export PATH := $(HOME)/.local/bin:$(PATH)
 
-ZEPHYR_DIR := $(CURDIR)/zephyrproject
+ZEPHYR_DIR := $(CURDIR)/
 APP_DIR := $(ZEPHYR_DIR)/app
 BOARD ?= native_sim
 WEST := west
