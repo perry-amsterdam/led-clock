@@ -7,7 +7,7 @@
 export PATH := $(HOME)/.local/bin:$(PATH)
 
 # Basis paden
-ZEPHYR_DIR := $(CURDIR)/              # workspace root = zephyrproject/
+ZEPHYR_DIR := $(CURDIR)/
 MANIFEST_DIR := manifest
 APP_DIR := $(MANIFEST_DIR)/app
 
