@@ -1,6 +1,9 @@
 # Makefile for LED Clock Dev Environment
 # Alles komt in ./zephyrproject binnen je repo
 
+# Make sure west (pip user install) is in PATH
+export PATH := $(HOME)/.local/bin:$(PATH)
+
 ZEPHYR_DIR := $(CURDIR)/zephyrproject
 APP_DIR := $(ZEPHYR_DIR)/app
 WEST := west
