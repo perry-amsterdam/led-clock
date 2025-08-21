@@ -18,16 +18,18 @@ SETUP_SCRIPT := $(CURDIR)/bin/setup-zephyr-env.sh
 # Build directory per board
 BUILD_DIR := $(ZEPHYR_DIR)/build/$(BOARD)
 
-.PHONY: help setup-dev setup-dev-minimal init build build-esp32 flash clean clean-all run
+.PHONY: help setup-dev setup-dev-minimal init build build-esp32 flash clean clean-all run boards boards-all
 
 help:
 	@echo "Available targets:"
 	@echo "  make build             Build app for $(BOARD) (default: native_sim)"
-	@echo "  make build-esp32       Build app for ESP32 DevkitC (WROOM)"
+	@echo "  make build-esp32       Build app for ESP32 DevkitC"
 	@echo "  make flash             Flash firmware to ESP32"
 	@echo "  make run               Run the app (only works for native_sim)"
 	@echo "  make clean             Remove build artifacts for current BOARD"
 	@echo "  make clean-all         Remove all build artifacts"
+	@echo "  make boards-esp32      List available ESP32 boards"
+	@echo "  make boards-all        List all available boards"
 	@echo "  make setup-dev         Install software dependencies (Zephyr SDK, ESP-IDF, etc.)"
 	@echo "  make setup-dev-minimal Install only Zephyr (skip ESP32 toolchain)"
 	@echo "  make init              Initialize Zephyr workspace in ./zephyrproject"
@@ -53,7 +55,7 @@ build:
 	cd $(ZEPHYR_DIR) && $(WEST) build -b $(BOARD) $(APP_DIR) -d $(BUILD_DIR)
 
 build-esp32:
-	$(MAKE) build BOARD=esp32_devkitc_wroom
+	$(MAKE) build BOARD=esp32_devkitc
 
 flash:
 	@echo "👉 Flashing firmware to $(BOARD)..."
@@ -68,6 +70,14 @@ else
 	@exit 1
 endif
 
+boards-esp32:
+	@echo "👉 Available ESP32 boards in Zephyr:"
+	cd $(ZEPHYR_DIR) && $(WEST) boards | grep esp32 || true
+
+boards-all:
+	@echo "👉 All available boards in Zephyr:"
+	cd $(ZEPHYR_DIR) && $(WEST) boards || true
+
 clean:
 	@echo "🧹 Cleaning build directory for $(BOARD)..."
 	rm -rf $(BUILD_DIR)
@@ -75,4 +85,3 @@ clean:
 clean-all:
 	@echo "🧹 Cleaning ALL build directories..."
 	rm -rf $(ZEPHYR_DIR)/build
-
