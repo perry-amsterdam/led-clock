@@ -3,9 +3,12 @@ set -e
 
 # === CONFIG ===
 ZEPHYR_SDK_VERSION=0.16.8
-ZEPHYR_DIR=$HOME/zephyrproject
 ZEPHYR_SDK_DIR=/opt/zephyr-sdk
 ESP_DIR=$HOME/esp
+
+# === DEFAULT FLAGS ===
+MODE="full"
+FORCE_SDK="no"
 
 # === USAGE FUNCTION ===
 usage() {
@@ -13,30 +16,19 @@ usage() {
   echo ""
   echo "Options:"
   echo "  --minimal     Install only Zephyr (Ubuntu + native build), skip ESP32 toolchain"
-  echo "  --clean       Remove Zephyr and ESP-IDF environments"
+  echo "  --clean       Remove Zephyr SDK and ESP-IDF environments"
+  echo "  --force-sdk   Force reinstall Zephyr SDK (delete existing first)"
   echo "  -h, --help    Show this help message"
   echo ""
-  echo "Installed helper functions (added to ~/.bashrc):"
-  echo "  zephyr-env [PATH]   Activate Zephyr environment."
-  echo "                      - Without argument: goes to ~/zephyrproject"
-  echo "                      - With argument:   goes to the given project path"
-  echo ""
-  echo "  esp-env             Activate ESP-IDF environment (ESP32 toolchain)."
-  echo ""
   echo "Examples:"
-  echo "  $0            Install full environment (Zephyr + ESP32)"
-  echo "  $0 --minimal  Install minimal environment (Zephyr only)"
-  echo "  $0 --clean    Remove installed environment"
-  echo ""
-  echo "After installation:"
-  echo "  zephyr-env                  # Jump into ~/zephyrproject with env ready"
-  echo "  zephyr-env ~/my-zephyr-app  # Jump into custom project"
-  echo "  esp-env                     # Activate ESP-IDF toolchain"
+  echo "  $0             Install full environment (Zephyr + ESP32)"
+  echo "  $0 --minimal   Install minimal environment (Zephyr only)"
+  echo "  $0 --clean     Remove installed environment"
+  echo "  $0 --force-sdk Reinstall Zephyr SDK even if already present"
   exit 0
 }
 
 # === PARSE ARGS ===
-MODE="full"
 for arg in "$@"; do
   case "$arg" in
     --minimal)
@@ -44,6 +36,9 @@ for arg in "$@"; do
       ;;
     --clean)
       MODE="clean"
+      ;;
+    --force-sdk)
+      FORCE_SDK="yes"
       ;;
     -h|--help)
       usage
@@ -57,9 +52,8 @@ done
 
 # === CLEAN MODE ===
 if [[ "$MODE" == "clean" ]]; then
-  echo "🧹 Cleaning Zephyr + ESP32 environment..."
+  echo "🧹 Cleaning Zephyr SDK + ESP32 environment..."
   sudo rm -rf ${ZEPHYR_SDK_DIR}
-  rm -rf ${ZEPHYR_DIR}
   rm -rf ${ESP_DIR}
   sed -i '/esp-idf\/export.sh/d' $HOME/.bashrc || true
   sed -i '/zephyr-env()/,/}/d' $HOME/.bashrc || true
@@ -73,7 +67,7 @@ if [[ "$MODE" == "minimal" ]]; then
 fi
 
 # === SYSTEM DEPENDENCIES ===
-echo "[1/7] Installing system dependencies..."
+echo "[1/5] Installing system dependencies..."
 sudo apt update && sudo apt upgrade -y
 sudo apt install --no-install-recommends -y \
   git cmake ninja-build gperf ccache dfu-util device-tree-compiler wget \
@@ -82,33 +76,39 @@ sudo apt install --no-install-recommends -y \
   python3-click python3-cryptography python3-pyparsing python3-pyelftools
 
 # === FIX FOR FUTURE LIB ===
-echo "[2/7] Installing Python 'future' package..."
+echo "[2/5] Installing Python 'future' package..."
 pip install --user --break-system-packages future
 
 # === INSTALL WEST ===
-echo "[3/7] Installing west (Zephyr build tool)..."
+echo "[3/5] Installing west (Zephyr build tool)..."
 pip install --user --break-system-packages west
 
-# === INSTALL ZEPHYR SDK ===
-echo "[4/7] Installing Zephyr SDK v${ZEPHYR_SDK_VERSION}..."
-wget -q https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64.tar.xz
-tar -xf zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64.tar.xz
-rm zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64.tar.xz
-sudo mv zephyr-sdk-${ZEPHYR_SDK_VERSION} ${ZEPHYR_SDK_DIR}
-${ZEPHYR_SDK_DIR}/setup.sh -t all -h
+# Ensure ~/.local/bin is in PATH
+if ! echo "$PATH" | grep -q "$HOME/.local/bin"; then
+  export PATH=$HOME/.local/bin:$PATH
+fi
 
-# === INIT ZEPHYR PROJECT ===
-echo "[5/7] Initializing Zephyr project..."
-mkdir -p ${ZEPHYR_DIR}
-cd ${ZEPHYR_DIR}
-west init -m https://github.com/zephyrproject-rtos/zephyr.git
-west update
-west zephyr-export
-pip install --break-system-packages -r zephyr/scripts/requirements.txt
+# === INSTALL ZEPHYR SDK ===
+echo "[4/5] Installing Zephyr SDK v${ZEPHYR_SDK_VERSION}..."
+
+if [[ "$FORCE_SDK" == "yes" ]]; then
+  echo "⚠️  Forcing SDK reinstall..."
+  sudo rm -rf ${ZEPHYR_SDK_DIR}
+fi
+
+if [ ! -d "${ZEPHYR_SDK_DIR}" ]; then
+  wget -q https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64.tar.xz
+  tar -xf zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64.tar.xz
+  rm zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64.tar.xz
+  sudo mv zephyr-sdk-${ZEPHYR_SDK_VERSION} ${ZEPHYR_SDK_DIR}
+  ${ZEPHYR_SDK_DIR}/setup.sh -t all -h
+else
+  echo "⏭️  Zephyr SDK already present at ${ZEPHYR_SDK_DIR}, skipping..."
+fi
 
 # === ESP-IDF TOOLCHAIN (ONLY IN FULL MODE) ===
 if [[ "$MODE" == "full" ]]; then
-  echo "[6/7] Installing ESP-IDF toolchain..."
+  echo "[5/5] Installing ESP-IDF toolchain..."
   mkdir -p ${ESP_DIR}
   cd ${ESP_DIR}
   if [ ! -d "esp-idf" ]; then
@@ -126,7 +126,7 @@ else
 fi
 
 # === ADD FUNCTIONS TO BASHRC ===
-echo "[7/7] Adding helper functions to ~/.bashrc..."
+echo "Adding helper functions to ~/.bashrc..."
 
 # Remove old definitions first
 sed -i '/zephyr-env()/,/}/d' $HOME/.bashrc || true
@@ -136,7 +136,7 @@ cat << 'EOF' >> $HOME/.bashrc
 
 # === Zephyr/ESP helper functions ===
 zephyr-env() {
-    local PROJECT_DIR=${1:-$HOME/zephyrproject}
+    local PROJECT_DIR=${1:-$PWD/zephyrproject}
     if [ -d "$PROJECT_DIR" ]; then
         cd "$PROJECT_DIR" || return
         west zephyr-export > /dev/null 2>&1
@@ -158,23 +158,12 @@ EOF
 
 echo "✅ Functions 'zephyr-env' and 'esp-env' added to ~/.bashrc"
 
-# === TEST BUILD ===
-echo "🔧 Testing native build..."
-cd ${ZEPHYR_DIR}/zephyr/samples/hello_world
-west build -b native_sim
-
 echo ""
-echo "✅ Zephyr environment setup complete!"
-if [[ "$MODE" == "minimal" ]]; then
-  echo "👉 Minimal mode: Only Zephyr on Ubuntu installed"
-else
-  echo "👉 Full mode: Zephyr + ESP32 toolchain installed"
-fi
-
-echo ""
+echo "✅ Setup complete!"
 echo "➡️  Open a new terminal or run: source ~/.bashrc"
 echo "   Then you can use:"
-echo "     zephyr-env                  # Default project"
-echo "     zephyr-env ~/my-zephyr-app  # Custom project"
-echo "     esp-env                     # Activate ESP-IDF toolchain"
-
+echo "     zephyr-env [PATH]   # Activate Zephyr environment"
+echo "     esp-env             # Activate ESP-IDF toolchain"
+echo ""
+echo "👉 Note: Zephyr project is NOT created automatically."
+echo "   Run 'make init' in your repo to initialize the Zephyr workspace."
