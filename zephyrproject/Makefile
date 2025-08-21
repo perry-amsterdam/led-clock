@@ -5,7 +5,7 @@
 # Zorg dat 'west' altijd gevonden wordt
 export PATH := $(HOME)/.local/bin:$(PATH)
 
-ZEPHYR_DIR := $(CURDIR)/
+ZEPHYR_DIR := $(CURDIR)/          # wijst naar zephyrproject/
 APP_DIR := $(ZEPHYR_DIR)/app
 BOARD ?= native_sim
 WEST := west
@@ -37,8 +37,7 @@ setup-dev-minimal:
 	$(SETUP_SCRIPT) --minimal
 
 init:
-	@echo "👉 Initializing Zephyr workspace inside repo..."
-	mkdir -p $(ZEPHYR_DIR)
+	@echo "👉 Initializing Zephyr workspace inside $(ZEPHYR_DIR)..."
 	cd $(ZEPHYR_DIR) && $(WEST) init -l .
 	cd $(ZEPHYR_DIR) && $(WEST) update
 	cd $(ZEPHYR_DIR) && $(WEST) zephyr-export
@@ -71,3 +70,4 @@ clean:
 clean-all:
 	@echo "🧹 Cleaning ALL build directories..."
 	rm -rf $(ZEPHYR_DIR)/build
+
