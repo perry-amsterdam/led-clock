@@ -1,0 +1,18 @@
+manifest:
+  version: 0.13
+
+  defaults:
+    remote: zephyrproject-rtos
+
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+
+  projects:
+    - name: zephyr
+      repo-path: zephyr
+      revision: main   # je kunt ook bv. v3.6.0 pinnen
+      import: true     # haalt alle standaard Zephyr-modules op
+
+  self:
+    path: app
