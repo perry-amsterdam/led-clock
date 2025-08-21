@@ -3,7 +3,7 @@
 # Manifest lives in ./zephyrproject/manifest
 # App lives in ./zephyrproject/manifest/app
 
-# Zorg dat 'west' altijd gevonden wordt
+# Zorg dat 'west' en venv-python altijd gevonden worden
 export PATH := $(HOME)/.local/bin:$(PATH)
 
 # Basis paden (zonder trailing slash om spaties te voorkomen)
@@ -21,6 +21,9 @@ BUILD_DIR := $(ZEPHYR_DIR)/build/$(BOARD)
 # Virtual environment directory
 VENV_DIR := $(ZEPHYR_DIR)/.venv
 
+# Force Zephyr to use Python from venv
+export ZEPHYR_PYTHON := $(VENV_DIR)/bin/python
+
 .PHONY: help setup-dev setup-dev-minimal init build build-esp32 flash clean clean-all run boards boards-all venv
 
 help:
@@ -34,8 +37,8 @@ help:
 	@echo "  make boards            List available ESP32 boards"
 	@echo "  make boards-all        List all available boards"
 	@echo "  make venv              Show how to activate Python virtual environment"
-	@echo "  make setup-dev         Install software dependencies (Zephyr SDK, ESP-IDF, etc.)"
-	@echo "  make setup-dev-minimal Install only Zephyr (skip ESP32 toolchain)"
+	@echo "  make setup-dev         Install Zephyr SDK + ESP32 dependencies"
+	@echo "  make setup-dev-minimal Install only Zephyr SDK (skip ESP32)"
 	@echo "  make init              Initialize Zephyr workspace in ./zephyrproject"
 
 setup-dev:
@@ -83,9 +86,9 @@ boards-all:
 	cd $(ZEPHYR_DIR) && $(WEST) boards || true
 
 venv:
-	@echo "👉 Activating Python virtual environment at $(VENV_DIR)"
+	@echo "👉 Python virtual environment is at $(VENV_DIR)"
 	@echo ""
-	@echo "Run this command in your shell:"
+	@echo "To activate manually, run:"
 	@echo "    source $(VENV_DIR)/bin/activate"
 	@echo ""
 
@@ -96,4 +99,3 @@ clean:
 clean-all:
 	@echo "🧹 Cleaning ALL build directories..."
 	rm -rf $(ZEPHYR_DIR)/build
-
