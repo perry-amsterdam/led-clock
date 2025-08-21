@@ -38,7 +38,8 @@ setup-dev-minimal:
 
 init:
 	@echo "👉 Initializing Zephyr workspace inside $(ZEPHYR_DIR)..."
-	cd $(ZEPHYR_DIR) && $(WEST) init -l .
+	mkdir -p $(ZEPHYR_DIR)
+	cd $(ZEPHYR_DIR) && $(WEST) init -l . --mr .
 	cd $(ZEPHYR_DIR) && $(WEST) update
 	cd $(ZEPHYR_DIR) && $(WEST) zephyr-export
 	@echo "✅ Zephyr workspace initialized in $(ZEPHYR_DIR)"

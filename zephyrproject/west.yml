@@ -10,9 +10,9 @@ manifest:
 
   projects:
     - name: zephyr
-      repo-path: zephyr
-      revision: main   # je kunt ook bv. v3.6.0 pinnen
-      import: true     # haalt alle standaard Zephyr-modules op
+      path: zephyr         # 👈 forceer de locatie in zephyrproject/zephyr
+      revision: main
+      import: true
 
   self:
     path: app
