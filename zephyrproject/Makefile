@@ -1,12 +1,16 @@
 # Makefile for LED Clock with Zephyr
 # Workspace lives in ./zephyrproject
-# App lives in ./zephyrproject/app
+# Manifest lives in ./zephyrproject/manifest
+# App lives in ./zephyrproject/manifest/app
 
 # Zorg dat 'west' altijd gevonden wordt
 export PATH := $(HOME)/.local/bin:$(PATH)
 
-ZEPHYR_DIR := $(CURDIR)/          # wijst naar zephyrproject/
-APP_DIR := $(ZEPHYR_DIR)/app
+# Basis paden
+ZEPHYR_DIR := $(CURDIR)/              # workspace root = zephyrproject/
+MANIFEST_DIR := $(ZEPHYR_DIR)/manifest
+APP_DIR := $(MANIFEST_DIR)/app
+
 BOARD ?= native_sim
 WEST := west
 SETUP_SCRIPT := $(CURDIR)/bin/setup-zephyr-env.sh
@@ -39,14 +43,14 @@ setup-dev-minimal:
 init:
 	@echo "👉 Initializing Zephyr workspace inside $(ZEPHYR_DIR)..."
 	mkdir -p $(ZEPHYR_DIR)
-	cd $(ZEPHYR_DIR) && $(WEST) init -l .
+	cd $(ZEPHYR_DIR) && $(WEST) init -l $(MANIFEST_DIR)
 	cd $(ZEPHYR_DIR) && $(WEST) update
 	cd $(ZEPHYR_DIR) && $(WEST) zephyr-export
 	@echo "✅ Zephyr workspace initialized in $(ZEPHYR_DIR)"
 
 build:
 	@echo "👉 Building app for $(BOARD) in $(BUILD_DIR)..."
-	cd $(ZEPHYR_DIR) && $(WEST) build -b $(BOARD) app -d $(BUILD_DIR)
+	cd $(ZEPHYR_DIR) && $(WEST) build -b $(BOARD) $(APP_DIR) -d $(BUILD_DIR)
 
 build-esp32:
 	$(MAKE) build BOARD=esp32_devkitc_wroom
@@ -71,4 +75,3 @@ clean:
 clean-all:
 	@echo "🧹 Cleaning ALL build directories..."
 	rm -rf $(ZEPHYR_DIR)/build
-
