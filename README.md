@@ -27,36 +27,6 @@ De eerste hardware (klokfront, lasercut) is klaar ✅. De software wordt nu voll
 
 ## 🖥️ Software Setup
 
-### Zephyr Development Environment
-
-1. Clone de repo:
-
-   ```bash
-   git clone https://github.com/perry-amsterdam/led-clock.git
-   cd led-clock
-   ```
-
-2. Voer het setup-script uit:
-
-   ```bash
-   ./setup-zephyr-env.sh
-   ```
-
-   * `--minimal` → installeert alleen Zephyr native
-   * `--clean` → verwijdert de hele omgeving
-   * Daarna gebruik je:
-
-     * `zephyr-env [PATH]` → activeer Zephyr omgeving en spring naar project
-     * `esp-env` → activeer ESP32 toolchain
-
-3. Test build:
-
-   ```bash
-   zephyr-env
-   cd zephyr/samples/hello_world
-   west build -b native_sim -t run
-   ```
-
 ---
 
 ## ⚙️ Hardware Setup
