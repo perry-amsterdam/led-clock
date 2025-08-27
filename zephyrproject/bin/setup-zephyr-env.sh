@@ -1,110 +1,124 @@
 #!/usr/bin/env bash
-set -e
+# Robust Zephyr setup helper for Ubuntu / Linux
+# - Ensures we're inside a west workspace
+# - Uses `west packages` when available (Zephyr ≥ 4.1 within a workspace)
+# - Falls back to pip-installing Zephyr tool requirements if `packages` is unavailable
+# - Optionally installs the Zephyr SDK when WEST_SDK_INSTALL=1
+#
+# Usage:
+#   ./setup-zephyr-env.sh
+#
+# Optional env vars:
+#   VENV_PATH=path/to/.venv      # If set, source this virtualenv before installing anything
+#   WEST_SDK_INSTALL=1           # If set to 1, attempt 'west sdk install' (may be interactive)
+#   EXTRA_PIP_ARGS="--user"      # Extra args for pip installs (if not using venv)
+#
+# Notes:
+# - Run this from anywhere *inside* your west workspace (the tree containing the .west/ directory).
+# - If you haven't initialized a workspace yet, do something like:
+#     mkdir zephyrproject && cd zephyrproject
+#     west init -m https://github.com/zephyrproject-rtos/zephyr
+#     west update
+# - `west packages` exists only when the workspace defines the Zephyr extension commands (Zephyr ≥ 4.1).
+#   See: https://docs.zephyrproject.org/latest/develop/west/index.html
+set -euo pipefail
 
-# === CONFIG ===
-ZEPHYR_SDK_VERSION=0.16.8
-ZEPHYR_SDK_DIR=/opt/zephyr-sdk
-ESP_DIR=$HOME/esp
-PROJECT_DIR=$HOME/led-clock/zephyrproject
-VENV_DIR=$PROJECT_DIR/.venv   # virtuele env in project
+log() { printf '\033[1;34m[setup]\033[0m %s\n' "$*"; }
+warn() { printf '\033[1;33m[warn]\033[0m %s\n' "$*"; }
+err() { printf '\033[1;31m[error]\033[0m %s\n' "$*"; }
 
-# === DEFAULT FLAGS ===
-MODE="full"
-FORCE_SDK="no"
-
-# === USAGE FUNCTION ===
-usage() {
-  echo "Usage: $0 [OPTIONS]"
-  echo ""
-  echo "Options:"
-  echo "  --minimal     Install only Zephyr SDK + native build support, skip ESP32 toolchain"
-  echo "  --clean       Remove Zephyr SDK, ESP-IDF, and Python virtual environment"
-  echo "  --force-sdk   Force reinstall Zephyr SDK (delete existing first)"
-  echo "  -h, --help    Show this help message"
-  echo ""
-  echo "Examples:"
-  echo "  $0             Install full environment (Zephyr + ESP32 support)"
-  echo "  $0 --minimal   Install minimal environment (Zephyr only)"
-  echo "  $0 --clean     Remove installed environment"
-  echo "  $0 --force-sdk Reinstall Zephyr SDK even if already present"
-  exit 0
-}
-
-# === PARSE ARGS ===
-for arg in "$@"; do
-  case "$arg" in
-    --minimal) MODE="minimal" ;;
-    --clean) MODE="clean" ;;
-    --force-sdk) FORCE_SDK="yes" ;;
-    -h|--help) usage ;;
-    *) echo "Unknown option: $arg"; usage ;;
-  esac
-done
-
-# === CLEAN MODE ===
-if [ "$MODE" = "clean" ]; then
-  echo "🧹 Removing Zephyr SDK, ESP-IDF and virtual environment..."
-  sudo rm -rf "$ZEPHYR_SDK_DIR"
-  rm -rf "$ESP_DIR"
-  rm -rf "$VENV_DIR"
-  echo "✅ Clean complete"
-  exit 0
+# 1) Optionally activate venv
+if [[ -n "${VENV_PATH:-}" ]]; then
+  if [[ -f "$VENV_PATH/bin/activate" ]]; then
+    log "Activating virtualenv: $VENV_PATH"
+    # shellcheck disable=SC1090
+    source "$VENV_PATH/bin/activate"
+  else
+    warn "VENV_PATH is set but activate script not found: $VENV_PATH/bin/activate"
+  fi
 fi
 
-# === INSTALL SYSTEM DEPENDENCIES ===
-echo "👉 Installing system dependencies..."
-sudo apt-get update
-sudo apt-get install -y git cmake ninja-build gperf ccache dfu-util \
-  device-tree-compiler wget python3-dev python3-pip python3-venv python3-setuptools \
-  python3-tk python3-wheel xz-utils file make gcc gcc-multilib g++-multilib libsdl2-dev
-
-# === INSTALL ZEPHYR SDK ===
-if [ "$FORCE_SDK" = "yes" ]; then
-  echo "👉 Forcing reinstall of Zephyr SDK..."
-  sudo rm -rf "$ZEPHYR_SDK_DIR"
-fi
-
-if [ ! -d "$ZEPHYR_SDK_DIR" ]; then
-  echo "👉 Installing Zephyr SDK $ZEPHYR_SDK_VERSION..."
-  wget -q https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v$ZEPHYR_SDK_VERSION/zephyr-sdk-$ZEPHYR_SDK_VERSION-linux-x86_64-setup.run -O /tmp/zephyr-sdk.run
-  chmod +x /tmp/zephyr-sdk.run
-  sudo /tmp/zephyr-sdk.run -- -d "$ZEPHYR_SDK_DIR"
-  rm /tmp/zephyr-sdk.run
-else
-  echo "✅ Zephyr SDK already installed at $ZEPHYR_SDK_DIR"
-fi
-
-# === PYTHON VIRTUAL ENVIRONMENT ===
-if [ ! -d "$VENV_DIR" ]; then
-  echo "👉 Creating Python virtual environment in $VENV_DIR"
-  python3 -m venv "$VENV_DIR"
-fi
-
-echo "👉 Activating Python virtual environment..."
-# shellcheck source=/dev/null
-source "$VENV_DIR/bin/activate"
-
-# Set Zephyr to use this venv's python
-export ZEPHYR_PYTHON="$VENV_DIR/bin/python"
-echo "✅ ZEPHYR_PYTHON set to $ZEPHYR_PYTHON"
-
-# Upgrade pip inside venv
-pip install --upgrade pip
-
-# Ensure west is installed in venv
+# 2) Sanity checks for west
 if ! command -v west >/dev/null 2>&1; then
-  echo "👉 Installing west inside virtual environment..."
-  pip install west
+  err "west is not installed. Install with:  pip install --upgrade west"
+  exit 2
 fi
 
-# === INSTALL ESP32 TOOLCHAIN & DEPENDENCIES (ONLY IF NOT MINIMAL) ===
-if [ "$MODE" = "full" ]; then
-  echo "👉 Installing ESP32 Python dependencies in venv..."
-  pip install "esptool>=5.0.2"
-  west packages pip --install
-  echo "✅ esptool installed: $(esptool.py --version)"
+log "west version: $(west --version 2>/dev/null || echo unknown)"
+
+# 3) Ensure we're in a west workspace (detect topdir)
+WEST_TOPDIR=""
+if west topdir >/dev/null 2>&1; then
+  WEST_TOPDIR="$(west topdir)"
+else
+  # Fallback: search upwards for .west directory
+  CUR="$(pwd)"
+  while [[ "$CUR" != "/" ]]; do
+    if [[ -d "$CUR/.west" ]]; then
+      WEST_TOPDIR="$CUR"
+      break
+    fi
+    CUR="$(dirname "$CUR")"
+  done
 fi
 
-echo "🎉 Setup complete!"
-echo "👉 To activate the environment later, run: source $VENV_DIR/bin/activate"
+if [[ -z "$WEST_TOPDIR" ]]; then
+  err "Not inside a west workspace (no .west/ found). Run this inside your Zephyr workspace root."
+  err "Tip: create one with 'west init' then 'west update'."
+  exit 3
+fi
+
+log "Workspace detected at: $WEST_TOPDIR"
+cd "$WEST_TOPDIR"
+
+# 4) Update projects
+log "Running 'west update' to sync manifest projects…"
+west update
+
+# 5) Detect if 'west packages' exists (requires Zephyr extension commands in this workspace)
+if west help packages >/dev/null 2>&1; then
+  log "'west packages' is available. Installing Zephyr Python tools via packages…"
+  west packages list || true
+  if [[ -n "${EXTRA_PIP_ARGS:-}" ]]; then
+    west packages pip --install --pip-extra-args "$EXTRA_PIP_ARGS"
+  else
+    west packages pip --install
+  fi
+else
+  warn "'west packages' not available in this workspace. Falling back to requirements install."
+  ZEPHYR_PATH="$(west list -f '{path}' zephyr 2>/dev/null || true)"
+  if [[ -z "$ZEPHYR_PATH" || ! -d "$ZEPHYR_PATH" ]]; then
+    warn "Could not locate Zephyr repo via 'west list'. Trying common path '$WEST_TOPDIR/zephyr'."
+    ZEPHYR_PATH="$WEST_TOPDIR/zephyr"
+  fi
+
+  if [[ ! -d "$ZEPHYR_PATH" ]]; then
+    err "Zephyr repo not found (looked for: $ZEPHYR_PATH). Cannot install requirements."
+    exit 4
+  fi
+
+  REQ_PRIMARY="$ZEPHYR_PATH/scripts/requirements.txt"
+  REQ_EXTRA="$ZEPHYR_PATH/scripts/requirements-extra.txt"
+  PIP="pip"
+  if command -v pip3 >/dev/null 2>&1; then PIP="pip3"; fi
+
+  log "Installing Zephyr Python requirements from $REQ_PRIMARY"
+  $PIP install -U -r "$REQ_PRIMARY" ${EXTRA_PIP_ARGS:-}
+  if [[ -f "$REQ_EXTRA" ]]; then
+    log "Installing extra Zephyr Python requirements from $REQ_EXTRA"
+    $PIP install -U -r "$REQ_EXTRA" ${EXTRA_PIP_ARGS:-}
+  fi
+fi
+
+# 6) Optional: install Zephyr SDK (may be interactive depending on version)
+if [[ "${WEST_SDK_INSTALL:-0}" == "1" ]]; then
+  log "Attempting Zephyr SDK install via 'west sdk install' (this may be interactive)…"
+  if ! west sdk install; then
+    warn "'west sdk install' did not complete successfully. You can install the SDK manually later."
+  fi
+else
+  log "Skipping SDK install. Set WEST_SDK_INSTALL=1 to run 'west sdk install'."
+fi
+
+log "✅ Zephyr environment setup finished."
 
