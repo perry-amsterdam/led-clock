@@ -75,6 +75,17 @@ cd "$WEST_TOPDIR"
 log "Running 'west update' to sync manifest projects…"
 west update
 
+# Fetch Espressif Wi‑Fi/Bluetooth blobs required for ESP32‑S3 builds.
+# The Espressif HAL requires binary blobs for Wi‑Fi and Bluetooth; they
+# must be downloaded after every `west update` to ensure version
+# compatibility【212531024432480†L938-L950】.  Doing this here makes
+# the board buildable out of the box.  If the blobs are already up to
+# date, this command is a no‑op.
+log "Fetching Espressif binary blobs (hal_espressif)…"
+if ! west blobs fetch hal_espressif; then
+  warn "Failed to fetch hal_espressif blobs. Zephyr builds for ESP32‑S3 may fail until the blobs are downloaded."
+fi
+
 # 5) Detect if 'west packages' exists (requires Zephyr extension commands in this workspace)
 if west help packages >/dev/null 2>&1; then
   log "'west packages' is available. Installing Zephyr Python tools via packages…"
