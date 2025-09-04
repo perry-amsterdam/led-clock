@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Robust Zephyr setup helper for Ubuntu / Linux
 # - Ensures we're inside a west workspace
 # - Uses `west packages` when available (Zephyr ≥ 4.1 within a workspace)

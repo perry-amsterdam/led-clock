@@ -7,7 +7,9 @@
 # - Bootstrapt automatisch 'west' in .venv indien nodig
 # - Kan workspace auto-initialiseren met AUTO_INIT=1
 
-SHELL := /usr/bin/env bash
+## Gebruik expliciet /bin/bash als shell. Op sommige systemen is `/usr/bin/env` niet aanwezig, maar
+## `/bin/bash` bestaat wel. Dit voorkomt de fout 'No such file or directory' bij `make help`.
+SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 .ONESHELL:
 
