@@ -36,7 +36,7 @@ ESP_PORT    ?= /dev/ttyUSB0
 FLASH_SNIPPET ?= flash-16M
 PSRAM_SNIPPET ?= psram-8M
 
-SETUP_SCRIPT := ./setup-zephyr-env.sh
+SETUP_SCRIPT := bin/setup-zephyr-env.sh
 
 # --------- Bootstrap helper ---------
 .PHONY: __bootstrap
