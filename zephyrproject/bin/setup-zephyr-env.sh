@@ -119,6 +119,19 @@ echo "[ok] 'west' is installed: $(west --version)"
 
 log "west version: $(west --version 2>/dev/null || echo unknown)"
 
+# --- Ensure we are inside a west workspace ---
+if [ ! -d "$REPO_ROOT/.west" ]; then
+    echo "[info] No .west/ directory found, initializing workspace ..."
+    if [ -d "$REPO_ROOT/zephyr" ]; then
+        west init -l "$REPO_ROOT/zephyr"
+    else
+        west init "$REPO_ROOT"
+    fi
+    west update
+else
+    echo "[ok] Already inside a west workspace."
+fi
+
 # 3) Ensure we're in a west workspace (detect topdir)
 WEST_TOPDIR=""
 if west topdir >/dev/null 2>&1; then
