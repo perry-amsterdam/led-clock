@@ -1,4 +1,59 @@
 #!/bin/bash
+set -Eeuo pipefail
+
+echo "[setup-dev] Running bin/setup-zephyr-env.sh ..."
+
+# --- Directories ---
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+VENV_DIR="$REPO_ROOT/.venv"
+VENV_BIN="$VENV_DIR/bin"
+
+need_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "[error] Required command '$1' not found on PATH." >&2
+    exit 1
+  fi
+}
+
+need_cmd python3
+
+# Ensure Python venv module is available
+if ! python3 -m venv --help >/dev/null 2>&1; then
+  echo "[error] Python venv module not found."
+  echo "        On Debian/Ubuntu install:  sudo apt-get install -y python3-venv"
+  exit 1
+fi
+
+# Create or reuse .venv
+if [ ! -d "$VENV_DIR" ]; then
+  echo "[info] Creating virtualenv at $VENV_DIR"
+  python3 -m venv "$VENV_DIR"
+fi
+
+# Prefer tools from the venv
+export PATH="$VENV_BIN:$PATH"
+
+# Upgrade packaging tools in the venv (quietly)
+echo "[info] Upgrading pip/setuptools/wheel in .venv ..."
+"$VENV_BIN/python" -m pip install --upgrade pip setuptools wheel >/dev/null
+
+# Install west into the venv if missing
+if ! command -v west >/dev/null 2>&1; then
+  echo "[info] Installing 'west' in .venv ..."
+  "$VENV_BIN/pip" install --upgrade west
+fi
+
+# Verify west
+if ! command -v west >/dev/null 2>&1; then
+  echo "[error] Failed to install 'west' into the virtual environment." >&2
+  echo "        Try: $VENV_BIN/pip install --upgrade west" >&2
+  exit 1
+fi
+
+echo "[ok] 'west' is available: $(west --version)"
+
+# --- Original script continues below ---
 # Robust Zephyr setup helper for Ubuntu / Linux
 # - Ensures we're inside a west workspace
 # - Uses `west packages` when available (Zephyr ≥ 4.1 within a workspace)
