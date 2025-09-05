@@ -40,10 +40,27 @@ if [[ -n "${VENV_PATH:-}" ]]; then
 fi
 
 # 2) Sanity checks for west
+echo "[setup-dev] Running bin/setup-zephyr-env.sh ..."
+
+# Check if west is installed
 if ! command -v west >/dev/null 2>&1; then
-  err "west is not installed. Install with:  pip install --upgrade west"
-  exit 2
+    echo "[info] 'west' is not installed. Installing with pip ..."
+    # Gebruik lokale venv als aanwezig, anders system-wide pip
+    if [ -x ".venv/bin/pip" ]; then
+        .venv/bin/pip install --upgrade west
+    else
+        pip install --user --upgrade west
+    fi
 fi
+
+# Check again after install
+if ! command -v west >/dev/null 2>&1; then
+    echo "[error] Failed to install 'west'. Please install manually with:"
+    echo "       pip install --upgrade west"
+    exit 1
+fi
+
+echo "[ok] 'west' is installed: $(west --version)"
 
 log "west version: $(west --version 2>/dev/null || echo unknown)"
 
