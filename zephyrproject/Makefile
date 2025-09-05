@@ -24,9 +24,9 @@ WORKSPACE_DIR    ?= $(CURDIR)
 
 ## Standaard target board. Voor de ESP32‑S3‑WROOM‑1‑N16R8 (16 MB flash, 8 MB PSRAM)
 ## gebruiken we het Zephyr‑board esp32s3_devkitc (WROOM‑gebaseerd)
-BOARD       ?= esp32s3_devkitc
+BOARD       ?= esp32s3_devkitc/esp32s3/procpu
 ## Standaard applicatie. Pas aan naar je eigen app of sample.
-APP         ?= samples/hello_world
+APP         ?= manifest/app/
 BUILD_DIR   ?= build
 ESP_PORT    ?= /dev/ttyUSB0
 
@@ -88,7 +88,7 @@ setup-dev: __bootstrap $(SETUP_SCRIPT) ## Installeer alle dependencies via setup
 
 # --------- Build ---------
 .PHONY: build
-build: __bootstrap ## Build de app (default: samples/hello_world voor native_sim)
+build: __bootstrap ## Build de app (default: manifest/app/ voor native_sim)
 	if [[ -f "$(VENV_PATH)/bin/activate" && -z "${VIRTUAL_ENV:-}" ]]; then
 		source "$(VENV_PATH)/bin/activate"
 	fi
