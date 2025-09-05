@@ -23,8 +23,8 @@ EXTRA_CMAKE_ARGS ?=
 WEST         ?= west
 
 # Local helper scripts
-SETUP_SCRIPT := ./setup-zephyr-env.sh
-FETCH_BLOBS  := ./fetch-blobs.sh
+SETUP_SCRIPT := bin/setup-zephyr-env.sh
+FETCH_BLOBS  := bin/fetch-blobs.sh
 
 # Serial/flash options (customize via environment/CLI: make flash MONITOR_ARGS="--device /dev/ttyUSB0")
 FLASH_ARGS   ?=
