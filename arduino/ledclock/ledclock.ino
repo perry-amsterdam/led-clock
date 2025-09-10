@@ -1,13 +1,38 @@
-// ==== ESP32: Minimal Wi-Fi Test met Captive Portal (zonder FreeRTOS) ====
-// - Probeert verbinden met opgeslagen Wi-Fi
-// - Faalt? Start Access Point + webportal om SSID/WPA in te voeren
-// - Na opslaan -> reboot en verbindt
+// ==== ESP32: Minimal Wi-Fi Test + Captive Portal + WS2812 status LED ====
+// WS2812 kleuren:
+// - Blauw  = WiFi start / verbinden
+// - Rood   = niet verbonden (AP/portal actief)
+// - Groen  = verbonden
 
 #include <WiFi.h>
 #include <WebServer.h>
 #include <DNSServer.h>
 #include <Preferences.h>
+#include <Adafruit_NeoPixel.h>
 
+// ---- WS2812 (NeoPixel) ----
+#define LED_PIN    48      // <-- PAS AAN aan jouw board (bijv. 8 of 48)
+#define LED_COUNT  1
+Adafruit_NeoPixel pixel(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+
+void ledBegin() {
+  pixel.begin();
+  pixel.setBrightness(50); // 0..255 (houd dit bescheiden)
+  pixel.clear();
+  pixel.show();
+}
+
+void ledColor(uint8_t r, uint8_t g, uint8_t b) {
+  pixel.setPixelColor(0, pixel.Color(r, g, b));
+  pixel.show();
+}
+
+void ledBlue()  { ledColor(  0,   0, 60); }
+void ledRed()   { ledColor( 60,   0,  0); }
+void ledGreen() { ledColor(  0,  60,  0); }
+void ledOff()   { ledColor(  0,   0,  0); }
+
+// ---- Wi-Fi portal vars ----
 Preferences prefs;
 WebServer server(80);
 DNSServer dns;
@@ -37,7 +62,7 @@ void handleRoot() {
   String body = F(
     "<h1>ESP32 Wi-Fi configuratie</h1>"
     "<form method='POST' action='/save'>"
-    "<label>SSID<br><input name='ssid' required placeholder='Bijv. MijnWiFi'></label>"
+    "<label>SSID<br><input name='ssid' required></label>"
     "<label>Wachtwoord<br><input name='pass' type='password' required></label>"
     "<button type='submit'>Opslaan</button>"
     "</form>"
@@ -51,18 +76,12 @@ void handleSave() {
     server.send(400, "text/plain", "Ontbrekende velden");
     return;
   }
-  String ssid = server.arg("ssid");
-  String pass = server.arg("pass");
-
   prefs.begin(PREF_NS, false);
-  prefs.putString("ssid", ssid);
-  prefs.putString("pass", pass);
+  prefs.putString("ssid", server.arg("ssid"));
+  prefs.putString("pass", server.arg("pass"));
   prefs.end();
-
-  server.send(200, "text/html", htmlWrap(
-    "<h1>Opgeslagen ✅</h1><p>Herstart en verbinden met <b>" + ssid + "</b>...</p>"
-  ));
-  delay(600);
+  server.send(200, "text/html", htmlWrap("<h1>Opgeslagen ✅</h1><p>Herstart...</p>"));
+  delay(500);
   ESP.restart();
 }
 
@@ -71,7 +90,7 @@ void handleReset() {
   prefs.clear();
   prefs.end();
   server.send(200, "text/html", htmlWrap("<h1>Gewist ✅</h1><p>Herstart...</p>"));
-  delay(600);
+  delay(500);
   ESP.restart();
 }
 
@@ -85,7 +104,6 @@ static bool isIpLike(const String& h) {
 }
 
 void handleNotFound() {
-  // Captive portal: alles omleiden naar / als host niet ons AP-IP is
   if (!isIpLike(server.hostHeader()) && server.hostHeader() != AP_IP.toString()) {
     String loc = "http://" + AP_IP.toString();
     server.sendHeader("Location", loc, true);
@@ -106,7 +124,11 @@ bool connectWiFi(const String& ssid, const String& pass, uint32_t timeoutMs=1500
   WiFi.begin(ssid.c_str(), pass.c_str());
 
   uint32_t start = millis();
+  bool blinkState = false;
   while (WiFi.status() != WL_CONNECTED && (millis() - start) < timeoutMs) {
+    // tijdens verbinden: blauw knipperen
+    blinkState = !blinkState;
+    if (blinkState) ledBlue(); else ledOff();
     delay(250);
     Serial.print('.');
   }
@@ -115,9 +137,11 @@ bool connectWiFi(const String& ssid, const String& pass, uint32_t timeoutMs=1500
   if (WiFi.status() == WL_CONNECTED) {
     Serial.print("Verbonden! IP: ");
     Serial.println(WiFi.localIP());
+    ledGreen();
     return true;
   }
   Serial.println("Verbinden mislukt.");
+  ledRed();
   return false;
 }
 
@@ -127,6 +151,7 @@ void startPortal() {
   WiFi.softAPConfig(AP_IP, AP_GW, AP_MASK);
   if (!WiFi.softAP(AP_SSID, AP_PASS)) {
     Serial.println("AP starten mislukt!");
+    ledRed();
     return;
   }
   dns.start(DNS_PORT, "*", AP_IP);
@@ -137,6 +162,7 @@ void startPortal() {
   server.onNotFound(handleNotFound);
   server.begin();
 
+  ledRed(); // AP actief = rood
   Serial.printf("AP actief: %s  (http://%s)\n", AP_SSID, AP_IP.toString().c_str());
 }
 
@@ -150,8 +176,10 @@ void stopPortal() {
 // -------- Arduino lifecycle --------
 void setup() {
   Serial.begin(115200);
-  delay(300);
-  Serial.println("\nBoot Wi-Fi test...");
+  delay(200);
+
+  ledBegin();
+  ledBlue(); // opstart -> blauw
 
   // opgeslagen credentials
   prefs.begin(PREF_NS, true);
@@ -161,9 +189,9 @@ void setup() {
 
   // 1) Probeer Wi-Fi
   if (connectWiFi(savedSsid, savedPass)) {
-    Serial.println("Klaar: STA verbonden.");
+    // groen in connectWiFi()
   } else {
-    // 2) Start AP + portal
+    // 2) Start AP + portal (rood)
     startPortal();
   }
 }
@@ -175,11 +203,12 @@ void loop() {
     server.handleClient();
   }
 
-  // Optioneel: als we intussen verbinding kregen, kun je portal uitzetten:
+  // Als we alsnog verbonden raken (bijv. na portal -> reboot -> reconnect)
   if (WiFi.status() == WL_CONNECTED && WiFi.getMode() != WIFI_STA) {
     stopPortal();
     WiFi.mode(WIFI_STA);
     Serial.print("Verbonden! IP: ");
     Serial.println(WiFi.localIP());
+    ledGreen();
   }
 }
