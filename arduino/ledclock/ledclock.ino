@@ -1,3 +1,5 @@
+Using configuration file at "/etc/bcpp/bcpp.cfg"
+Using configuration file at "/etc/bcpp/bcpp.cfg"
 // ==== ESP32: TZ bij opstart + datum/tijd via NTP ====
 // - Verbindt met Wi-Fi of start captive portal
 // - Bij succesvolle Wi-Fi: vraagt timezone op (HTTP) en stelt NTP in
