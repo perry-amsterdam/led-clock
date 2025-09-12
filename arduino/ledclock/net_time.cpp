@@ -3,98 +3,138 @@
 #include <time.h>
 #include "net_time.h"
 
-String extractJsonString(const String& json, const String& key)
-{
-	String pat="\""+key+"\":";
-	int i=json.indexOf(pat); if(i<0) return ""; i+=pat.length();
-	while(i<(int)json.length() && json[i]==' ') i++;
-	if(i<(int)json.length() && json[i]=='\"'){ int s=i+1; int e=json.indexOf('\"',s); if(e>s) return json.substring(s,e); }
-	int e=json.indexOf(',',i); if(e<0) e=json.indexOf('}
-
+// Preview helper for HTTP payloads (guarded by DEBUG_TZ)
 void dumpPreview(const String& payload)
 {
-	if(!DEBUG_TZ) return;
-								 // iets ruimer voor debug
-	int n=payload.length(); int k = n>160 ? 160 : n;
-	String head = payload.substring(0,k); head.replace("\n","\\n"); head.replace("\r","\\r");
-	Serial.printf("[HTTP] len=%d preview=%s%s\n", n, head.c_str(), (n>k?"...":""));
+#ifdef DEBUG_TZ
+    int n = payload.length();
+    int k = n > 160 ? 160 : n;
+    String head = payload.substring(0, k);
+    String tmp = head;
+    tmp.replace("\n", "\\n");
+    tmp.replace("\r", "\\r");
+    Serial.printf("[HTTP] len=%d preview=%s%s\n", n, tmp.c_str(), (n > k ? "..." : ""));
+#endif
 }
 
+// Very small/robust extractor for flat JSON (string or numeric/bool token)
+String extractJsonString(const String& json, const String& key)
+{
+    String pat = "\"" + key + "\":";
+    int i = json.indexOf(pat);
+    if (i < 0) return "";
+    i += pat.length();
+    while (i < (int)json.length() && (json[i] == ' ' || json[i] == '\t')) i++;
+
+    // Case 1: quoted string value
+    if (i < (int)json.length() && json[i] == '\"') {
+        int s = i + 1;
+        int e = json.indexOf('\"', s);
+        if (e > s) return json.substring(s, e);
+        return "";
+    }
+
+    // Case 2: raw token (number, true/false/null) until ',' or '}'
+    int e = json.indexOf(',', i);
+    if (e < 0) e = json.indexOf('}', i);
+    if (e < 0) e = json.length();
+    String v = json.substring(i, e);
+    v.trim();
+    return v;
+}
+
+// worldtimeapi.org: timezone (string), raw_offset (seconds), dst_offset (seconds)
+// ip-api.com: countryCode (string)
 bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec)
 {
-	if(DEBUG_TZ) Serial.printf("[TZ] GET %s\n", URL_TIMEINFO);
-	HTTPClient http;
-	if(!http.begin(URL_TIMEINFO)){ Serial.println("[TZ] http.begin() fail"); return false; }
-	int code=http.GET(); if(DEBUG_TZ) Serial.printf("[TZ] HTTP %d\n", code);
-	if(code!=200){ http.end(); return false; }
-	String payload=http.getString(); http.end(); dumpPreview(payload);
+    HTTPClient http;
+    if (!http.begin(URL_TIMEINFO)) {
+#ifdef DEBUG_TZ
+        Serial.println("[TZ] http.begin failed");
+#endif
+        return false;
+    }
+    int code = http.GET();
+    if (code <= 0) {
+#ifdef DEBUG_TZ
+        Serial.printf("[TZ] HTTP GET failed: %d\n", code);
+#endif
+        http.end();
+        return false;
+    }
+    String payload = http.getString();
+    http.end();
+    dumpPreview(payload);
 
-	String tz = extractJsonString(payload,"timezone");
-								 // "+01:00"
-	String utcOff = extractJsonString(payload,"utc_offset");
-								 // true/false
-	String dstRaw = extractJsonString(payload,"dst");
-	if(tz.isEmpty() || utcOff.length()<3){ Serial.println("[TZ] incomplete response"); return false; }
+    String tz = extractJsonString(payload, "timezone");
+    String raw = extractJsonString(payload, "raw_offset");
+    String dst = extractJsonString(payload, "dst_offset");
 
-	int sign = (utcOff[0]=='-')?-1:1;
-	int hh = utcOff.substring(1,3).toInt();
-	int mm = (utcOff.length()>=6 && utcOff[3]==':') ? utcOff.substring(4,6).toInt() : 0;
-	gmtOffsetSec = sign*(hh*3600 + mm*60);
-	bool dst = dstRaw.indexOf("true")>=0;
-	daylightOffsetSec = dst ? 3600 : 0;
+    if (tz.length() == 0) {
+#ifdef DEBUG_TZ
+        Serial.println("[TZ] timezone missing in payload");
+#endif
+        return false;
+    }
 
-	tzIana = tz;
-	if(DEBUG_TZ) Serial.printf("[TZ] Parsed tz=%s offset=%s => gmtOffsetSec=%d dst=%s(daylight=%d)\n",
-			tz.c_str(), utcOff.c_str(), gmtOffsetSec, dst?"true":"false", daylightOffsetSec);
-	return true;
+    tzIana = tz;
+    gmtOffsetSec = raw.length() ? raw.toInt() : 0;
+    daylightOffsetSec = dst.length() ? dst.toInt() : 0;
+    return true;
 }
 
 String fetchCountryCode()
 {
-	if(DEBUG_TZ) Serial.printf("[Geo] GET %s\n", URL_COUNTRY);
-	HTTPClient http;
-	if(!http.begin(URL_COUNTRY)){ Serial.println("[Geo] http.begin() fail"); return ""; }
-	int code=http.GET(); if(DEBUG_TZ) Serial.printf("[Geo] HTTP %d\n", code);
-	if(code!=200){ http.end(); return ""; }
-	String payload=http.getString(); http.end(); dumpPreview(payload);
-	String cc = extractJsonString(payload,"countryCode"); cc.trim();
-	if(DEBUG_TZ) Serial.printf("[Geo] countryCode=%s\n", cc.c_str());
-	return cc;
+    HTTPClient http;
+    if (!http.begin(URL_COUNTRY)) {
+        return "";
+    }
+    int code = http.GET();
+    if (code <= 0) { http.end(); return ""; }
+    String payload = http.getString();
+    http.end();
+    dumpPreview(payload);
+    String cc = extractJsonString(payload, "countryCode");
+    return cc;
 }
 
 bool setupTimeFromInternet()
 {
-	// 1) TZ ophalen
-	if(!fetchTimeInfo(g_timezoneIANA, g_gmtOffsetSec, g_daylightSec)){ Serial.println("[NTP] TZ fetch failed"); return false; }
+    String tz;
+    int gmt = 0, dst = 0;
+    if (!fetchTimeInfo(tz, gmt, dst)) {
+#ifdef DEBUG_TZ
+        Serial.println("[TZ] fetchTimeInfo failed");
+#endif
+        return false;
+    }
 
-	// 2) NTP instellen met offsets  lokale tijd via getLocalTime()
-	if(DEBUG_TZ) Serial.printf("[NTP] configTime(gmt=%d, dst=%d, servers=[%s,%s])\n",
-			g_gmtOffsetSec, g_daylightSec, NTP1, NTP2);
-	configTime(g_gmtOffsetSec, g_daylightSec, NTP1, NTP2);
+    // Configure NTP using offsets (ESP32 time.h)
+    configTime(gmt, dst, NTP1, NTP2, NTP3);
 
-	// 3) Wachten op sync
-	struct tm t; g_timeReady=false;
-	for(int i=1;i<=25;i++)
-	{
-		if(getLocalTime(&t, 400)){ g_timeReady=true; if(DEBUG_TZ) Serial.printf("[NTP] sync OK (try %d)\n", i); break; }
-		delay(200); if(DEBUG_TZ) Serial.printf("[NTP] waiting... (%d)\n", i);
-	}
-	// 4) (Optioneel) country code
-	g_countryCode = fetchCountryCode();
+#ifdef DEBUG_TZ
+    Serial.printf("[TZ] configTime(gmt=%d, dst=%d) with tz=%s\n", gmt, dst, tz.c_str());
+#endif
 
-	if(DEBUG_TZ)
-	{
-		if(g_timeReady)
-		{
-			char buf[64]; strftime(buf,sizeof(buf),"%Y-%m-%d %H:%M:%S",&t);
-			Serial.printf("[Time] local=%s | TZ=%s | CC=%s\n", buf,
-				g_timezoneIANA.c_str(),
-				g_countryCode.length()? g_countryCode.c_str():"(?)");
-		}
-		else
-		{
-			Serial.println("[NTP] sync failed");
-		}
-	}
-	return g_timeReady;
+    // Optionally set TZ environment if needed by localtime
+    // Note: mapping IANA tz to POSIX TZ string is non-trivial; we only set offsets here.
+    // setenv("TZ", tz.c_str(), 1); tzset();
+
+    // Try to obtain time
+    time_t now = 0;
+    for (int i = 0; i < 10; ++i) {
+        now = time(nullptr);
+        if (now > 8 * 3600) break; // sanity: time synced
+        delay(300);
+    }
+#ifdef DEBUG_TZ
+    if (now > 8 * 3600) {
+        struct tm t; localtime_r(&now, &t);
+        Serial.printf("[TZ] time synced: %04d-%02d-%02d %02d:%02d:%02d\n",
+            t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
+    } else {
+        Serial.println("[TZ] time sync timeout");
+    }
+#endif
+    return now > 8 * 3600;
 }

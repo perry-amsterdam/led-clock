@@ -5,7 +5,7 @@
 #include "status_led.h"
 #include "net_time.h"
 
-bool connectWiFi(const String& ssid, const String& pass, uint32_t timeoutMs=15000)
+bool connectWiFi(const String& ssid, const String& pass, uint32_t timeoutMs)
 {
 	if(ssid.isEmpty()){ Serial.println("[WiFi] geen opgeslagen SSID"); return false; }
 	if(DEBUG_NET) Serial.printf("[WiFi] verbinden met SSID='%s'...\n", ssid.c_str());

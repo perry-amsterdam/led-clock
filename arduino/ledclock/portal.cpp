@@ -51,7 +51,7 @@ void handleReset()
 	delay(500); ESP.restart();
 }
 
-static bool isIpLike(const String& h)
+bool isIpLike(const String& h)
 {
 	int dots=0; for(char c: h)
 	{

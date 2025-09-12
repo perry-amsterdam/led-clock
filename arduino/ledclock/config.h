@@ -24,3 +24,4 @@ extern const char* URL_TIMEINFO;
 extern const char* URL_COUNTRY;
 extern const char* NTP1;
 extern const char* NTP2;
+extern const char* NTP3;

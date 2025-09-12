@@ -17,11 +17,12 @@ const char* PREF_PASS = "pass";
 const char* AP_SSID  = "ESP32-Setup";
 const char* AP_PASS  = "configwifi";
 const byte  DNS_PORT = 53;
-IPAddress   AP_IP(192,168,4,1), AP_GW(192,168,4,1), AP_MASK(255,255,255,0);
+const IPAddress AP_IP(192,168,4,1), AP_GW(192,168,4,1), AP_MASK(255,255,255,0);
 const char* URL_TIMEINFO = "http://worldtimeapi.org/api/ip";
 const char* URL_COUNTRY  = "http://ip-api.com/json";
-const char* NTP1 = "pool.ntp.org";
-const char* NTP2 = "time.nist.gov";
+const char* NTP1 = "0.europe.pool.ntp.org";
+const char* NTP2 = "1.europe.pool.ntp.org";
+const char* NTP3 = "2.europe.pool.ntp.org";
 
 // ===== Global objects =====
 Adafruit_NeoPixel pixel(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
