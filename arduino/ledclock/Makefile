@@ -1,10 +1,13 @@
 help:
 	@echo "Beschikbare targets:"
-	@echo "  make build    - Compileer de sketch met arduino-cli"
-	@echo "  make upload   - Upload de sketch naar /dev/ttyACM0"
-	@echo "  make clean    - Verwijder de build directory"
-	@echo "  make monitor  - Open seriële monitor op /dev/ttyACM0"
-	@echo "  make help     - Toon dit overzicht"
+	@echo "  make build     - Compileer de sketch met arduino-cli"
+	@echo "  make upload    - Upload de sketch naar /dev/ttyACM0"
+	@echo "  make clean     - Verwijder de build directory"
+	@echo "  make monitor   - Open seriële monitor op /dev/ttyACM0"
+	@echo "  make erase-all - Wis volledige flash (incl. firmware, NVS, FFAT)"
+	@echo "  make erase-nvs - Wis alleen NVS (o.a. WiFi-credentials)"
+	@echo "  make erase-ffat- Wis alleen FFAT filesystem"
+	@echo "  make help      - Toon dit overzicht"
 
 # Makefile voor ESP32-S3 N16R8 met Arduino CLI
 # Gebruik:
@@ -35,7 +38,7 @@ BUILD_DIR   := build
 FQBN := $(CORE):$(BOARD):$(BOARD_OPTS)
 
 # ======= Targets =======
-.PHONY: setup libs build upload all monitor flash clean board-details board-list erase-flash help
+.PHONY: setup libs build upload all monitor flash clean board-details board-list erase-flash help erase-all erase-nvs erase-ffat
 
 setup:
 	arduino-cli core update-index
@@ -81,3 +84,12 @@ board-list:
 # Volledige chip erase (wist ook filesystem/NVS). Vereist: esptool.py
 erase-flash:
 	esptool.py --chip esp32s3 --port $(PORT) erase_flash
+
+erase-all:
+	esptool.py --chip esp32s3 --port /dev/ttyACM0 erase_flash
+
+erase-nvs:
+	esptool.py --chip esp32s3 --port /dev/ttyACM0 erase_region 0x9000 0x5000
+
+erase-ffat:
+	esptool.py --chip esp32s3 --port /dev/ttyACM0 erase_region 0x610000 0x9E0000
