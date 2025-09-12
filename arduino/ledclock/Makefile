@@ -2,38 +2,32 @@
 # Gebruik:
 #   make setup           # core installeren (eenmalig)
 #   make build           # compile
-#   make upload PORT=/dev/ttyUSB0   # upload
-#   make monitor PORT=/dev/ttyUSB0  # seriële monitor
-#   make all PORT=/dev/ttyUSB0      # build + upload
+#   make upload          # upload naar /dev/ttyACM0
+#   make monitor         # seriële monitor
+#   make all             # build + upload
+#   make flash           # build + upload + monitor
+#   make erase-flash     # VOLLEDIGE flash wissen (incl. filesystem/NVS)
 #   make board-details   # toon exacte board-opties
 #   make board-list      # toon alle ESP32 borden
 
 # ======= Config =======
-CORE          ?= esp32:esp32
-BOARD         ?= esp32s3                       # "ESP32S3 Dev Module"
-FQBN_BASE     := $(CORE):$(BOARD)
+CORE        := esp32:esp32
+BOARD       := esp32s3
+BOARD_OPTS  := FlashSize=16M,PSRAM=enabled,PartitionScheme=app3M_fat9M_16MB
 
-# Kies de juiste opties voor jouw module:
-# - FlashSize=16M  -> 16MB flash
-# - PSRAM=enabled  -> 8MB PSRAM aan
-# - PartitionScheme=app3M_fat9M_16MB  -> handige 16MB indeling (3MB app / 9MB FATFS)
-#   (pas dit aan naar jouw wens: huge_app, min_spiffs, etc.)
-BOARD_OPTS    ?= FlashSize=16M,PSRAM=enabled,PartitionScheme=app3M_fat9M_16MB
-
-# Poort & snelheid
-PORT          ?=                                  # bv. /dev/ttyUSB0 of /dev/ttyACM0
-BAUD          ?= 115200
+# Vast ingestelde poort en baudrate
+PORT        := /dev/ttyACM0
+BAUD        := 115200
 
 # Paden
-SKETCH        ?= .                                 # map of .ino-bestand
-BUILD_DIR     ?= build
+SKETCH      := .
+BUILD_DIR   := build
 
-# ======= Interne afleidingen =======
-# Volledige FQBN met opties (opties mogen ook bij --board-options)
-FQBN := $(FQBN_BASE):$(BOARD_OPTS)
+# ======= Afleidingen =======
+FQBN := $(CORE):$(BOARD):$(BOARD_OPTS)
 
 # ======= Targets =======
-.PHONY: setup build upload all clean monitor board-details board-list libs
+.PHONY: setup libs build upload all monitor flash clean board-details board-list erase-flash
 
 setup:
 	arduino-cli core update-index
@@ -43,32 +37,30 @@ libs:
 	@echo "Plaats extra 'arduino-cli lib install ...' regels hier indien nodig"
 
 build:
-	@test -n "$(FQBN_BASE)" || (echo "FQBN_BASE leeg"; exit 1)
-	arduino-cli compile \
-		--fqbn "$(FQBN)" \
-		--build-path "$(BUILD_DIR)" \
-		"$(SKETCH)"
+	arduino-cli compile --fqbn $(FQBN) --build-path $(BUILD_DIR) $(SKETCH)
 
 upload: build
-	@test -n "$(PORT)" || (echo "Geef de seriële poort mee: make upload PORT=/dev/ttyUSB0"; exit 2)
-	arduino-cli upload \
-		--port "$(PORT)" \
-		--fqbn "$(FQBN)" \
-		--input-dir "$(BUILD_DIR)" \
-		"$(SKETCH)"
+	arduino-cli upload -p $(PORT) --fqbn $(FQBN) --input-dir $(BUILD_DIR)
 
 all: build upload
 
 monitor:
-	@test -n "$(PORT)" || (echo "Geef de seriële poort mee: make monitor PORT=/dev/ttyUSB0"; exit 2)
-	arduino-cli monitor -p "$(PORT)" -c baudrate=$(BAUD)
+	arduino-cli monitor -p $(PORT) -c baudrate=$(BAUD)
+
+# Build + upload + automatisch monitor starten
+flash: upload
+	@sleep 1
+	@$(MAKE) monitor
+
+clean:
+	rm -rf "$(BUILD_DIR)"
 
 board-details:
-	@echo ">>> Board details voor $(FQBN_BASE)"
-	arduino-cli board details --fqbn "$(FQBN_BASE)" --full
+	@echo ">>> Board details voor $(CORE):$(BOARD)"
+	arduino-cli board details --fqbn "$(CORE):$(BOARD)" --full
 	@echo
 	@echo ">>> Opties die je in BOARD_OPTS kunt gebruiken (namen exact overnemen)"
-	arduino-cli board details --fqbn "$(FQBN_BASE)"
+	arduino-cli board details --fqbn "$(CORE):$(BOARD)"
 
 board-list:
 	@echo ">>> Aangesloten borden:"
@@ -77,6 +69,8 @@ board-list:
 	@echo ">>> Alle ESP32 varianten:"
 	arduino-cli board listall esp32 | sed -n '1,120p' || true
 
-clean:
-	rm -rf "$(BUILD_DIR)"
+# ---- Gevraagd: filesystem wissen ----
+# Volledige chip erase (wist ook filesystem/NVS). Vereist: esptool.py
+erase-flash:
+	esptool.py --chip esp32s3 --port $(PORT) erase_flash
 

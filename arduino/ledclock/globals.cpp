@@ -1,0 +1,39 @@
+#include <Arduino.h>
+#include <WiFi.h>
+#include <WebServer.h>
+#include <DNSServer.h>
+#include <Preferences.h>
+#include <Adafruit_NeoPixel.h>
+#include <time.h>
+#include "config.h"
+#include "globals.h"
+
+// ===== Constant definitions (moved from .ino) =====
+const uint8_t LED_BRIGHTNESS = 50;
+const unsigned long TIME_PRINT_INTERVAL_SEC = 300;
+const char* PREF_NS  = "wifi";
+const char* PREF_SSID = "ssid";
+const char* PREF_PASS = "pass";
+const char* AP_SSID  = "ESP32-Setup";
+const char* AP_PASS  = "configwifi";
+const byte  DNS_PORT = 53;
+IPAddress   AP_IP(192,168,4,1), AP_GW(192,168,4,1), AP_MASK(255,255,255,0);
+const char* URL_TIMEINFO = "http://worldtimeapi.org/api/ip";
+const char* URL_COUNTRY  = "http://ip-api.com/json";
+const char* NTP1 = "pool.ntp.org";
+const char* NTP2 = "time.nist.gov";
+
+// ===== Global objects =====
+Adafruit_NeoPixel pixel(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+Preferences prefs;
+WebServer server(80);
+DNSServer dns;
+
+// ===== Global state =====
+String savedSsid, savedPass;
+String g_timezoneIANA = "";
+String g_countryCode  = "";
+int    g_gmtOffsetSec = 0;
+int    g_daylightSec  = 0;
+bool   g_timeReady    = false;
+unsigned long lastPrintMs = 0;
