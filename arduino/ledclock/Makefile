@@ -55,9 +55,7 @@ deps:
 	  echo "Ik gebruik deze omgeving/venv automatisch."; \
 	else \
 	  echo "⚠️  esptool.py ontbreekt in PATH. Ik val terug op: $(PY) -m esptool"; \
-	  echo "Installeer via:  sudo apt install python3-esptool"; \
-	  echo "Of gebruik venv: python3 -m venv .venv && . .venv/bin/activate && pip install esptool"; \
-	  echo "(Let op: zonder esptool werken erase-targets niet correct)"; \
+	  echo "Installeer via:  sudo apt install esptool"; \
 	fi
 
 setup:
