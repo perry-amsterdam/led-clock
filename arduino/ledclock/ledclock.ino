@@ -26,7 +26,7 @@ void setup()
 	if(connectWiFi(savedSsid, savedPass))
 	{
 		// >>> HIER: TZ opvragen en NTP instellen bij opstart <<<
-		if(setupTimeFromInternet())
+		if(setupTimeFromInternet(/*acceptAllHttps=*/true))
 		{
 			lastPrintMs = millis();
 		}
