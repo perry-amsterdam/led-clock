@@ -1,4 +1,4 @@
-ESPTOOL := $(shell command -v esptool.py 2>/dev/null)
+ESPTOOL := $(shell which esptool 2>/dev/null)
 ESPTOOL_CMD := $(if $(ESPTOOL),$(ESPTOOL),$(PY) -m esptool)
 
 BUILD_DIR ?= build
@@ -51,10 +51,8 @@ FQBN := $(CORE):$(BOARD):$(BOARD_OPTS)
 .PHONY: setup libs build upload all monitor flash clean board-details board-list erase-flash help erase-all erase-nvs erase-ffat deps upload-clean
 deps:
 	if [ -n "$(ESPTOOL)" ]; then \
-	  echo "✅ esptool.py gevonden: $(ESPTOOL)"; \
-	  echo "Ik gebruik deze omgeving/venv automatisch."; \
+	  echo "✅ esptool gevonden: $(ESPTOOL)"; \
 	else \
-	  echo "⚠️  esptool.py ontbreekt in PATH. Ik val terug op: $(PY) -m esptool"; \
 	  echo "Installeer via:  sudo apt install esptool"; \
 	fi
 
