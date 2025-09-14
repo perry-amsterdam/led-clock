@@ -8,6 +8,7 @@
 #include "wifi.h"
 #include "net_time.h"
 #include "portal.h"
+#include "ws2812b.h"
 
 void setup()
 {
