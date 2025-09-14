@@ -41,6 +41,7 @@ void setup()
 	}
 }
 
+
 void loop()
 {
 	// Portal afhandelen als AP actief is

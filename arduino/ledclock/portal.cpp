@@ -100,7 +100,7 @@ void handleRoot()
 		"<p class='note'>Tip: na opslaan wordt de ESP32 opnieuw verbonden met het gekozen netwerk.</p>"
 		"</form>"
 
-		// klein scriptje voor wachtwoord tonen, super compact
+	// klein scriptje voor wachtwoord tonen, super compact
 		"<script>"
 		"var s=document.getElementById('showpw'),p=document.getElementById('pass');"
 		"if(s&&p){s.addEventListener('change',function(){p.type=this.checked?'text':'password';});}"
