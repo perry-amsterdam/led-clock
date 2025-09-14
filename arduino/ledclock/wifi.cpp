@@ -8,7 +8,7 @@
 bool connectWiFi(const String& ssid, const String& pass, uint32_t timeoutMs)
 {
 	if(ssid.isEmpty()){ Serial.println("[WiFi] geen opgeslagen SSID"); return false; }
-	if(DEBUG_NET) Serial.printf("[WiFi] verbinden met SSID='%s'...\n", ssid.c_str());
+	if(DEBUG_NET) Serial.printf("\r[WiFi] verbinden met SSID='%s'...\n", ssid.c_str());
 	ledBlue();
 	WiFi.mode(WIFI_STA);
 	WiFi.disconnect(true,true);

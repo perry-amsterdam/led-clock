@@ -12,7 +12,7 @@
 void setup()
 {
 	Serial.begin(115200);
-	delay(200);
+	delay(5000);
 	Serial.println("\n[Boot] Start");
 
 	ledBegin(); ledBlue();
@@ -29,6 +29,7 @@ void setup()
 		if(setupTimeFromInternet(/*acceptAllHttps=*/true))
 		{
 			lastPrintMs = millis();
+      g_timeReady = true;
 		}
 		else
 		{
@@ -56,15 +57,17 @@ void loop()
 		unsigned long nowMs = millis();
 		if(nowMs - lastPrintMs >= TIME_PRINT_INTERVAL_SEC*1000UL)
 		{
+
 			lastPrintMs = nowMs;
+
 			struct tm t; if(getLocalTime(&t))
 			{
 				char buf[64]; strftime(buf,sizeof(buf),"%Y-%m-%d %H:%M:%S",&t);
 				time_t epoch = time(nullptr);
-				Serial.printf("[Time] %s | epoch=%ld | TZ=%s | CC=%s\n",
-					buf, (long)epoch,
-					g_timezoneIANA.c_str(),
-					g_countryCode.length()? g_countryCode.c_str():"(?)");
+				Serial.printf("\r[Time] %s | epoch=%ld | TZ=%s | CC=%s\n", buf, (long)epoch, g_timezoneIANA.c_str(), g_countryCode.length()? g_countryCode.c_str():"(?)");
+
+        // Hier komt de code voor de ws2812b leds.
+
 			}
 			else
 			{

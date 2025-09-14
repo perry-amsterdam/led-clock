@@ -4,6 +4,7 @@
 #include <time.h>
 #include "net_time.h"
 #include <WiFi.h>
+#include "lwip/apps/sntp.h"
 
 // Preview helper for HTTP payloads (guarded by DEBUG_TZ)
 void dumpPreview(const String& payload)
@@ -52,11 +53,10 @@ String extractJsonString(const String& json, const String& key)
 // ip-api.com: countryCode (string)
 bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bool acceptAllHttps)
 {
-	// En client, niet twee
 	WiFiClientSecure client;
 	if (acceptAllHttps)
 	{
-		client.setInsecure();	 // alleen tijdelijk voor debug!
+		client.setInsecure();
 	}
 
 	HTTPClient http;
@@ -71,7 +71,19 @@ bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bo
 	http.setTimeout(8000);
 	http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
 
-	int code = http.GET();
+	// Retry time api to make sure it works. Some times it refuses connection.
+	int code = -1;
+	for (int i = 0;(i < 10 && code < 0);i++)
+	{
+		code = http.GET();
+
+		// Wait 1 second for retry.
+		if (code < 0)
+		{
+			delay(1000);
+		}
+	}
+
 	if (code <= 0)
 	{
 		#ifdef DEBUG_TZ
@@ -161,32 +173,49 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 	configTime(gmt, dst, NTP1, NTP2, NTP3);
 
 	#ifdef DEBUG_TZ
-	Serial.printf("[TZ] configTime(gmt=%d, dst=%d) with tz=%s\n", gmt, dst, tz.c_str());
+	Serial.printf("\r[TZ] configTime(gmt=%d, dst=%d) with tz=%s\n", gmt, dst, tz.c_str());
 	#endif
 
 	// Optionally set TZ environment if needed by localtime
 	// Note: mapping IANA tz to POSIX TZ string is non-trivial; we only set offsets here.
 	// setenv("TZ", tz.c_str(), 1); tzset();
 
-	// Try to obtain time
 	time_t now = 0;
 	for (int i = 0; i < 10; ++i)
 	{
 		now = time(nullptr);
-								 // sanity: time synced
-		if (now > 8 * 3600) break;
-		delay(300);
+
+		if (now > 8 * 3600)
+		{
+			// success: time synced
+			break;
+		}
+
+		// Every 5th attempt (5 and 10), "restart" SNTP in a portable way
+		if ((i + 1) % 5 == 0)
+		{
+			#ifdef DEBUG_TZ
+			Serial.printf("\r[TZ] Re-kicking SNTP at attempt %d via configTime()\n", i + 1);
+			#endif
+			configTime(gmt, dst, NTP1, NTP2, NTP3);
+			// If you prefer lwIP directly (optional, requires header):
+			// extern "C" { #include "lwip/apps/sntp.h" }
+			// sntp_stop();
+			// sntp_init();
+		}
+
+		delay(1000);			 // wait 1 second
 	}
+
 	#ifdef DEBUG_TZ
 	if (now > 8 * 3600)
 	{
 		struct tm t; localtime_r(&now, &t);
-		Serial.printf("[TZ] time synced: %04d-%02d-%02d %02d:%02d:%02d\n",
-			t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
+		Serial.printf("\r[TZ] time synced: %04d-%02d-%02d %02d:%02d:%02d\n", t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
 	}
 	else
 	{
-		Serial.println("[TZ] time sync timeout");
+		Serial.println("\r[TZ] time sync timeout\n");
 	}
 	#endif
 	return now > 8 * 3600;
