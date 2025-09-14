@@ -3,6 +3,7 @@
 #include <WiFiClientSecure.h>
 #include <time.h>
 #include "net_time.h"
+#include <WiFi.h>
 
 // Preview helper for HTTP payloads (guarded by DEBUG_TZ)
 void dumpPreview(const String& payload)
@@ -48,8 +49,12 @@ String extractJsonString(const String& json, const String& key)
 // ip-api.com: countryCode (string)
 bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bool acceptAllHttps)
 {
+    // Eén client, niet twee
     WiFiClientSecure client;
-    if (acceptAllHttps) { client.setInsecure(); }
+    if (acceptAllHttps) {
+        client.setInsecure(); // alleen tijdelijk voor debug!
+    }
+
     HTTPClient http;
     if (!http.begin(client, URL_TIMEINFO)) {
 #ifdef DEBUG_TZ
@@ -57,19 +62,40 @@ bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bo
 #endif
         return false;
     }
+    http.setConnectTimeout(5000);
+    http.setTimeout(8000);
+    http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
+
     int code = http.GET();
     if (code <= 0) {
 #ifdef DEBUG_TZ
         Serial.printf("[TZ] HTTP GET failed: %d\n", code);
+        Serial.printf("[TZ] Reason: %s\n", HTTPClient::errorToString(code).c_str());
+        Serial.printf("[TZ] URL: %s\n", URL_TIMEINFO);
+        Serial.printf("[TZ] WiFi status: %d (WL_CONNECTED=%d)\n", WiFi.status(), WL_CONNECTED);
+        Serial.printf("[TZ] Local IP: %s DNS: %s Gateway: %s\n",
+                      WiFi.localIP().toString().c_str(),
+                      WiFi.dnsIP().toString().c_str(),
+                      WiFi.gatewayIP().toString().c_str());
 #endif
         http.end();
         return false;
     }
+    if (code != HTTP_CODE_OK) {
+#ifdef DEBUG_TZ
+        Serial.printf("[TZ] HTTP status: %d (expected 200)\n", code);
+#endif
+        http.end();
+        return false;
+    }
+
+    // ➜ Eerst payload ophalen, dan pas parsen
     String payload = http.getString();
     http.end();
     dumpPreview(payload);
 
-    String tz = extractJsonString(payload, "timezone");
+    // JSON waarden parsen
+    String tz  = extractJsonString(payload, "timezone");
     String raw = extractJsonString(payload, "raw_offset");
     String dst = extractJsonString(payload, "dst_offset");
 
@@ -80,6 +106,7 @@ bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bo
         return false;
     }
 
+    // Output params vullen
     tzIana = tz;
     gmtOffsetSec = raw.length() ? raw.toInt() : 0;
     daylightOffsetSec = dst.length() ? dst.toInt() : 0;

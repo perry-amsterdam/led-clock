@@ -51,6 +51,8 @@ build:
 	$(ARDUINO_CLI) compile \
 		--fqbn "$(FQBN)" \
 		--build-path "$(BUILD_DIR)" \
+		--build-property compiler.cpp.extra_flags="-DDEBUG_TZ" \
+		--build-property compiler.c.extra_flags="-DDEBUG_TZ" \
 		"$(SKETCH)"
 
 upload: build
