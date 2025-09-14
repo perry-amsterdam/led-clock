@@ -31,6 +31,8 @@ void setup()
 		{
 			lastPrintMs = millis();
       g_timeReady = true;
+
+      ws2812bBegin();
 		}
 		else
 		{
@@ -68,7 +70,6 @@ void loop()
 				Serial.printf("\r[Time] %s | epoch=%ld | TZ=%s | CC=%s\n", buf, (long)epoch, g_timezoneIANA.c_str(), g_countryCode.length()? g_countryCode.c_str():"(?)");
 
         // Hier komt de code voor de ws2812b leds.
-
 			}
 			else
 			{

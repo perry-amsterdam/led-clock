@@ -1,12 +1,9 @@
 #pragma once
 #include <Arduino.h>
-#include <time.h>   // voor struct tm
+#include <time.h>
 
-// Init strip. Aanroepen in setup()
+// Public API
 void ws2812bBegin();
-
-// Optioneel: periodieke update met huidige tijd
-void ws2812bUpdate(const tm& now, time_t epoch);
-
-// Eventueel: hard flush als je iets direct wil pushen
+void ws2812bUpdate(const tm &now, time_t epoch);
 void ws2812bShow();
+
