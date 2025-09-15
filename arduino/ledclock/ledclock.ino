@@ -32,15 +32,14 @@ void setup()
 		{
 			lastPrintMs = millis();
 			g_timeReady = true;
-
-			ws2812bBegin();
 		}
 		else
 		{
 			Serial.println("[Boot] NTP/TZ setup mislukt");
 		}
 
-		if (MDNS.begin("ledclock"))
+		-
+			if (MDNS.begin("ledclock"))
 		{
 			Serial.println("mDNS responder started: http://ledclock.local");
 		}
@@ -48,6 +47,7 @@ void setup()
 		{
 			Serial.println("Error setting up MDNS responder!");
 		}
+
 	}
 	else
 	{
@@ -80,6 +80,7 @@ void loop()
 				Serial.printf("\r[Time] %s | epoch=%ld | TZ=%s | CC=%s\n", buf, (long)epoch, g_timezoneIANA.c_str(), g_countryCode.length()? g_countryCode.c_str():"(?)");
 
 				// Hier komt de code voor de ws2812b leds.
+
 			}
 			else
 			{
