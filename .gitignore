@@ -1,0 +1,13 @@
+# Arduino build directories
+build/
+*.elf
+*.bin
+*.hex
+
+# VSCode / Editor files
+.vscode/
+*.swp
+*.swo
+
+# Local config (bevat wifi wachtwoord!)
+arduino/ledclock/config.h
