@@ -1,20 +1,27 @@
-// config.sample.h
 #pragma once
 
-// ---- Wi-Fi instellingen ----
-#define WIFI_SSID   "your_wifi_ssid"
-#define WIFI_PASS   "your_wifi_password"
+// ==== Configuration, debug flags, pins ====
 
-// ---- mDNS / hostname ----
-#define HOSTNAME    "ledclock"
+#define DEBUG_TZ 1
+#define DEBUG_NET 1
+#define LED_PIN    48			 // < PAS AAN (vaak 8 of 48)
+#define LED_COUNT  1
 
-// ---- Tijdzone & NTP servers ----
-// CET/CEST voorbeeld (NL/BE): laatste zondag van maart/okt tot zomer-/wintertijd
-#define TZ_INFO     "CET-1CEST,M3.5.0/2,M10.5.0/3"
-// ---- NTP servers (declared in globals.cpp) ----
-#ifdef __cplusplus
-extern const char* const NTP1;
-extern const char* const NTP2;
-extern const char* const NTP3;
-#endif
+extern const uint8_t LED_BRIGHTNESS;
+extern const unsigned long TIME_PRINT_INTERVAL_SEC;
 
+// Wi-Fi / AP
+extern const char* PREF_NS;
+extern const char* PREF_SSID;
+extern const char* PREF_PASS;
+extern const char* AP_SSID;
+extern const char* AP_PASS;
+extern const byte DNS_PORT;
+extern const IPAddress AP_IP, AP_GW, AP_MASK;
+
+// Time & HTTP endpoints
+extern const char* URL_TIMEINFO;
+extern const char* URL_COUNTRY;
+extern const char* NTP1;
+extern const char* NTP2;
+extern const char* NTP3;
