@@ -8,6 +8,3 @@ build/
 .vscode/
 *.swp
 *.swo
-
-# Local config (bevat wifi wachtwoord!)
-arduino/ledclock/config.h
