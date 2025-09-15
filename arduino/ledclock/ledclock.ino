@@ -9,6 +9,7 @@
 #include "net_time.h"
 #include "portal.h"
 #include "ws2812b.h"
+#include <ESPmDNS.h>
 
 void setup()
 {
@@ -30,13 +31,22 @@ void setup()
 		if(setupTimeFromInternet(/*acceptAllHttps=*/true))
 		{
 			lastPrintMs = millis();
-      g_timeReady = true;
+			g_timeReady = true;
 
-      ws2812bBegin();
+			ws2812bBegin();
 		}
 		else
 		{
 			Serial.println("[Boot] NTP/TZ setup mislukt");
+		}
+
+		if (MDNS.begin("ledclock"))
+		{
+			Serial.println("mDNS responder started: http://ledclock.local");
+		}
+		else
+		{
+			Serial.println("Error setting up MDNS responder!");
 		}
 	}
 	else
@@ -69,7 +79,7 @@ void loop()
 				time_t epoch = time(nullptr);
 				Serial.printf("\r[Time] %s | epoch=%ld | TZ=%s | CC=%s\n", buf, (long)epoch, g_timezoneIANA.c_str(), g_countryCode.length()? g_countryCode.c_str():"(?)");
 
-        // Hier komt de code voor de ws2812b leds.
+				// Hier komt de code voor de ws2812b leds.
 			}
 			else
 			{
