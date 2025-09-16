@@ -1,14 +1,13 @@
 ---
 
-# LED Clock with ESP32, Zephyr & WS2812B
+# LED Clock with ESP32, FreeRTOS & WS2812B
 
 ![GitHub License](https://img.shields.io/github/license/<jouw-username>/<jouw-repo>)
-![Build with Zephyr](https://img.shields.io/badge/built%20with-Zephyr-blue)
 ![Platform ESP32](https://img.shields.io/badge/platform-ESP32-orange)
 ![WS2812B LEDs](https://img.shields.io/badge/LEDs-WS2812B-green)
 
 Een **DIY LED-klok** gebouwd met WS2812B LEDs, een IKEA fotolijst, lasergesneden onderdelen en een **ESP32** draaiend op **Zephyr RTOS**.
-De eerste hardware (klokfront, lasercut) is klaar ✅. De software wordt nu volledig herbouwd op **ESP32 + Zephyr**.
+De eerste hardware (klokfront, lasercut) is klaar ✅. De software wordt nu volledig herbouwd op **ESP32 + FreeRTOS**.
 
 ---
 
@@ -20,7 +19,7 @@ De eerste hardware (klokfront, lasercut) is klaar ✅. De software wordt nu voll
 * Toekomstige **API server** waarmee externe apps (zoals Flutter) de klok kunnen besturen
 * **Flutter app** ontdekt de klok via mDNS en bestuurt hem via de API
 * Wi-Fi setup: als er geen internetverbinding is → start de klok zelf een **Access Point + captive portal** voor configuratie
-* Firmware geschreven in **Zephyr RTOS (C)**
+* Firmware geschreven in **Free RTOS (C)**
 * Platform voor uitbreidingen: animaties, slimme integraties, artistieke varianten van de klok face
 
 ---
@@ -48,7 +47,6 @@ De eerste hardware (klokfront, lasercut) is klaar ✅. De software wordt nu voll
 * [LibreCAD](https://librecad.org/) – ontwerp klokplaat
 * [OpenSCAD](https://www.openscad.org/) – 3D-modellen
 * [KiCad EDA](https://www.kicad.org/) – PCB design (optioneel)
-* [Zephyr RTOS](https://zephyrproject.org/) – firmware voor de ESP32
 * [Flutter](https://flutter.dev/) – mobiele app die de klok via mDNS + API bestuurt
 
 ---
