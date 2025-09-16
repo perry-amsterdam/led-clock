@@ -6,7 +6,7 @@
 ![Platform ESP32](https://img.shields.io/badge/platform-ESP32-orange)
 ![WS2812B LEDs](https://img.shields.io/badge/LEDs-WS2812B-green)
 
-Een **DIY LED-klok** gebouwd met WS2812B LEDs, een IKEA fotolijst, lasergesneden onderdelen en een **ESP32** draaiend op **Zephyr RTOS**.
+Een **DIY LED-klok** gebouwd met WS2812B LEDs, een IKEA fotolijst, lasergesneden onderdelen en een **ESP32** draaiend op **Free RTOS**.
 De eerste hardware (klokfront, lasercut) is klaar ✅. De software wordt nu volledig herbouwd op **ESP32 + FreeRTOS**.
 
 ---
