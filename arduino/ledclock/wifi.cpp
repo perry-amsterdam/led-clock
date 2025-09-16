@@ -7,9 +7,15 @@
 
 bool connectWiFi(const String& ssid, const String& pass, uint32_t timeoutMs)
 {
-	if(ssid.isEmpty()){ Serial.println("[WiFi] geen opgeslagen SSID"); return false; }
+	if(ssid.isEmpty()){
+		Serial.println("[WiFi] geen opgeslagen SSID"); 
+		return false; 
+	}
+
 	if(DEBUG_NET) Serial.printf("\r[WiFi] verbinden met SSID='%s'...\n", ssid.c_str());
+
 	ledBlue();
+
 	WiFi.mode(WIFI_STA);
 	WiFi.disconnect(true,true);
 	delay(50);
@@ -28,5 +34,6 @@ bool connectWiFi(const String& ssid, const String& pass, uint32_t timeoutMs)
 		if(DEBUG_NET){ Serial.print("[WiFi] OK IP="); Serial.println(WiFi.localIP()); }
 		ledGreen(); return true;
 	}
+
 	Serial.println("[WiFi] FAILED"); ledRed(); return false;
 }

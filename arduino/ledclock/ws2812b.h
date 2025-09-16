@@ -1,6 +1,6 @@
 #pragma once
 #include <Arduino.h>
-#include <time.h>   // voor struct tm
+#include <time.h>				 // voor struct tm
 
 // Init strip. Aanroepen in setup()
 void ws2812bBegin();

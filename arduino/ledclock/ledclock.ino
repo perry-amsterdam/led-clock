@@ -29,7 +29,7 @@ void setup()
 		if(setupTimeFromInternet(/*acceptAllHttps=*/true))
 		{
 			lastPrintMs = millis();
-      g_timeReady = true;
+			g_timeReady = true;
 		}
 		else
 		{
@@ -66,7 +66,7 @@ void loop()
 				time_t epoch = time(nullptr);
 				Serial.printf("\r[Time] %s | epoch=%ld | TZ=%s | CC=%s\n", buf, (long)epoch, g_timezoneIANA.c_str(), g_countryCode.length()? g_countryCode.c_str():"(?)");
 
-        // Hier komt de code voor de ws2812b leds.
+				// Hier komt de code voor de ws2812b leds.
 
 			}
 			else
