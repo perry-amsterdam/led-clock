@@ -8,11 +8,12 @@
 #include "wifi.h"
 #include "net_time.h"
 #include "portal.h"
+#include "hal_time.h"
 
 void setup()
 {
 	Serial.begin(115200);
-	delay(5000);
+	hal_delay_ms(5000);
 	Serial.println("\n[Boot] Start");
 
 	ledBegin(); ledBlue();
@@ -28,7 +29,7 @@ void setup()
 		// >>> HIER: TZ opvragen en NTP instellen bij opstart <<<
 		if(setupTimeFromInternet(/*acceptAllHttps=*/true))
 		{
-			lastPrintMs = millis();
+			lastPrintMs = hal_millis();
 			g_timeReady = true;
 		}
 		else
@@ -54,7 +55,7 @@ void loop()
 	// Periodiek tijd printen (alleen als NTP ok)
 	if(WiFi.status()==WL_CONNECTED && g_timeReady)
 	{
-		unsigned long nowMs = millis();
+		unsigned long nowMs = hal_millis();
 		if(nowMs - lastPrintMs >= TIME_PRINT_INTERVAL_SEC*1000UL)
 		{
 

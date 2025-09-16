@@ -5,6 +5,7 @@
 #include "net_time.h"
 #include <WiFi.h>
 #include "lwip/apps/sntp.h"
+#include "hal_time.h"
 
 // Preview helper for HTTP payloads (guarded by DEBUG_TZ)
 void dumpPreview(const String& payload)
@@ -80,7 +81,7 @@ bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bo
 		// Wait 1 second for retry.
 		if (code < 0)
 		{
-			delay(1000);
+			hal_delay_ms(1000);
 		}
 	}
 
@@ -204,7 +205,7 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 			// sntp_init();
 		}
 
-		delay(1000);			 // wait 1 second
+		hal_delay_ms(1000);
 	}
 
 	#ifdef DEBUG_TZ

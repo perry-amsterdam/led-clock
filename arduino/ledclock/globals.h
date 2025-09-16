@@ -7,6 +7,11 @@
 
 #include "config.h"
 
+#if defined(ARDUINO)
+#define millis DO_NOT_USE_millis__use_hal_millis
+#define delay  DO_NOT_USE_delay__use_hal_delay_ms
+#endif
+
 extern Adafruit_NeoPixel pixel;
 extern Preferences prefs;
 extern WebServer server;

@@ -4,6 +4,7 @@
 #include <DNSServer.h>
 #include "portal.h"
 #include "status_led.h"
+#include "hal_time.h"
 
 String htmlWrap(const String& body)
 {
@@ -120,7 +121,7 @@ void handleSave()
 	prefs.end();
 	if(DEBUG_NET) Serial.printf("[WiFi] Stored SSID='%s' len(pass)=%u\n", server.arg("ssid").c_str(), server.arg("pass").length());
 	server.send(200,"text/html",htmlWrap("<h1>Opgeslagen \342\234\205</h1><p>Herstart...</p>"));
-	delay(500); ESP.restart();
+	hal_delay_ms(500); ESP.restart();
 }
 
 
@@ -129,7 +130,7 @@ void handleReset()
 	if(DEBUG_NET) Serial.println("[HTTP] GET /reset -> clear creds");
 	prefs.begin(PREF_NS,false); prefs.clear(); prefs.end();
 	server.send(200,"text/html",htmlWrap("<h1>Gewist \342\234\205</h1><p>Herstart...</p>"));
-	delay(500); ESP.restart();
+	hal_delay_ms(500); ESP.restart();
 }
 
 

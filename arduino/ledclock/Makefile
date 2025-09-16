@@ -1,4 +1,4 @@
-# ===== 10Telecom ESP32-S3 Makefile (cleaned) =====
+# ===== ESP32-S3 Makefile (cleaned) =====
 # Tooling
 ARDUINO_CLI ?= arduino-cli
 PY ?= python3
