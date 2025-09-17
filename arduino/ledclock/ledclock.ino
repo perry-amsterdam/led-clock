@@ -9,6 +9,18 @@
 #include "net_time.h"
 #include "portal.h"
 #include "hal_time.h"
+#include "ws2812b.h"
+#include <time.h>
+
+// Optional compile-time config
+// Uncomment and adjust before including ws2812b.cpp in your build system if needed.
+#define LED_PIN 8
+#define LED_COUNT 84
+#define LED_BRIGHTNESS 48
+#define RING60_OFFSET 0
+#define RING60_DIR +1
+#define RING24_OFFSET 0
+#define RING24_DIR +1
 
 void setup()
 {
@@ -31,6 +43,7 @@ void setup()
 		{
 			lastPrintMs = hal_millis();
 			g_timeReady = true;
+			ws2812bBegin();
 		}
 		else
 		{
@@ -61,14 +74,16 @@ void loop()
 
 			lastPrintMs = nowMs;
 
-			struct tm t; if(getLocalTime(&t))
+			struct tm now; 
+
+      if(getLocalTime(&now))
 			{
-				char buf[64]; strftime(buf,sizeof(buf),"%Y-%m-%d %H:%M:%S",&t);
+				char buf[64]; strftime(buf,sizeof(buf),"%Y-%m-%d %H:%M:%S",&now);
 				time_t epoch = time(nullptr);
 				Serial.printf("\r[Time] %s | epoch=%ld | TZ=%s | CC=%s\n", buf, (long)epoch, g_timezoneIANA.c_str(), g_countryCode.length()? g_countryCode.c_str():"(?)");
 
-				// Hier komt de code voor de ws2812b leds.
-
+				// Optionally pass epoch if you want smooth animations tied to wall-clock seconds.
+				ws2812bUpdate(now, epoch);
 			}
 			else
 			{
