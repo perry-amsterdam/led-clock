@@ -27,7 +27,7 @@ void setup()
 {
 	Serial.begin(115200);
 	hal_delay_ms(5000);
-	Serial.println("\n[Boot] Start");
+	Serial.println("\r[Boot] Start");
 
 	ledBegin(); ledBlue();
 
@@ -43,13 +43,13 @@ void setup()
 		// Setup mdns for ledclock.local
 		if (MDNS.begin("ledclock"))
 		{
-			Serial.println("mDNS responder started: http://ledclock.local/");
+			Serial.println("\rmDNS responder started: http://ledclock.local/");
 			// optional: announce your webserver
 			MDNS.addService("http", "tcp", 80);
 		}
 		else
 		{
-			Serial.println("Error setting up MDNS responder!");
+			Serial.println("\rError setting up MDNS responder!");
 		}
 
 		// >>> HIER: TZ opvragen en NTP instellen bij opstart <<<
@@ -61,7 +61,7 @@ void setup()
 		}
 		else
 		{
-			Serial.println("[Boot] NTP/TZ setup mislukt");
+			Serial.println("\r[Boot] NTP/TZ setup mislukt");
 		}
 	}
 	else
@@ -94,14 +94,14 @@ void loop()
 			{
 				char buf[64]; strftime(buf,sizeof(buf),"%Y-%m-%d %H:%M:%S",&now);
 				time_t epoch = time(nullptr);
-				Serial.printf("\r[Time] %s | epoch=%ld | TZ=%s | CC=%s\n", buf, (long)epoch, g_timezoneIANA.c_str(), g_countryCode.length()? g_countryCode.c_str():"(?)");
+				Serial.printf("\r[Time] %s | epoch=%ld\n", buf, (long)epoch);
 
 				// Optionally pass epoch if you want smooth animations tied to wall-clock seconds.
 				ws2812bUpdate(now, epoch);
 			}
 			else
 			{
-				Serial.println("[Time] getLocalTime() fail \342\200\224 probeer resync?");
+				Serial.println("\r[Time] getLocalTime() fail \342\200\224 probeer resync?");
 			}
 		}
 	}
