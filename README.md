@@ -69,6 +69,49 @@ De hardware (klokfront, lasercut) is klaar ✅. De software wordt nu opnieuw opg
 * [KiCad EDA](https://www.kicad.org/) – PCB design (optioneel)
 * [Flutter](https://flutter.dev/) – mobiele app die de klok via mDNS & API bestuurt
 
+
+Deze repo bevat een **Makefile** voor een snelle CLI-workflow met `arduino-cli`.
+
+### Vereisten
+- `arduino-cli` in je PATH (installeren: https://arduino.github.io/arduino-cli/latest/)
+- (Optioneel) `bcpp` als je `make format` wilt gebruiken
+
+### Belangrijke variabelen (met defaults)
+- `PORT` – seriële poort van je ESP32 (default: `/dev/ttyACM0`)
+- `CHIP` – doelschipspecificatie (default: `esp32s3`)
+- `BOARD` – Arduino FQBN basis (default: `esp32:esp32:esp32s3`)
+- `FLASH_OPTS` – flash/PSRAM/partition/upload settings
+ (default: `FlashSize=16M,PSRAM=enabled,PartitionScheme=app3M_fat9M_16MB,UploadSpeed=921600`)
+- `FQBN` – samengesteld uit `BOARD` + `FLASH_OPTS`
+- `SKETCH` – sketchmap (default: `.`)
+- `BUILD_DIR` – buildmap (default: `build`)
+- `MONITOR_BAUD` – baudrate voor de seriële monitor (stel in als env var of in de Makefile)
+
+> Tip: je kunt elke variabele **ad-hoc** overschrijven:
+> `make PORT=/dev/ttyUSB0 MONITOR_BAUD=115200 monitor`
+
+### Beschikbare targets
+- `make format` – formatteert alle `.cpp`, `.h` en `.ino` bestanden met **bcpp**
+- `make monitor` – opent de **arduino-cli** seriële monitor op `$(PORT)` met `baudrate=$(MONITOR_BAUD)`
+- `make clean` – verwijdert de `$(BUILD_DIR)` map
+- `make erase-fs` – **wist** de filesystem-regio via esptool (vereist correcte `ESPTOOL_CMD`, `FS_START` en `FS_SIZE` in de Makefile)
+
+⚠️ **Waarschuwing**: `erase-fs` verwijdert de inhoud van de FS-partitie. Gebruik met beleid.
+
+### Voorbeelden
+```bash
+# Seriële monitor op andere poort en baudrate
+make PORT=/dev/ttyUSB0 MONITOR_BAUD=115200 monitor
+
+# Format alle bronbestanden
+make format
+
+# Schoon build-artefacten
+make clean
+
+# (Gevorderd) Wis filesystem-regio
+make erase-fs
+```
 ---
 
 ## 🔌 Belangrijke richtlijnen voor NeoPixels
