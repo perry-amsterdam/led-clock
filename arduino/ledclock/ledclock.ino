@@ -74,9 +74,9 @@ void loop()
 
 			lastPrintMs = nowMs;
 
-			struct tm now; 
+			struct tm now;
 
-      if(getLocalTime(&now))
+			if(getLocalTime(&now))
 			{
 				char buf[64]; strftime(buf,sizeof(buf),"%Y-%m-%d %H:%M:%S",&now);
 				time_t epoch = time(nullptr);
