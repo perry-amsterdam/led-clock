@@ -56,7 +56,7 @@ De hardware (klokfront, lasercut) is klaar ✅. De software wordt nu opnieuw opg
   * [x] [IKEA frame 23x23cm](https://www.ikea.com/nl/nl/p/sannahed-fotolijst-wit-00459116/)
   * [x] [WS2812B LED Ring (5V)](https://nl.aliexpress.com/item/32808302785.html)
   * [x] Kartonnen/lasergesneden frontplaat
-  * [x ] ESP32 devkit (WROOM of WROVER)
+  * [x] ESP32 devkit (WROOM of WROVER)
 
 ---
 
