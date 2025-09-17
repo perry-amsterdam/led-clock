@@ -40,6 +40,7 @@ help:
 	@echo "  make monitor        - Open seriële monitor ($(MONITOR_BAUD) baud)"
 	@echo "  make clean          - Verwijder de build directory"
 	@echo "  make fqbn           - Toon de volledige FQBN"
+	@echo "  make format         - Beautify all source files (*.cpp, *.h, *.ino) using bcpp"
 
 fqbn:
 	@echo "$(FQBN)"
@@ -81,3 +82,9 @@ monitor:
 
 clean:
 	rm -rf "$(BUILD_DIR)"
+
+format: ## Format all .cpp, .h and .ino files with bcpp
+	for file in $(shell ls *.cpp *.h *.ino 2>/dev/null); do \
+		bcpp -t $$file > $$file.new; \
+		mv -f -v $$file.new $$file; \
+	done
