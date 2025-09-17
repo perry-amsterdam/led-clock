@@ -33,6 +33,9 @@ De eerste hardware (klokfront, lasercut) is klaar ✅. De software wordt nu voll
 * **Clock front** (lasergesneden ✅):
   ![Clock Face](images/led-clock-face.svg)
 
+* **ws2812b connecters**:
+  ![Conncter image](images/ws2812b-connecters.png)
+
 * **Onderdelenlijst**:
 
   * [x] [IKEA frame 23x23cm](https://www.ikea.com/nl/nl/p/sannahed-fotolijst-wit-00459116/)
