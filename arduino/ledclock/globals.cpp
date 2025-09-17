@@ -8,9 +8,9 @@
 #include "config.h"
 #include "globals.h"
 
-// ===== Constant definitions (moved from .ino) =====
+// ===== Constant definitions =====
 const uint8_t LED_BRIGHTNESS = 50;
-const unsigned long TIME_PRINT_INTERVAL_SEC = 5;
+const unsigned long TIME_PRINT_INTERVAL_SEC = 15;
 const char* PREF_NS  = "wifi";
 const char* PREF_SSID = "ssid";
 const char* PREF_PASS = "pass";

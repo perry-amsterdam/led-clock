@@ -47,6 +47,8 @@ De eerste hardware (klokfront, lasercut) is klaar ✅. De software wordt nu voll
 
 ## 🛠️ Tools & Software
 
+* [Arduino IDE](https://www.arduino.cc/en/software) – ontwikkeling & uploaden van firmware
+* [Arduino CLI](https://arduino.github.io/arduino-cli/latest/) – command-line toolchain
 * [LibreCAD](https://librecad.org/) – ontwerp klokplaat
 * [OpenSCAD](https://www.openscad.org/) – 3D-modellen
 * [KiCad EDA](https://www.kicad.org/) – PCB design (optioneel)
