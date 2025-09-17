@@ -1,4 +1,4 @@
-// ledclock (split version)
+// ledclock 
 // Board: ESP32-S3 (e.g., S3-N16R8)
 
 #include <Arduino.h>
@@ -11,6 +11,7 @@
 #include "hal_time.h"
 #include "ws2812b.h"
 #include <time.h>
+#include <ESPmDNS.h>
 
 // Optional compile-time config
 // Uncomment and adjust before including ws2812b.cpp in your build system if needed.
@@ -38,6 +39,19 @@ void setup()
 
 	if(connectWiFi(savedSsid, savedPass))
 	{
+
+		// Setup mdns for ledclock.local
+		if (MDNS.begin("ledclock"))
+		{
+			Serial.println("mDNS responder started: http://ledclock.local/");
+			// optional: announce your webserver
+			MDNS.addService("http", "tcp", 80);
+		}
+		else
+		{
+			Serial.println("Error setting up MDNS responder!");
+		}
+
 		// >>> HIER: TZ opvragen en NTP instellen bij opstart <<<
 		if(setupTimeFromInternet(/*acceptAllHttps=*/true))
 		{
