@@ -14,7 +14,6 @@
 #include <ESPmDNS.h>
 
 // Optional compile-time config
-// Uncomment and adjust before including ws2812b.cpp in your build system if needed.
 #define LED_PIN 8
 #define LED_COUNT 84
 #define LED_BRIGHTNESS 48
