@@ -1,40 +1,55 @@
----
-
-# LED Clock with ESP32, FreeRTOS & WS2812B
+# LED Clock met ESP32, FreeRTOS & WS2812B
 
 ![GitHub License](https://img.shields.io/github/license/<jouw-username>/<jouw-repo>)
 ![Platform ESP32](https://img.shields.io/badge/platform-ESP32-orange)
 ![WS2812B LEDs](https://img.shields.io/badge/LEDs-WS2812B-green)
 
-Een **DIY LED-klok** gebouwd met WS2812B LEDs, een IKEA fotolijst, lasergesneden onderdelen en een **ESP32** draaiend op **Free RTOS**.
-De eerste hardware (klokfront, lasercut) is klaar ✅. De software wordt nu volledig herbouwd op **ESP32 + FreeRTOS**.
+Een **DIY LED-klok** gebouwd met WS2812B LEDs, een IKEA fotolijst, lasergesneden onderdelen en een **ESP32** die draait op **FreeRTOS**.
+De hardware (klokfront, lasercut) is klaar ✅. De software wordt nu opnieuw opgebouwd met een modern ESP32 + FreeRTOS platform.
 
 ---
 
 ## ✨ Features
 
-* Internet-synchronisatie via **NTP**
-* Automatische **timezone-detectie** via IP-geolocatie
-* **mDNS** voor eenvoudige discovery op lokaal netwerk
-* Toekomstige **API server** waarmee externe apps (zoals Flutter) de klok kunnen besturen
-* **Flutter app** ontdekt de klok via mDNS en bestuurt hem via de API
-* Wi-Fi setup: als er geen internetverbinding is → start de klok zelf een **Access Point + captive portal** voor configuratie
-* Firmware geschreven in **Free RTOS (C)**
-* Platform voor uitbreidingen: animaties, slimme integraties, artistieke varianten van de klok face
+* Automatische tijd via **NTP** synchronisatie
+* **Timezone-detectie** via IP-geolocatie
+* **mDNS** discovery op het lokale netwerk
+* Toekomstige **API server** voor externe aansturing (bijv. Flutter-app)
+* **Flutter app** die de klok via mDNS & API ontdekt en bedient
+* Wi-Fi setup: bij geen internetverbinding start de klok zelf een **Access Point + captive portal**
+* Geschreven in **C met FreeRTOS**
+* Uitbreidbaar platform: animaties, slimme integraties en artistieke varianten van de klokface
 
 ---
 
 ## 🖥️ Software Setup
 
+1. Installeer de benodigde tools:
+
+   * [Arduino IDE](https://www.arduino.cc/en/software) of [Arduino CLI](https://arduino.github.io/arduino-cli/latest/)
+   * ESP32 board support in Arduino IDE (via Board Manager)
+   * [Flutter](https://flutter.dev/) (optioneel, voor de mobiele app)
+
+2. Clone deze repository en open het project in Arduino IDE of gebruik de CLI:
+
+   ```bash
+   git clone https://github.com/<jouw-username>/<jouw-repo>.git
+   cd <jouw-repo>
+   arduino-cli compile --fqbn esp32:esp32:esp32
+   arduino-cli upload -p /dev/ttyUSB0 --fqbn esp32:esp32:esp32
+   ```
+
+3. Configureer Wi-Fi via captive portal bij eerste start.
+
 ---
 
 ## ⚙️ Hardware Setup
 
-* **Clock front** (lasergesneden ✅):
+* **Klokfront** (lasergesneden ✅):
   ![Clock Face](images/led-clock-face.svg)
 
-* **ws2812b connecters**:
-  ![Conncter image](images/ws2812b-connecters.png)
+* **WS2812B connectors**:
+  ![Connector image](images/ws2812b-connecters.png)
 
 * **Onderdelenlijst**:
 
@@ -47,12 +62,12 @@ De eerste hardware (klokfront, lasercut) is klaar ✅. De software wordt nu voll
 
 ## 🛠️ Tools & Software
 
-* [Arduino IDE](https://www.arduino.cc/en/software) – ontwikkeling & uploaden van firmware
-* [Arduino CLI](https://arduino.github.io/arduino-cli/latest/) – command-line toolchain
+* [Arduino IDE](https://www.arduino.cc/en/software) – firmware ontwikkeling & uploaden
+* [Arduino CLI](https://arduino.github.io/arduino-cli/latest/) – command-line workflow
 * [LibreCAD](https://librecad.org/) – ontwerp klokplaat
 * [OpenSCAD](https://www.openscad.org/) – 3D-modellen
 * [KiCad EDA](https://www.kicad.org/) – PCB design (optioneel)
-* [Flutter](https://flutter.dev/) – mobiele app die de klok via mDNS + API bestuurt
+* [Flutter](https://flutter.dev/) – mobiele app die de klok via mDNS & API bestuurt
 
 ---
 
@@ -60,7 +75,7 @@ De eerste hardware (klokfront, lasercut) is klaar ✅. De software wordt nu voll
 
 1. **Capacitor** – 1000µF, 6.3V+ tussen V+ en GND
 2. **Resistor** – 300–500Ω in de datalijn
-3. **Level shifter** – indien MCU op 3.3V werkt (ESP32 → 5V voor WS2812B)
+3. **Level shifter** – nodig bij 3.3V MCU’s (ESP32) → 5V voor WS2812B
 
 ➡️ Dit verlengt de levensduur en voorkomt dat de eerste LED stukgaat.
 
@@ -73,17 +88,17 @@ De eerste hardware (klokfront, lasercut) is klaar ✅. De software wordt nu voll
 
 ---
 
-## 🗺️ Project Roadmap
+## 🗺️ Roadmap
 
-* [x] Clock front lasercutten
+* [x] Klokfront lasercutten
 * [ ] ESP32 hardware integratie
 * [ ] Wi-Fi captive portal & NTP synchronisatie
 * [ ] Automatische timezone-detectie via IP
 * [ ] mDNS service op lokaal netwerk
 * [ ] API server op ESP32
 * [ ] Flutter app koppelen via mDNS + API
-* [ ] Clock face design uitbreiden met artistieke varianten
-* [ ] Animaties en extra LED-effecten toevoegen
+* [ ] Artistieke varianten van de klokface
+* [ ] Animaties & LED-effecten
 * [ ] Integratie met slimme thuisplatformen (Home Assistant / MQTT)
 * [ ] Public release van PCB design & 3D files
 
@@ -91,20 +106,20 @@ De eerste hardware (klokfront, lasercut) is klaar ✅. De software wordt nu voll
 
 ## 🤝 Contributing
 
-Wil je meebouwen aan dit project? Super!
+Wil je bijdragen? Top!
 
-* Fork de repo en maak je eigen branch:
+1. Fork de repo en maak een feature branch:
 
-  ```bash
-  git checkout -b feature/nieuwe-functie
-  ```
-* Doe je aanpassingen en commit met duidelijke messages
-* Stuur een Pull Request 🚀
+   ```bash
+   git checkout -b feature/nieuwe-functie
+   ```
+2. Commit je wijzigingen met duidelijke messages
+3. Stuur een Pull Request 🚀
 
-**Tips voor bijdragen:**
+**Tips:**
 
-* Documenteer nieuwe hardware of software duidelijk
-* Voeg afbeeldingen of schema’s toe waar mogelijk
+* Documenteer hardware/software toevoegingen
+* Voeg schema’s of afbeeldingen toe waar mogelijk
 * Houd commit messages kort en informatief
 
 ---
@@ -114,3 +129,4 @@ Wil je meebouwen aan dit project? Super!
 * **Perry Couprie** – initiële ontwikkeling
 
   * GitHub: [perry-amsterdam](https://github.com/perry-amsterdam)
+
