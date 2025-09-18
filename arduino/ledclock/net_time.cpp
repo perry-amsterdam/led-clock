@@ -174,7 +174,7 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 	configTime(gmt, dst, NTP1, NTP2, NTP3);
 
 	#ifdef DEBUG_TZ
-	Serial.printf("\r[TZ] configTime(gmt=%d, dst=%d) with tz=%s\n", gmt, dst, tz.c_str());
+	Serial.printf("\r[TZ] configTime(gmt=%d, dst=%d) with tz=%s\r\n", gmt, dst, tz.c_str());
 	#endif
 
 	// Optionally set TZ environment if needed by localtime
@@ -212,7 +212,7 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 	if (now > 8 * 3600)
 	{
 		struct tm t; localtime_r(&now, &t);
-		Serial.printf("\r[TZ] time synced: %04d-%02d-%02d %02d:%02d:%02d\n", t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
+		Serial.printf("\r[TZ] time synced: %04d-%02d-%02d %02d:%02d:%02d\r\n", t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
 	}
 	else
 	{

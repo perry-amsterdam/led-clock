@@ -1,4 +1,4 @@
-// ledclock 
+// ledclock
 // Board: ESP32-S3 (e.g., S3-N16R8)
 
 #include <Arduino.h>
@@ -93,7 +93,7 @@ void loop()
 			{
 				char buf[64]; strftime(buf,sizeof(buf),"%Y-%m-%d %H:%M:%S",&now);
 				time_t epoch = time(nullptr);
-				Serial.printf("\r[Time] %s | epoch=%ld\n", buf, (long)epoch);
+				Serial.printf("\r[Time] %s | epoch=%ld\r\n", buf, (long)epoch);
 
 				// Optionally pass epoch if you want smooth animations tied to wall-clock seconds.
 				ws2812bUpdate(now, epoch);
