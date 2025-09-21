@@ -1,0 +1,29 @@
+arduino-cli compile \
+	--fqbn "esp32:esp32:esp32s3:FlashSize=16M,PSRAM=enabled,PartitionScheme=app3M_fat9M_16MB,UploadSpeed=921600" \
+	--build-path "build" \
+	--build-property compiler.cpp.extra_flags="-DDEBUG_TZ" \
+	--build-property compiler.c.extra_flags="-DDEBUG_TZ" \
+	"."
+/home/perry-couprie/.arduino15/packages/esp32/tools/esp-x32/2411/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/bin/ld: /home/perry-couprie/led-clock/arduino/ledclock-freertos/build/sketch/ledclock-freertos.ino.cpp.o:(.literal._Z5setupv+0xc): undefined reference to `g_sysEvents'
+/home/perry-couprie/.arduino15/packages/esp32/tools/esp-x32/2411/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/bin/ld: /home/perry-couprie/led-clock/arduino/ledclock-freertos/build/sketch/ledclock-freertos.ino.cpp.o:(.literal._Z5setupv+0x10): undefined reference to `g_ledQueue'
+/home/perry-couprie/.arduino15/packages/esp32/tools/esp-x32/2411/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/bin/ld: /home/perry-couprie/led-clock/arduino/ledclock-freertos/build/sketch/ledclock-freertos.ino.cpp.o:(.literal._Z5setupv+0x18): undefined reference to `_Z8task_ledPv'
+/home/perry-couprie/.arduino15/packages/esp32/tools/esp-x32/2411/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/bin/ld: /home/perry-couprie/led-clock/arduino/ledclock-freertos/build/sketch/ledclock-freertos.ino.cpp.o:(.literal._Z5setupv+0x20): undefined reference to `_Z9task_wifiPv'
+/home/perry-couprie/.arduino15/packages/esp32/tools/esp-x32/2411/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/bin/ld: /home/perry-couprie/led-clock/arduino/ledclock-freertos/build/sketch/ledclock-freertos.ino.cpp.o:(.literal._Z5setupv+0x28): undefined reference to `_Z9task_timePv'
+/home/perry-couprie/.arduino15/packages/esp32/tools/esp-x32/2411/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/bin/ld: /home/perry-couprie/led-clock/arduino/ledclock-freertos/build/sketch/ledclock-freertos.ino.cpp.o:(.literal._Z5setupv+0x30): undefined reference to `_Z11task_portalPv'
+/home/perry-couprie/.arduino15/packages/esp32/tools/esp-x32/2411/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/bin/ld: /home/perry-couprie/led-clock/arduino/ledclock-freertos/build/sketch/ledclock-freertos.ino.cpp.o:(.literal._Z5setupv+0x38): undefined reference to `_Z11task_renderPv'
+collect2: error: ld returned 1 exit status
+
+[92mUsed library[0m      [92mVersion[0m [90mPath[0m
+[93mAdafruit NeoPixel[0m 1.15.1  [90m/home/perry-couprie/Arduino/libraries/Adafruit_NeoPixel[0m
+[93mWebServer[0m         3.3.0   [90m/home/perry-couprie/.arduino15/packages/esp32/hardware/esp32/3.3.0/libraries/WebServer[0m
+[93mFS[0m                3.3.0   [90m/home/perry-couprie/.arduino15/packages/esp32/hardware/esp32/3.3.0/libraries/FS[0m
+[93mNetworking[0m        3.3.0   [90m/home/perry-couprie/.arduino15/packages/esp32/hardware/esp32/3.3.0/libraries/Network[0m
+[93mDNSServer[0m         3.3.0   [90m/home/perry-couprie/.arduino15/packages/esp32/hardware/esp32/3.3.0/libraries/DNSServer[0m
+[93mESP32 Async UDP[0m   3.3.0   [90m/home/perry-couprie/.arduino15/packages/esp32/hardware/esp32/3.3.0/libraries/AsyncUDP[0m
+[93mPreferences[0m       3.3.0   [90m/home/perry-couprie/.arduino15/packages/esp32/hardware/esp32/3.3.0/libraries/Preferences[0m
+[93mWiFi[0m              3.3.0   [90m/home/perry-couprie/.arduino15/packages/esp32/hardware/esp32/3.3.0/libraries/WiFi[0m
+
+[92mUsed platform[0m [92mVersion[0m [90mPath[0m
+[93mesp32:esp32[0m   3.3.0   [90m/home/perry-couprie/.arduino15/packages/esp32/hardware/esp32/3.3.0[0m
+Error during build: exit status 1
+make: *** [Makefile:52: build] Error 1

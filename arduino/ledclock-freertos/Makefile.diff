@@ -1,0 +1,10 @@
+	@echo "  make deps            - install esp32 core and required libraries"
+
+deps: setup-core setup-libs
+
+setup-core:
+	arduino-cli core update-index
+	arduino-cli core install esp32:esp32
+
+setup-libs:
+	arduino-cli lib install "Adafruit NeoPixel"
