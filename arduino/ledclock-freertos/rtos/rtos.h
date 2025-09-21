@@ -21,7 +21,7 @@ extern QueueHandle_t g_ledQueue;
 void rtos_wait_bits(EventBits_t bits, TickType_t timeoutTicks = portMAX_DELAY);
 bool rtos_test_bits (EventBits_t bits);
 
-// Task stack sizes & priorities (tuned for ESP32‑S3)
+// Task stack sizes & priorities (tuned for ESP32S3)
 constexpr uint32_t STACK_LED     = 2048;
 constexpr uint32_t STACK_WIFI    = 4096;
 constexpr uint32_t STACK_TIME    = 3072;

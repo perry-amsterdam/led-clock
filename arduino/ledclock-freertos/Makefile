@@ -93,8 +93,9 @@ monitor:
 clean:
 	rm -rf "$(BUILD_DIR)"
 
-format: ## Format all .cpp, .h and .ino files with bcpp
-	for file in $(shell ls *.cpp *.h *.ino 2>/dev/null); do \
-		bcpp -t $$file > $$file.new; \
-		mv -f -v $$file.new $$file; \
+## Format all .cpp, .h and .ino files recursively with bcpp
+format:
+	find . -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.ino" \) -print | while read file; do \
+		echo "Formatting $$file"; \
+		bcpp -t "$$file" > "$$file.new" && mv -f -v "$$file.new" "$$file"; \
 	done
