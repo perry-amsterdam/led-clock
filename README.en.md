@@ -83,14 +83,16 @@ The hardware (clock face, lasercut parts) is ready ✅. The software runs on a m
 
 ### 📷 Wiring Diagram
 
-![Wiring Diagram](wiring_diagram.png)
+![Wiring Diagram](images/wiring_diagram.png)
+
+> ℹ️ The status LED (GPIO 48) is built into the ESP32-S3 DevKit (on-board RGB LED).
 
 ### 📋 Pinout Table
 
 | GPIO | Function      | Note                                 |
 |------|---------------|--------------------------------------|
 | 8    | Clock LEDs DIN| Data input of WS2812B strip/matrix   |
-| 48   | Status LED DIN| Data input of a single WS2812B LED   |
+| 48   | Status LED (on-board)| Built-in RGB LED on ESP32 DevKit   |
 | 5V   | LED Power     | Ensure sufficient power supply       |
 | GND  | Ground        | Must be shared with LED power supply |
 

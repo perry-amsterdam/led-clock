@@ -83,14 +83,16 @@ De hardware (klokfront, lasercut) is klaar ✅. De software draait op een modern
 
 ### 📷 Aansluitschema
 
-![Wiring Diagram](wiring_diagram.png)
+![Wiring Diagram](images/wiring_diagram.png)
+
+> ℹ️ De status-LED (GPIO 48) zit al op de ESP32-S3 DevKit zelf (ingebouwde RGB LED).
 
 ### 📋 Pinout-tabel
 
 | GPIO | Functie        | Opmerking                           |
 |------|----------------|-------------------------------------|
 | 8    | Klok-LEDs DIN  | Data-in van WS2812B strip/matrix    |
-| 48   | Status-LED DIN | Data-in van losse WS2812B LED       |
+| 48   | Status-LED (onboard) | Ingebouwde RGB LED op ESP32 DevKit       |
 | 5V   | Voeding LEDs   | Zorg voor voldoende stroomcapaciteit |
 | GND  | Massa          | Moet gedeeld worden met LED-voeding |
 
