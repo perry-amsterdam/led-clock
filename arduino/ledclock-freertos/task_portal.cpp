@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include "rtos/rtos.h"
-#include "portal.h"
+#include "rtos.h"
+#include "task_portal.h"
 #include "globals.h"
 
 void task_portal(void*)

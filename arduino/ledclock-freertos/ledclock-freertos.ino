@@ -1,12 +1,12 @@
 #include <Arduino.h>
-#include "rtos/rtos.h"
-#include "compat/hal_time_freertos.h"
+#include "rtos.h"
+#include "hal_time_freertos.h"
 #include "globals.h"
-#include "tasks/task_led.h"
-#include "tasks/task_wifi.h"
-#include "tasks/task_time.h"
-#include "tasks/task_portal.h"
-#include "tasks/task_render.h"
+#include "task_led.h"
+#include "task_wifi.h"
+#include "task_time.h"
+#include "task_portal.h"
+#include "task_render.h"
 
 void setup()
 {

@@ -1,6 +1,8 @@
 #include <Arduino.h>
-#include "rtos/rtos.h"
+#include "rtos.h"
 #include "status_led.h"
+#include "task_led.h"
+#include "hal_time_freertos.h"
 
 static inline void ledBluePulse()
 {

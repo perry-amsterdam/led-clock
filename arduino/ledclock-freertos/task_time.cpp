@@ -1,7 +1,8 @@
 #include <Arduino.h>
-#include "rtos/rtos.h"
+#include "rtos.h"
 #include "net_time.h"
 #include "globals.h"
+#include "hal_time_freertos.h"
 
 void task_time(void*)
 {

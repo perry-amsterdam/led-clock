@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "rtos/rtos.h"
+#include "rtos.h"
 #include "ws2812b.h"
 #include "net_time.h"
 #include <time.h>

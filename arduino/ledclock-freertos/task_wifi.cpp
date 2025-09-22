@@ -1,10 +1,13 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <Preferences.h>
-#include "rtos/rtos.h"
+#include "rtos.h"
 #include "globals.h"
+#include "task_wifi.h"
 #include "wifi.h"
+#include "task_portal.h"
 #include "portal.h"
+#include "hal_time_freertos.h"
 
 static void push_led(uint8_t r,uint8_t g,uint8_t b,uint16_t ms)
 {
