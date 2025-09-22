@@ -18,7 +18,7 @@ BOARD_BASE    ?= esp32s3
 
 # ====== Board menu options (confirmed working on your setup) ======
 # You can override FLASH_OPTS at make-time if needed.
-FLASH_OPTS    ?= FlashMode=opi,FlashSize=16M,PSRAM=opi,PartitionScheme=app3M_fat9M_16MB
+FLASH_OPTS    ?= FlashSize=16M,PSRAM=enabled,PartitionScheme=app3M_fat9M_16MB,UploadSpeed=$(UPLOAD_SPEED)
 
 # Fully qualified board name
 FQBN          ?= $(CORE_ID):$(BOARD_BASE):$(FLASH_OPTS)
@@ -65,10 +65,10 @@ monitor: ## Open serial monitor
 
 # ----- Maintenance -----
 erase: ## Erase full flash (⚠ wipes everything)
-	esptool.py --port "$(PORT)" erase_flash
+	esptool --port "$(PORT)" erase-flash
 
 erase-fs: ## Erase NVS/filesystem region (adjust for your partition scheme if needed)
-	esptool.py --port "$(PORT)" erase_region 0x9000 0x6000
+	esptool --port "$(PORT)" erase_region 0x9000 0x6000
 
 clean: ## Remove build directory
 	rm -rf "$(BUILD_DIR)"
@@ -82,4 +82,3 @@ format: ## Run clang-format on all C/C++ headers/sources
 help: ## Show this help
 	@echo "Available targets (vars: SKETCH, PORT, UPLOAD_SPEED, MONITOR_BAUD, BUILD_DIR, FLASH_OPTS, LIBS_FILE):"
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-14s %s\n", $$1, $$2}'
-
