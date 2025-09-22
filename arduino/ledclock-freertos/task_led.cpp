@@ -20,30 +20,29 @@ static inline void ledGreenPulse()
 
 void task_led(void*)
 {
-//	ledBegin();
-//	for(;;)
-//	{
-//		// Non-blocking: check for queued color commands first
-//		LedCmd cmd;
-//		if (xQueueReceive(g_ledQueue, &cmd, pdMS_TO_TICKS(10)) == pdPASS)
-//		{
-//			ledColor(cmd.r,cmd.g,cmd.b); hal_delay_ms(cmd.hold_ms);
-//			continue;
-//		}
-//		if(!rtos_test_bits(EVT_WIFI_UP))
-//		{
-//			ledBluePulse();
-//		}
-//		else if(!rtos_test_bits(EVT_TIME_READY))
-//		{
-//			ledGreenPulse();
-//		}
-//		else
-//		{
-//			// All good  very faint heartbeat
-//			ledColor(0,0,1); hal_delay_ms(50);
-//			ledOff();        hal_delay_ms(1950);
-//		}
-//	}
-	hal_delay_ms(250);
+	ledBegin();
+	for(;;)
+	{
+		// Non-blocking: check for queued color commands first
+		LedCmd cmd;
+		if (xQueueReceive(g_ledQueue, &cmd, pdMS_TO_TICKS(10)) == pdPASS)
+		{
+			ledColor(cmd.r,cmd.g,cmd.b); hal_delay_ms(cmd.hold_ms);
+			continue;
+		}
+		if(!rtos_test_bits(EVT_WIFI_UP))
+		{
+			ledBluePulse();
+		}
+		else if(!rtos_test_bits(EVT_TIME_READY))
+		{
+			ledGreenPulse();
+		}
+		else
+		{
+			// All good  very faint heartbeat
+			ledColor(0,0,1); hal_delay_ms(50);
+			ledOff();        hal_delay_ms(1950);
+		}
+	}
 }

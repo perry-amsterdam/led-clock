@@ -18,7 +18,7 @@ BOARD_BASE    ?= esp32s3
 
 # ====== Board menu options (confirmed working on your setup) ======
 # You can override FLASH_OPTS at make-time if needed.
-FLASH_OPTS    ?= FlashSize=16M,PSRAM=enabled,PartitionScheme=app3M_fat9M_16MB,UploadSpeed=$(UPLOAD_SPEED)
+FLASH_OPTS    ?= FlashMode=opi,FlashSize=16M,PSRAM=opi,PartitionScheme=app3M_fat9M_16MB
 
 # Fully qualified board name
 FQBN          ?= $(CORE_ID):$(BOARD_BASE):$(FLASH_OPTS)
