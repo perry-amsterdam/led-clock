@@ -1,101 +1,85 @@
-# ===== ESP32-S3 Makefile (cleaned) =====
-# Tooling
-ARDUINO_CLI ?= arduino-cli
-PY ?= python3
+# ====== User-configurable ======
+# Sketch folder (directory containing your .ino)
+SKETCH        ?= .
+# Serial port for the board
+PORT          ?= /dev/ttyACM0
+# Upload speed
+UPLOAD_SPEED  ?= 921600
+# Serial monitor baudrate
+MONITOR_BAUD  ?= 115200
+# Build directory
+BUILD_DIR     ?= build
+# Optional libraries manifest (one library name per line)
+LIBS_FILE     ?= libs.txt
 
-# Ports & chip
-PORT ?= /dev/ttyACM0
-CHIP ?= esp32s3
+# Arduino core ID and base board
+CORE_ID       ?= esp32:esp32
+BOARD_BASE    ?= esp32s3
 
-# Build options
-BOARD ?= esp32:esp32:esp32s3
-FLASH_OPTS ?= FlashSize=16M,PSRAM=enabled,PartitionScheme=app3M_fat9M_16MB,UploadSpeed=921600
-FQBN := $(BOARD):$(FLASH_OPTS)
+# ====== Board menu options (confirmed working on your setup) ======
+# You can override FLASH_OPTS at make-time if needed.
+FLASH_OPTS    ?= FlashSize=16M,PSRAM=enabled,PartitionScheme=app3M_fat9M_16MB,UploadSpeed=$(UPLOAD_SPEED)
 
-SKETCH ?= .
-BUILD_DIR ?= build
-UPLOAD_SPEED ?= 921600
-MONITOR_BAUD ?= 115200
+# Fully qualified board name
+FQBN          ?= $(CORE_ID):$(BOARD_BASE):$(FLASH_OPTS)
+# Base FQBN without menu options (for board-details etc.)
+FQBN_BASE     ?= $(CORE_ID):$(BOARD_BASE)
 
-# esptool detection (uses system esptool if present, otherwise python module)
-ESPTOOL := $(shell which esptool 2>/dev/null)
-ESPTOOL_CMD := $(if $(ESPTOOL),$(ESPTOOL),$(PY) -m esptool)
+# ====== Phony targets ======
+.PHONY: all deps board-details build flash upload monitor erase erase-fs clean format help
 
-# (Optional) Filesystem region for "app3M_fat9M_16MB" partition scheme
-# Adjust if you change the partition scheme!
-FS_START ?= 0x290000
-FS_SIZE  ?= 0x960000
+# Default target
+all: build
 
-.PHONY: help build upload flash upload-clean erase-all erase-all-no-stub erase-fs monitor clean core-version fqbn
-
-help:
-	@echo "Beschikbare targets:"
-	@echo "  make build          	- Compileer de sketch met arduino-cli"
-	@echo "  make upload         	- Upload de sketch (PORT=$(PORT))"
-	@echo "  make flash          	- Alias: build + upload"
-	@echo "  make upload-clean   	- Wis hele flash, bouw en upload opnieuw"
-	@echo "  make erase-all      	- Wis de volledige flash"
-	@echo "  make erase-all-no-stub - Wis flash zonder stub (fallback)"
-	@echo "  make erase-fs       	- Wis alléén de FATFS partitie (LET OP: data kwijt)"
-	@echo "  make deps           	- install esp32 core and required libraries"
-	@echo "  make monitor        	- Open seriële monitor ($(MONITOR_BAUD) baud)"
-	@echo "  make clean          	- Verwijder de build directory"
-	@echo "  make fqbn           	- Toon de volledige FQBN"
-	@echo "  make format         	- Beautify all source files (*.cpp, *.h, *.ino) using bcpp"
-
-fqbn:
-	@echo "$(FQBN)"
-
-core-version:
-	$(ARDUINO_CLI) version && $(ARDUINO_CLI) core list
-
-build:
-	$(ARDUINO_CLI) compile \
-		--fqbn "$(FQBN)" \
-		--build-path "$(BUILD_DIR)" \
-		--build-property compiler.cpp.extra_flags="-DDEBUG_TZ" \
-		--build-property compiler.c.extra_flags="-DDEBUG_TZ" \
-		"$(SKETCH)"
-
-upload: build
-	$(ARDUINO_CLI) upload \
-		--fqbn "$(FQBN)" \
-		--port "$(PORT)" \
-		--input-dir "$(BUILD_DIR)" \
-		--verify \
-
-flash: upload
-
-upload-clean: erase-all build upload
-
-deps: setup-core setup-libs
-
-setup-core:
+# ----- Dependencies (core + optional libs) -----
+deps: ## Install ESP32 core and libraries from $(LIBS_FILE) if present
 	arduino-cli core update-index
-	arduino-cli core install esp32:esp32
+	arduino-cli core install $(CORE_ID)
+	@if [ -f "$(LIBS_FILE)" ]; then \
+		echo "Installing libraries from $(LIBS_FILE)..."; \
+		arduino-cli lib install $$(tr '\n' ' ' < "$(LIBS_FILE)"); \
+	else \
+		echo "No $(LIBS_FILE) found. Skipping library install."; \
+	fi
 
-setup-libs:
-	arduino-cli lib install "Adafruit NeoPixel"
+# ----- Inspect available board options for your installed core -----
+board-details: ## Show board menu options for $(FQBN_BASE)
+	arduino-cli board details -b $(FQBN_BASE)
 
-erase-all:
-	$(ESPTOOL_CMD) --chip $(CHIP) --port "$(PORT)" erase_flash
+# ----- Build -----
+build: ## Compile the sketch into $(BUILD_DIR)
+	@mkdir -p "$(BUILD_DIR)"
+	@echo "Building for FQBN: $(FQBN)"
+	arduino-cli compile --fqbn "$(FQBN)" --build-path "$(BUILD_DIR)" "$(SKETCH)"
 
-erase-all-no-stub:
-	$(ESPTOOL_CMD) --chip $(CHIP) --port "$(PORT)" --no-stub erase_flash
+# ----- Upload/Flash (reuses artifacts from BUILD_DIR) -----
+flash: build ## Upload (flash) prebuilt artifacts from $(BUILD_DIR)
+	arduino-cli upload -p "$(PORT)" --fqbn "$(FQBN)" --input-dir "$(BUILD_DIR)"
 
-erase-fs:
-	@echo "⚠️  Wissen van filesystem regio: start=$(FS_START), size=$(FS_SIZE)"
-	$(ESPTOOL_CMD) --chip $(CHIP) --port "$(PORT)" erase_region $(FS_START) $(FS_SIZE)
+upload: flash ## Alias for flash
+	@true
 
-monitor:
-	$(ARDUINO_CLI) monitor -p "$(PORT)" --config baudrate=$(MONITOR_BAUD)
+# ----- Serial Monitor -----
+monitor: ## Open serial monitor
+	arduino-cli monitor -p "$(PORT)" -c baudrate=$(MONITOR_BAUD)
 
-clean:
+# ----- Maintenance -----
+erase: ## Erase full flash (⚠ wipes everything)
+	esptool.py --port "$(PORT)" erase_flash
+
+erase-fs: ## Erase NVS/filesystem region (adjust for your partition scheme if needed)
+	esptool.py --port "$(PORT)" erase_region 0x9000 0x6000
+
+clean: ## Remove build directory
 	rm -rf "$(BUILD_DIR)"
 
-## Format all .cpp, .h and .ino files recursively with bcpp
-format:
-	find . -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.ino" \) -print | while read file; do \
-		echo "Formatting $$file"; \
-		bcpp -t "$$file" > "$$file.new" && mv -f -v "$$file.new" "$$file"; \
-	done
+format: ## Run clang-format on all C/C++ headers/sources
+	@command -v clang-format >/dev/null 2>&1 && \
+		find . -type f \( -name '*.c' -o -name '*.cpp' -o -name '*.h' -o -name '*.hpp' \) -print0 | xargs -0 clang-format -i || \
+		echo "clang-format not found, skipping."
+
+# ----- Help -----
+help: ## Show this help
+	@echo "Available targets (vars: SKETCH, PORT, UPLOAD_SPEED, MONITOR_BAUD, BUILD_DIR, FLASH_OPTS, LIBS_FILE):"
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-14s %s\n", $$1, $$2}'
+
