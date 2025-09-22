@@ -222,19 +222,21 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 	return now > 8 * 3600;
 }
 
+
 // Periodic time maintenance: if time seems unsynced (epoch too small) retry NTP setup.
 // Called from task_time loop.
 void netTimeMaintain()
 {
-    static uint32_t last = 0;
-    uint32_t now_ms = hal_millis();
-    // run roughly once per minute
-    if (now_ms - last < 60000) return;
-    last = now_ms;
+	static uint32_t last = 0;
+	uint32_t now_ms = hal_millis();
+	// run roughly once per minute
+	if (now_ms - last < 60000) return;
+	last = now_ms;
 
-    time_t now = time(nullptr);
-    // If epoch looks invalid (< 8 hours since boot default), try to resync.
-    if (now < 8 * 3600) {
-        setupTimeFromInternet(false);
-    }
+	time_t now = time(nullptr);
+	// If epoch looks invalid (< 8 hours since boot default), try to resync.
+	if (now < 8 * 3600)
+	{
+		setupTimeFromInternet(false);
+	}
 }
