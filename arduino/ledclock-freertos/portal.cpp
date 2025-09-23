@@ -167,7 +167,6 @@ void startPortal()
 	server.on("/reset",HTTP_GET,handleReset);
 	server.onNotFound(handleNotFound);
 	server.begin();
-	ledRed();
 	if(DEBUG_NET) Serial.printf("[Portal] SSID '%s' -> http://%s\n", AP_SSID, AP_IP.toString().c_str());
 }
 

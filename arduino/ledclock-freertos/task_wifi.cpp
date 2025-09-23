@@ -40,14 +40,14 @@ void task_wifi(void*)
 	{
 		if(!rtos_test_bits(EVT_WIFI_UP) && !rtos_test_bits(EVT_PORTAL_ON))
 		{
-//			push_led(0,0,32,50);
+			//push_led(0,0,32,50);
 			connectWiFi(ssid, pass);
 
 			// Wait up to 10s
 			uint32_t t0 = hal_millis();
 			while(hal_millis()-t0 < 10000 && WiFi.status()!=WL_CONNECTED)
-			{ 
-				hal_delay_ms(50); 
+			{
+				hal_delay_ms(50);
 			}
 
 			if(WiFi.status()==WL_CONNECTED)

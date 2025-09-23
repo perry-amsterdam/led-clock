@@ -4,7 +4,7 @@
 
 #define DEBUG_TZ 1
 #define DEBUG_NET 1
-#define LED_PIN    48			 // < PAS AAN (vaak 8 of 48)
+#define LED_PIN    48  // < PAS AAN (vaak 8 of 48)
 #define LED_COUNT  1
 
 extern const uint8_t LED_BRIGHTNESS;

@@ -16,8 +16,6 @@ bool connectWiFi(const String& ssid, const String& pass, uint32_t timeoutMs)
 
 	if(DEBUG_NET) Serial.printf("\r[WiFi] verbinden met SSID='%s'...\n", ssid.c_str());
 
-	ledBlue();
-
 	WiFi.mode(WIFI_STA);
 	WiFi.disconnect(true,true);
 	hal_delay_ms(50);
@@ -26,10 +24,8 @@ bool connectWiFi(const String& ssid, const String& pass, uint32_t timeoutMs)
 	uint32_t start=hal_millis(); bool blink=false;
 	while(WiFi.status()!=WL_CONNECTED && (hal_millis()-start)<timeoutMs)
 	{
-		blink=!blink; if(blink) ledBlue(); else ledOff();
-		hal_delay_ms(300); Serial.print('.');
+		hal_delay_ms(300);
 	}
-	Serial.println();
 
 	if(WiFi.status()==WL_CONNECTED)
 	{
@@ -37,5 +33,5 @@ bool connectWiFi(const String& ssid, const String& pass, uint32_t timeoutMs)
 		ledGreen(); return true;
 	}
 
-	Serial.println("[WiFi] FAILED"); ledRed(); return false;
+	Serial.println("[WiFi] FAILED"); return false;
 }
