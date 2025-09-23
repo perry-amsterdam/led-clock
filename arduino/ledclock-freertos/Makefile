@@ -73,10 +73,11 @@ erase-fs: ## Erase NVS/filesystem region (adjust for your partition scheme if ne
 clean: ## Remove build directory
 	rm -rf "$(BUILD_DIR)"
 
-format: ## Run clang-format on all C/C++ headers/sources
-	@command -v clang-format >/dev/null 2>&1 && \
-		find . -type f \( -name '*.c' -o -name '*.cpp' -o -name '*.h' -o -name '*.hpp' \) -print0 | xargs -0 clang-format -i || \
-		echo "clang-format not found, skipping."
+format: ## Format all .cpp, .h and .ino files with bcpp
+	for file in $(shell ls *.cpp *.h *.ino 2>/dev/null); do \
+		bcpp -t $$file > $$file.new; \
+		mv -f -v $$file.new $$file; \
+	done
 
 # ----- Help -----
 help: ## Show this help
