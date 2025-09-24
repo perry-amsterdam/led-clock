@@ -30,17 +30,17 @@ FS_SIZE  ?= 0x960000
 
 help:
 	@echo "Beschikbare targets:"
-	@echo "  make build          - Compileer de sketch met arduino-cli"
-	@echo "  make upload         - Upload de sketch (PORT=$(PORT))"
-	@echo "  make flash          - Alias: build + upload"
-	@echo "  make upload-clean   - Wis hele flash, bouw en upload opnieuw"
-	@echo "  make erase-all      - Wis de volledige flash"
+	@echo "  make build             - Compileer de sketch met arduino-cli"
+	@echo "  make upload            - Upload de sketch (PORT=$(PORT))"
+	@echo "  make flash             - Alias: build + upload"
+	@echo "  make upload-clean      - Wis hele flash, bouw en upload opnieuw"
+	@echo "  make erase-all         - Wis de volledige flash"
 	@echo "  make erase-all-no-stub - Wis flash zonder stub (fallback)"
-	@echo "  make erase-fs       - Wis alléén de FATFS partitie (LET OP: data kwijt)"
-	@echo "  make monitor        - Open seriële monitor ($(MONITOR_BAUD) baud)"
-	@echo "  make clean          - Verwijder de build directory"
-	@echo "  make fqbn           - Toon de volledige FQBN"
-	@echo "  make format         - Beautify all source files (*.cpp, *.h, *.ino) using bcpp"
+	@echo "  make erase-fs          - Wis alléén de FATFS partitie (LET OP: data kwijt)"
+	@echo "  make monitor           - Open seriële monitor ($(MONITOR_BAUD) baud)"
+	@echo "  make clean             - Verwijder de build directory"
+	@echo "  make fqbn              - Toon de volledige FQBN"
+	@echo "  make format            - Beautify all source files (*.cpp, *.h, *.ino) using bcpp"
 
 fqbn:
 	@echo "$(FQBN)"
