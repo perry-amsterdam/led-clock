@@ -63,12 +63,14 @@ static inline uint32_t col(uint8_t r, uint8_t g, uint8_t b)
 	return strip.Color(r, g, b);
 }
 
+
 static inline uint16_t mod_wrap(int32_t x, uint16_t m)
 {
 	int32_t r = x % (int32_t)m;
 	if (r < 0) r += m;
 	return (uint16_t)r;
 }
+
 
 // Map a logical position (0..59) on the 60-ring to the strip index
 static inline uint16_t idx60(int32_t pos)
@@ -77,6 +79,7 @@ static inline uint16_t idx60(int32_t pos)
 	return (uint16_t)logical;
 }
 
+
 // Map a logical position (0..23) on the 24-ring to the strip index (offset after the first 60)
 static inline uint16_t idx24(int32_t pos)
 {
@@ -84,11 +87,13 @@ static inline uint16_t idx24(int32_t pos)
 	return (uint16_t)(RING60_COUNT + logical);
 }
 
+
 // Safe set/add pixel
 static inline void setPix(uint16_t i, uint32_t c)
 {
 	if (i < LED_COUNT) strip.setPixelColor(i, c);
 }
+
 
 static inline void addPix(uint16_t i, uint8_t r, uint8_t g, uint8_t b)
 {
@@ -103,10 +108,12 @@ static inline void addPix(uint16_t i, uint8_t r, uint8_t g, uint8_t b)
 	strip.setPixelColor(i, col(nr, ng, nb));
 }
 
+
 static inline void clearAll()
 {
 	strip.clear();
 }
+
 
 // Draw 5-minute tick marks on the 60-ring (dim white)
 static void drawMinuteTicks()
@@ -118,11 +125,13 @@ static void drawMinuteTicks()
 	}
 }
 
+
 // Draw "hand" with optional trailing
 static void drawHand60(uint8_t position, uint8_t r, uint8_t g, uint8_t b, uint8_t trailLen)
 {
 	// tip
 	addPix(idx60(position), r, g, b);
+
 	// trail behind (wrapping)
 	for (uint8_t t = 1; t <= trailLen; ++t)
 	{
@@ -135,6 +144,7 @@ static void drawHand60(uint8_t position, uint8_t r, uint8_t g, uint8_t b, uint8_
 	}
 }
 
+
 // ---------------------------------
 // Public API
 // ---------------------------------
@@ -145,6 +155,7 @@ void ws2812bBegin()
 	clearAll();
 	strip.show();
 }
+
 
 // now = civil time (local or UTC  you decide), epoch = seconds since epoch (optional for animations)
 void ws2812bUpdate(const tm& now, time_t /*epoch*/) {
@@ -161,12 +172,12 @@ void ws2812bUpdate(const tm& now, time_t /*epoch*/) {
 	
 	// Colors (you can tweak)
 	
-	 // red
+	// red
 	const uint8_t rHour = 180, gHour = 0,   bHour = 0;
-
+	
 	// green
 	const uint8_t rMin  = 0,   gMin  = 160, bMin  = 0;
-
+	
 	// blue
 	const uint8_t rSec  = 0,   gSec  = 0,   bSec  = 180;
 	
@@ -188,14 +199,17 @@ void ws2812bUpdate(const tm& now, time_t /*epoch*/) {
 	// E.g., light the next hour slot dimly proportional to minutes progress.
 	{
 		const uint8_t nextHour = (uint8_t)((posHour + 1) % 24);
-									 // 0..177 approx
+
+		// 0..177 approx
 		const uint8_t dim = (uint8_t)(now.tm_min * 3);
-									 // subtle red
+
+		// subtle red
 		addPix(idx24(nextHour), dim / 8, 0, 0);
 	}
 	
 	strip.show();
 }
+
 
 void ws2812bShow()
 {

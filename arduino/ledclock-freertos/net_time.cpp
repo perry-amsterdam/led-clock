@@ -49,6 +49,7 @@ String extractJsonString(const String& json, const String& key)
 	return v;
 }
 
+
 // worldtimeapi.org: timezone (string), raw_offset (seconds), dst_offset (seconds)
 // ip-api.com: countryCode (string)
 bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bool acceptAllHttps)

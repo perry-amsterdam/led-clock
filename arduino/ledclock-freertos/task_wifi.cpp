@@ -22,7 +22,7 @@ void task_wifi(void*)
 {
 
 	Preferences prefs;
-	
+
 	// Load saved credentials
 	prefs.begin(PREF_NS,true);
 	String ssid = prefs.getString("ssid","");
