@@ -19,6 +19,7 @@ void task_render(void*)
 		{
 			ws2812bUpdate(now, epoch);
 		}
+
 		// ~30 FPS animation (adjust inside ws2812bUpdate if static)
 		vTaskDelay(pdMS_TO_TICKS(33));
 	}
