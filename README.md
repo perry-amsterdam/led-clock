@@ -16,6 +16,8 @@ De hardware (klokfront, lasercut) is klaar ✅. De software draait op een modern
 * Automatische tijd via **NTP** synchronisatie
 * **Timezone-detectie** via IP-geolocatie
 * **mDNS** discovery op het lokale netwerk
+* **WPS** verbindingsoptie (Wi-Fi Protected Setup)
+
 * Wi-Fi setup: bij geen verbinding start de klok een **Access Point + captive portal**
 * Geschreven in **C/C++ met FreeRTOS**
 * Uitbreidbaar platform: animaties, integraties en artistieke varianten
@@ -118,6 +120,20 @@ De hardware (klokfront, lasercut) is klaar ✅. De software draait op een modern
 3. **Level shifter** – aanbevolen bij 3.3V → 5V  
 
 ---
+
+
+### 📡 Wi-Fi via WPS
+
+Naast het captive portal ondersteunt de klok ook **WPS (Wi-Fi Protected Setup)** om verbinding te maken met je netwerk.  
+Dit is handig als je de Wi-Fi gegevens niet handmatig wilt invoeren.
+
+- **WPS PBC (Push Button Configuration)**: druk op de WPS-knop van je router en start de klok in WPS-modus.  
+- Als de ESP32 succesvol een WPS-handshake uitvoert, worden de netwerkgegevens automatisch opgeslagen in het NVS-geheugen van de chip.  
+- Bij de volgende start gebruikt de klok deze opgeslagen gegevens direct om verbinding te maken.
+
+⚠️ Let op: niet elke ESP32 Arduino core ondersteunt WPS.  
+Vanaf **ESP32 Arduino core v3+** is `WiFi.beginWPSConfig()` verwijderd. Voor die versies moet je het captive portal gebruiken om Wi-Fi te configureren.
+
 
 ## 🚀 Gebruik
 

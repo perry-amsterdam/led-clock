@@ -119,6 +119,20 @@ The hardware (clock face, lasercut parts) is ready ✅. The software runs on a m
 
 ---
 
+
+### 📡 Wi-Fi via WPS
+
+In addition to the captive portal, the clock also supports **WPS (Wi-Fi Protected Setup)** for connecting to your network.  
+This can be useful if you don’t want to enter Wi-Fi credentials manually.
+
+- **WPS PBC (Push Button Configuration)**: press the WPS button on your router and start the clock in WPS mode.  
+- If the ESP32 successfully performs the WPS handshake, the credentials are automatically stored in the ESP32’s NVS memory.  
+- On the next boot, the clock will use the stored credentials to connect immediately.
+
+⚠️ Note: not every ESP32 Arduino core supports WPS.  
+Since **ESP32 Arduino core v3+**, `WiFi.beginWPSConfig()` has been removed. For those versions, you must use the captive portal for Wi-Fi configuration.
+
+
 ## 🚀 Usage
 
 1. Flash the firmware.  
