@@ -142,7 +142,7 @@ De hardware (klokfront, lasercut) is klaar ✅. De software draait op een modern
 * [x] Wi-Fi captive portal & NTP synchronisatie  
 * [x] Automatische timezone-detectie via IP  
 * [x] mDNS service  
-* [ ] Wifi wps
+* [x] Wifi wps
 * [ ] API server op ESP32  
 * [ ] Flutter app koppeling  
 * [ ] Artistieke klokvarianten  

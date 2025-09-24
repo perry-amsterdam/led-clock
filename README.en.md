@@ -142,7 +142,7 @@ The hardware (clock face, lasercut parts) is ready ✅. The software runs on a m
 * [x] Wi‑Fi captive portal & NTP synchronization  
 * [x] Automatic timezone detection via IP  
 * [x] mDNS service  
-* [ ] Wifi wps
+* [x] Wifi wps
 * [ ] API server on ESP32  
 * [ ] Flutter app integration  
 * [ ] Artistic clockface variants  
