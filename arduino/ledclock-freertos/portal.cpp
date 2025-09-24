@@ -70,20 +70,28 @@ void handleRoot()
 {
 	if(DEBUG_NET) Serial.println("[HTTP] GET /");
 
-	server.send(200,"text/html", htmlWrap(
-		F(
+	// Prefill from NVS
+	prefs.begin(PREF_NS, true);
+	String savedSsid = prefs.getString("ssid", "");
+	bool wpsOnce = prefs.getBool("wps_once", false);
+	prefs.end();
+
+	String page;
+	page.reserve(3000);
+
+	page += F(
 		"<h1>Wi-Fi configuratie</h1>"
 		"<p class='lead'>Verbind de klok met je draadloze netwerk. Je gegevens worden lokaal opgeslagen (NVS).</p>"
 		"<form method='POST' action='/save' autocomplete='on'>"
 
 		"<div class='field'>"
 		"<label for='ssid'>SSID</label>"
-		"<input id='ssid' name='ssid' required placeholder='Bijv. MijnNetwerk' autocapitalize='none'/>"
+		"<input id='ssid' name='ssid' placeholder='Bijv. MijnNetwerk' autocapitalize='none'/>"
 		"</div>"
 
 		"<div class='field'>"
 		"<label for='pass'>Wachtwoord</label>"
-		"<input id='pass' name='pass' type='password' required placeholder='\342\200\242\342\200\242\342\200\242\342\200\242\342\200\242\342\200\242\342\200\242\342\200\242'/>"
+		"<input id='pass' name='pass' type='password' placeholder='\342\200\242\342\200\242\342\200\242\342\200\242\342\200\242\342\200\242\342\200\242\342\200\242\342\200\242\342\200\242\342\200\242\342\200\242\342\200\242\342\200\242\342\200\242\342\200\242'/>"
 		"<div class='row note'>"
 		"<label style='display:flex;align-items:center;gap:.4rem'>"
 		"<input type='checkbox' id='showpw' style='width:auto'>"
@@ -91,7 +99,18 @@ void handleRoot()
 		"</label>"
 		"</div>"
 		"</div>"
+		);
 
+	// WPS one-shot checkbox block
+	page += F("<div class='field'>"
+		"<label><input type='checkbox' id='wps' name='wps' value='1' ");
+	if (wpsOnce) page += F("checked ");
+	page += F("/> Gebruik WPS bij volgende herstart (eenmalig)</label>"
+		"<div class='hint'>Na reboot probeert het device eerst WPS. De optie wordt dan automatisch gewist.</div>"
+		"</div>");
+
+	// Action buttons
+	page += F(
 		"<div class='row'>"
 		"<button class='btn btn-primary' type='submit'>Opslaan</button>"
 		"<a class='btn btn-ghost' href='/reset'>Opgeslagen gegevens wissen</a>"
@@ -100,26 +119,50 @@ void handleRoot()
 		"<div class='space'></div>"
 		"<p class='note'>Tip: na opslaan wordt de ESP32 opnieuw verbonden met het gekozen netwerk.</p>"
 		"</form>"
+		);
 
-	// klein java scriptje voor wachtwoord tonen, super compact
-		"<script>"
-		"var s=document.getElementById('showpw'),p=document.getElementById('pass');"
-		"if(s&&p){s.addEventListener('change',function(){p.type=this.checked?'text':'password';});}"
-		"</script>"
-		)
-		));
+	// Script to prefill SSID and wire up UI logic
+	page += F("<script>");
+	// Prefill SSID (escape simple quotes/backslashes)
+	String esc = savedSsid; esc.replace("\\", "\\\\"); esc.replace("'", "\\'");
+	page += "var ss=document.getElementById('ssid'); if(ss){ ss.value='";
+	page += esc;
+	page += "'; }";
+	// Password show/hide
+	page += "var s=document.getElementById('showpw'),p=document.getElementById('pass');"
+		"if(s&&p){s.addEventListener('change',function(){p.type=this.checked?'text':'password';});}";
+	// Disable SSID/PASS when WPS checked
+	page += "var wps=document.getElementById('wps');"
+		"function t(){var d=wps&&wps.checked; if(ss){ss.disabled=d; ss.required=!d;} if(p){p.disabled=d; p.required=!d;}}"
+		"if(wps){wps.addEventListener('change',t);} t();";
+	page += F("</script>");
+
+	server.send(200,"text/html", htmlWrap(page));
 }
 
 
 void handleSave()
 {
 	if(DEBUG_NET) Serial.println("[HTTP] POST /save");
-	if(!server.hasArg("ssid")||!server.hasArg("pass")){ server.send(400,"text/plain","Ontbrekende velden"); return; }
+
+	bool wpsChecked = server.hasArg("wps") && server.arg("wps") == "1";
+
+	// Only require SSID/PASS when not using WPS
+	if(!wpsChecked && (!server.hasArg("ssid") || !server.hasArg("pass")))
+	{
+		server.send(400,"text/plain","Ontbrekende velden");
+		return;
+	}
+
 	prefs.begin(PREF_NS,false);
-	prefs.putString("ssid", server.arg("ssid"));
-	prefs.putString("pass", server.arg("pass"));
+	prefs.putBool("wps_once", wpsChecked);
+	if(!wpsChecked)
+	{
+		prefs.putString("ssid", server.arg("ssid"));
+		prefs.putString("pass", server.arg("pass"));
+	}
 	prefs.end();
-	if(DEBUG_NET) Serial.printf("[WiFi] Stored SSID='%s' len(pass)=%u\n", server.arg("ssid").c_str(), server.arg("pass").length());
+
 	server.send(200,"text/html",htmlWrap("<h1>Opgeslagen \342\234\205</h1><p>Herstart...</p>"));
 	hal_delay_ms(500); ESP.restart();
 }

@@ -160,31 +160,34 @@ void ws2812bBegin()
 
 // now = civil time (local or UTC  you decide), epoch = seconds since epoch (optional for animations)
 void ws2812bUpdate(const tm& now, time_t /*epoch*/) {
-	
-	// Extract time parts
-	const uint8_t posSec  = (uint8_t)(now.tm_sec % 60);
-	const uint8_t posMin  = (uint8_t)(now.tm_min % 60);
-	const uint8_t posHour = (uint8_t)(now.tm_hour % 24);
-	
-	// Colors (you can tweak)
-	const uint8_t rHour = 180, gHour = 0,   bHour = 0; // red
-	const uint8_t rMin  = 0,   gMin  = 160, bMin  = 0; // green
-	const uint8_t rSec  = 0,   gSec  = 0,   bSec  = 180; // blue
-	
-	clearAll();
-	
+
+// Extract time parts
+const uint8_t posSec  = (uint8_t)(now.tm_sec % 60);
+const uint8_t posMin  = (uint8_t)(now.tm_min % 60);
+const uint8_t posHour = (uint8_t)(now.tm_hour % 24);
+
+// Colors (you can tweak)
+								 // red
+const uint8_t rHour = 180, gHour = 0,   bHour = 0;
+								 // green
+const uint8_t rMin  = 0,   gMin  = 160, bMin  = 0;
+								 // blue
+const uint8_t rSec  = 0,   gSec  = 0,   bSec  = 180;
+
+clearAll();
+
 //	// Background ticks on the 60-ring every 5 minutes
 //	drawMinuteTicks();
-//	
+//
 //	// Minutes hand on 60-ring (with a short trail)
 //	drawHand60(posMin, rMin, gMin, bMin, TRAIL_LENGTH_MIN);
-//	
-	// Seconds hand on 60-ring (with a short trail)
-	drawHand60(posSec, rSec, gSec, bSec, TRAIL_LENGTH_SEC);
-//	
+//
+// Seconds hand on 60-ring (with a short trail)
+drawHand60(posSec, rSec, gSec, bSec, TRAIL_LENGTH_SEC);
+//
 //	// Hours on 24-ring
 //	addPix(idx24(posHour), rHour, gHour, bHour);
-//	
+//
 //	// Optionally: show minute-progress on hour ring (subtle)
 //	// E.g., light the next hour slot dimly proportional to minutes progress.
 //	{
@@ -196,6 +199,6 @@ void ws2812bUpdate(const tm& now, time_t /*epoch*/) {
 //		// subtle red
 //		addPix(idx24(nextHour), dim / 8, 0, 0);
 //	}
-	
-	strip.show();
+
+strip.show();
 }

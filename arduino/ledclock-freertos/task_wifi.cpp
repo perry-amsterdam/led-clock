@@ -28,6 +28,38 @@ void task_wifi(void*)
 	String ssid = prefs.getString("ssid","");
 	String pass = prefs.getString("pass","");
 	prefs.end();
+	// One-shot WPS: read and clear flag
+	bool wpsOnce = false;
+	prefs.begin(PREF_NS, true);
+	wpsOnce = prefs.getBool("wps_once", false);
+	prefs.end();
+	if(wpsOnce)
+	{
+		// clear immediately to ensure one-time
+		prefs.begin(PREF_NS, false);
+		prefs.putBool("wps_once", false);
+		prefs.end();
+
+		Serial.println("[WiFi] WPS-once geactiveerd; probeer WPS...");
+		if(wpsConnect())
+		{
+			xEventGroupSetBits(g_sysEvents, EVT_WIFI_UP);
+		}
+		else
+		{
+			Serial.println("[WiFi] WPS mislukt; ga door met normale flow");
+		}
+	}
+
+	// If connected via WPS, skip normal connection attempts
+	if (WiFi.status()==WL_CONNECTED)
+	{
+		for(;;)
+		{
+			// keep task alive, no portal
+			hal_delay_ms(250);
+		}
+	}
 
 	if(ssid.isEmpty())
 	{
