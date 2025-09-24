@@ -13,6 +13,10 @@
 #include <time.h>
 #include <ESPmDNS.h>
 
+#if !defined(ESP_ARDUINO_VERSION_MAJOR) || (ESP_ARDUINO_VERSION_MAJOR < 3)
+#error "This project requires Arduino-ESP32 core v3.0.0 or higher"
+#endif
+
 // Optional compile-time config
 #define LED_PIN 8
 #define LED_COUNT 84
