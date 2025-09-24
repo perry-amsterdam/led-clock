@@ -63,14 +63,12 @@ static inline uint32_t col(uint8_t r, uint8_t g, uint8_t b)
 	return strip.Color(r, g, b);
 }
 
-
 static inline uint16_t mod_wrap(int32_t x, uint16_t m)
 {
 	int32_t r = x % (int32_t)m;
 	if (r < 0) r += m;
 	return (uint16_t)r;
 }
-
 
 // Map a logical position (0..59) on the 60-ring to the strip index
 static inline uint16_t idx60(int32_t pos)
@@ -79,7 +77,6 @@ static inline uint16_t idx60(int32_t pos)
 	return (uint16_t)logical;
 }
 
-
 // Map a logical position (0..23) on the 24-ring to the strip index (offset after the first 60)
 static inline uint16_t idx24(int32_t pos)
 {
@@ -87,13 +84,11 @@ static inline uint16_t idx24(int32_t pos)
 	return (uint16_t)(RING60_COUNT + logical);
 }
 
-
 // Safe set/add pixel
 static inline void setPix(uint16_t i, uint32_t c)
 {
 	if (i < LED_COUNT) strip.setPixelColor(i, c);
 }
-
 
 static inline void addPix(uint16_t i, uint8_t r, uint8_t g, uint8_t b)
 {
@@ -108,12 +103,10 @@ static inline void addPix(uint16_t i, uint8_t r, uint8_t g, uint8_t b)
 	strip.setPixelColor(i, col(nr, ng, nb));
 }
 
-
 static inline void clearAll()
 {
 	strip.clear();
 }
-
 
 // Draw 5-minute tick marks on the 60-ring (dim white)
 static void drawMinuteTicks()
@@ -124,7 +117,6 @@ static void drawMinuteTicks()
 		addPix(i, TICK_BRIGHTNESS, TICK_BRIGHTNESS, TICK_BRIGHTNESS);
 	}
 }
-
 
 // Draw "hand" with optional trailing
 static void drawHand60(uint8_t position, uint8_t r, uint8_t g, uint8_t b, uint8_t trailLen)
@@ -143,7 +135,6 @@ static void drawHand60(uint8_t position, uint8_t r, uint8_t g, uint8_t b, uint8_
 	}
 }
 
-
 // ---------------------------------
 // Public API
 // ---------------------------------
@@ -155,55 +146,56 @@ void ws2812bBegin()
 	strip.show();
 }
 
-
 // now = civil time (local or UTC  you decide), epoch = seconds since epoch (optional for animations)
 void ws2812bUpdate(const tm& now, time_t /*epoch*/) {
-// Extract time parts
-const uint8_t sec  = (uint8_t)(now.tm_sec % 60);
-const uint8_t min  = (uint8_t)(now.tm_min % 60);
-const uint8_t hour24 = (uint8_t)(now.tm_hour % 24);
+	
+	// Extract time parts
+	const uint8_t sec  = (uint8_t)(now.tm_sec % 60);
+	const uint8_t min  = (uint8_t)(now.tm_min % 60);
+	const uint8_t hour24 = (uint8_t)(now.tm_hour % 24);
+	
+	// Derived positions
+	const uint8_t posSec  = sec;
+	const uint8_t posMin  = min;
+	const uint8_t posHour = hour24;	 // 0..23 around the 24-LED ring
+	
+	// Colors (you can tweak)
+	
+	 // red
+	const uint8_t rHour = 180, gHour = 0,   bHour = 0;
 
-// Derived positions
-const uint8_t posSec  = sec;
-const uint8_t posMin  = min;
-const uint8_t posHour = hour24;	 // 0..23 around the 24-LED ring
+	// green
+	const uint8_t rMin  = 0,   gMin  = 160, bMin  = 0;
 
-// Colors (you can tweak)
-								 // red
-const uint8_t rHour = 180, gHour = 0,   bHour = 0;
-								 // green
-const uint8_t rMin  = 0,   gMin  = 160, bMin  = 0;
-								 // blue
-const uint8_t rSec  = 0,   gSec  = 0,   bSec  = 180;
-
-clearAll();
-
-// Background ticks on the 60-ring every 5 minutes
-drawMinuteTicks();
-
-// Minutes hand on 60-ring (with a short trail)
-drawHand60(posMin, rMin, gMin, bMin, TRAIL_LENGTH_MIN);
-
-// Seconds hand on 60-ring (with a short trail)
-drawHand60(posSec, rSec, gSec, bSec, TRAIL_LENGTH_SEC);
-
-// Hours on 24-ring
-addPix(idx24(posHour), rHour, gHour, bHour);
-
-// Optionally: show minute-progress on hour ring (subtle)
-// E.g., light the next hour slot dimly proportional to minutes progress.
-{
-	const uint8_t nextHour = (uint8_t)((posHour + 1) % 24);
-								 // 0..177 approx
-	const uint8_t dim = (uint8_t)(now.tm_min * 3);
-								 // subtle red
-	addPix(idx24(nextHour), dim / 8, 0, 0);
+	// blue
+	const uint8_t rSec  = 0,   gSec  = 0,   bSec  = 180;
+	
+	clearAll();
+	
+	// Background ticks on the 60-ring every 5 minutes
+	drawMinuteTicks();
+	
+	// Minutes hand on 60-ring (with a short trail)
+	drawHand60(posMin, rMin, gMin, bMin, TRAIL_LENGTH_MIN);
+	
+	// Seconds hand on 60-ring (with a short trail)
+	drawHand60(posSec, rSec, gSec, bSec, TRAIL_LENGTH_SEC);
+	
+	// Hours on 24-ring
+	addPix(idx24(posHour), rHour, gHour, bHour);
+	
+	// Optionally: show minute-progress on hour ring (subtle)
+	// E.g., light the next hour slot dimly proportional to minutes progress.
+	{
+		const uint8_t nextHour = (uint8_t)((posHour + 1) % 24);
+									 // 0..177 approx
+		const uint8_t dim = (uint8_t)(now.tm_min * 3);
+									 // subtle red
+		addPix(idx24(nextHour), dim / 8, 0, 0);
+	}
+	
+	strip.show();
 }
-
-
-strip.show();
-}
-
 
 void ws2812bShow()
 {

@@ -2,6 +2,7 @@
 #include "rtos.h"
 #include "hal_time_freertos.h"
 #include "globals.h"
+#include "status_led.h"
 #include "task_led.h"
 #include "task_wifi.h"
 #include "task_time.h"
@@ -13,6 +14,7 @@ void setup()
 	Serial.begin(115200);
 	hal_delay_ms(50);
 	Serial.println("\r[Boot] Start (FreeRTOS)");
+  ledBegin();
 
 	// Create RTOS primitives
 	g_sysEvents = xEventGroupCreate();

@@ -101,7 +101,7 @@ void handleRoot()
 		"<p class='note'>Tip: na opslaan wordt de ESP32 opnieuw verbonden met het gekozen netwerk.</p>"
 		"</form>"
 
-	// klein scriptje voor wachtwoord tonen, super compact
+	// klein java scriptje voor wachtwoord tonen, super compact
 		"<script>"
 		"var s=document.getElementById('showpw'),p=document.getElementById('pass');"
 		"if(s&&p){s.addEventListener('change',function(){p.type=this.checked?'text':'password';});}"
@@ -158,15 +158,22 @@ void handleNotFound()
 void startPortal()
 {
 	if(DEBUG_NET) Serial.println("[Portal] Start");
+
+	// Start wifi access point.
 	WiFi.mode(WIFI_AP);
 	WiFi.softAPConfig(AP_IP,AP_GW,AP_MASK);
 	WiFi.softAP(AP_SSID,AP_PASS);
+
+	// Start local dns server.
 	dns.start(DNS_PORT,"*",AP_IP);
+
+	// Start portal server to add wifi credentials.
 	server.on("/",HTTP_GET,handleRoot);
 	server.on("/save",HTTP_POST,handleSave);
 	server.on("/reset",HTTP_GET,handleReset);
 	server.onNotFound(handleNotFound);
 	server.begin();
+
 	if(DEBUG_NET) Serial.printf("[Portal] SSID '%s' -> http://%s\n", AP_SSID, AP_IP.toString().c_str());
 }
 

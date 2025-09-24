@@ -1,61 +1,43 @@
-#include <Arduino.h>
-#include "rtos.h"
-#include "status_led.h"
+// task_led.cpp
 #include "task_led.h"
+#include "status_led.h"
+#include "rtos.h"
 #include "hal_time_freertos.h"
 
-static inline void ledBluePulse()
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/event_groups.h"
+
+extern EventGroupHandle_t g_sysEvents;
+
+void task_led(void* arg)
 {
-	ledBlue();  hal_delay_ms(120);
-	ledOff();   hal_delay_ms(880);
-}
+	(void)arg;
 
-
-static inline void ledGreenPulse()
-{
-	ledGreen(); hal_delay_ms(120);
-	ledOff();   hal_delay_ms(380);
-}
-
-
-static inline void ledRedPulse()
-{
-	ledRed(); hal_delay_ms(120);
-	ledOff();   hal_delay_ms(380);
-}
-
-
-void task_led(void*)
-{
-	ledBegin();
-	for(;;)
+	for (;;)
 	{
-		// Non-blocking: check for queued color commands first
-		LedCmd cmd;
+		EventBits_t bits = xEventGroupGetBits(g_sysEvents);
 
-		//if (xQueueReceive(g_ledQueue, &cmd, pdMS_TO_TICKS(10)) == pdPASS)
-		//{
-		//	ledColor(cmd.r,cmd.g,cmd.b); hal_delay_ms(cmd.hold_ms);
-		//	continue;
-		//}
-
-		if(rtos_test_bits(EVT_PORTAL_ON))
+		if (bits & EVT_PORTAL_ON)
 		{
+			// Captive portal actief  rood pulse
 			ledRedPulse();
+		}
+		else if (!(bits & EVT_WIFI_UP))
+		{
+			// WiFi is niet verbonden  blauw pulse
+			ledBluePulse();
+		}
+		else if (!(bits & EVT_TIME_READY))
+		{
+			// WiFi verbonden, maar tijd nog niet gesynchroniseerd  groen pulse
+			ledGreenPulse();
 		}
 		else
 		{
-			if(!rtos_test_bits(EVT_WIFI_UP))
-			{
-				ledBluePulse();
-			}
-			else
-			{
-				if(rtos_test_bits(EVT_TIME_READY))
-				{
-					ledGreenPulse();
-				}
-			}
+			// Alles OK  heartbeat (groene korte pulse)
+			ledGreenPulse();
 		}
+		hal_delay_ms(500);
 	}
 }

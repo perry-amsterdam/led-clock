@@ -49,7 +49,6 @@ String extractJsonString(const String& json, const String& key)
 	return v;
 }
 
-
 // worldtimeapi.org: timezone (string), raw_offset (seconds), dst_offset (seconds)
 // ip-api.com: countryCode (string)
 bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bool acceptAllHttps)
@@ -164,10 +163,9 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 		#ifdef DEBUG_TZ
 		Serial.println("[TZ] worldtimeapi failed \342\200\224 fallback to configTzTime for Europe/Amsterdam");
 		#endif
+
 		// POSIX TZ for Europe/Amsterdam (CET/CEST with EU DST rules)
 		configTzTime("CET-1CEST,M3.5.0/2,M10.5.0/3", NTP1, NTP2, NTP3);
-		// continue without returning; we will wait for sync below
-
 	}
 
 	// Configure NTP using offsets (ESP32 time.h)
@@ -176,10 +174,6 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 	#ifdef DEBUG_TZ
 	Serial.printf("\r[TZ] configTime(gmt=%d, dst=%d) with tz=%s\r\n", gmt, dst, tz.c_str());
 	#endif
-
-	// Optionally set TZ environment if needed by localtime
-	// Note: mapping IANA tz to POSIX TZ string is non-trivial; we only set offsets here.
-	// setenv("TZ", tz.c_str(), 1); tzset();
 
 	time_t now = 0;
 	for (int i = 0; i < 10; ++i)

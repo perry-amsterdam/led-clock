@@ -9,20 +9,20 @@
 #include "portal.h"
 #include "hal_time_freertos.h"
 
-static void push_led(uint8_t r,uint8_t g,uint8_t b,uint16_t ms)
-{
-	LedCmd c
-	{
-		r,g,b,ms
-	};
-	xQueueSend(g_ledQueue,&c,0);
-}
-
+//static void push_led(uint8_t r,uint8_t g,uint8_t b,uint16_t ms)
+//{
+//	LedCmd c
+//	{
+//		r,g,b,ms
+//	};
+//	xQueueSend(g_ledQueue,&c,0);
+//}
 
 void task_wifi(void*)
 {
 
 	Preferences prefs;
+	
 	// Load saved credentials
 	prefs.begin(PREF_NS,true);
 	String ssid = prefs.getString("ssid","");
