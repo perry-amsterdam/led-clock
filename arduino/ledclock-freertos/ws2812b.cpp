@@ -136,6 +136,7 @@ static void drawHand60(uint8_t position, uint8_t r, uint8_t g, uint8_t b, uint8_
 	for (uint8_t t = 1; t <= trailLen; ++t)
 	{
 		uint8_t fade = (uint8_t)((uint16_t)(r+g+b) ? (uint16_t)((trailLen - t + 1) * 255 / (trailLen + 1)) : 0);
+
 		// Apply fade proportionally to each channel if non-zero input channel
 		uint8_t tr = r ? (uint8_t)((uint16_t)r * (uint16_t)(trailLen - t + 1) / (trailLen + 1)) : 0;
 		uint8_t tg = g ? (uint8_t)((uint16_t)g * (uint16_t)(trailLen - t + 1) / (trailLen + 1)) : 0;
@@ -161,25 +162,19 @@ void ws2812bBegin()
 void ws2812bUpdate(const tm& now, time_t /*epoch*/) {
 	
 	// Extract time parts
-	const uint8_t sec  = (uint8_t)(now.tm_sec % 60);
-	const uint8_t min  = (uint8_t)(now.tm_min % 60);
-	const uint8_t hour24 = (uint8_t)(now.tm_hour % 24);
+	const uint8_t posSec  = (uint8_t)(now.tm_sec % 60);
+	const uint8_t posMin  = (uint8_t)(now.tm_min % 60);
+	const uint8_t posHour = (uint8_t)(now.tm_hour % 24);
 	
-	// Derived positions
-	const uint8_t posSec  = sec;
-	const uint8_t posMin  = min;
-	const uint8_t posHour = hour24;	 // 0..23 around the 24-LED ring
+	//// Derived positions
+	//const uint8_t posSec  = sec;
+	//const uint8_t posMin  = min;
+	//const uint8_t posHour = hour24;	 // 0..23 around the 24-LED ring
 	
 	// Colors (you can tweak)
-	
-	// red
-	const uint8_t rHour = 180, gHour = 0,   bHour = 0;
-	
-	// green
-	const uint8_t rMin  = 0,   gMin  = 160, bMin  = 0;
-	
-	// blue
-	const uint8_t rSec  = 0,   gSec  = 0,   bSec  = 180;
+	const uint8_t rHour = 180, gHour = 0,   bHour = 0; // red
+	const uint8_t rMin  = 0,   gMin  = 160, bMin  = 0; // green
+	const uint8_t rSec  = 0,   gSec  = 0,   bSec  = 180; // blue
 	
 	clearAll();
 	
@@ -207,11 +202,5 @@ void ws2812bUpdate(const tm& now, time_t /*epoch*/) {
 		addPix(idx24(nextHour), dim / 8, 0, 0);
 	}
 	
-	strip.show();
-}
-
-
-void ws2812bShow()
-{
 	strip.show();
 }
