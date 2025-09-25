@@ -83,3 +83,16 @@ format: ## Format all .cpp, .h and .ino files with bcpp
 help: ## Show this help
 	@echo "Available targets (vars: SKETCH, PORT, UPLOAD_SPEED, MONITOR_BAUD, BUILD_DIR, FLASH_OPTS, LIBS_FILE):"
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-14s %s\n", $$1, $$2}'
+
+
+# ====== Extra tools ======
+
+.PHONY: lint cppcheck check
+
+lint:
+	arduino-lint --recursive --project .
+
+cppcheck:
+	cppcheck --enable=all --std=c++17 --platform=arduino --suppress=missingIncludeSystem $(SKETCH)
+
+check: lint cppcheck
