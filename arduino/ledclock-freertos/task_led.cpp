@@ -16,6 +16,7 @@ void task_led(void* arg)
 
 	for (;;)
 	{
+		LOG_STACK_WATERMARK("led:loop");
 		EventBits_t bits = xEventGroupGetBits(g_sysEvents);
 
 		if (bits & EVT_PORTAL_ON)

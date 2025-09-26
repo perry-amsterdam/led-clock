@@ -5,6 +5,8 @@
 #define DEBUG_TZ 1
 #define DEBUG_NET 1
 #define DEBUG_TIMING 1
+#define STACK_DEBUG 1                    // zet op 0 om stack-logs uit te zetten
+
 #define LED_PIN    48			 // < PAS AAN (vaak 8 of 48)
 #define LED_COUNT  1
 

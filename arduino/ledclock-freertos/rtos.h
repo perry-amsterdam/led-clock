@@ -24,7 +24,7 @@ bool rtos_test_bits (EventBits_t bits);
 // Task stack sizes & priorities (tuned for ESP32S3)
 constexpr uint32_t STACK_LED     = 2048;
 constexpr uint32_t STACK_WIFI    = 4096;
-constexpr uint32_t STACK_TIME    = 3072;
+constexpr uint32_t STACK_TIME    = 6144;
 constexpr uint32_t STACK_PORTAL  = 4096;
 constexpr uint32_t STACK_RENDER  = 4096;
 
@@ -33,3 +33,15 @@ constexpr UBaseType_t PRIO_WIFI   = 3;
 constexpr UBaseType_t PRIO_TIME   = 3;
 constexpr UBaseType_t PRIO_PORTAL = 2;
 constexpr UBaseType_t PRIO_RENDER = 2;
+
+#if STACK_DEBUG
+#define LOG_STACK_WATERMARK(TAG) do { \
+		UBaseType_t __hw = uxTaskGetStackHighWaterMark(NULL); \
+		/* uxTaskGetStackHighWaterMark geeft woorden terug (4 bytes/word)*/ \
+		size_t __bytes = (size_t)__hw * 4; \
+		Serial.printf("[%-8s] stack min free ~= %u bytes\n", \
+		(TAG), (unsigned)__bytes); \
+	} while(0)
+#else
+#define LOG_STACK_WATERMARK(TAG) do {} while(0)
+#endif

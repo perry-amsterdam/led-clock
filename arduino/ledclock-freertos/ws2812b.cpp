@@ -168,8 +168,8 @@ void ws2812bUpdate(const tm& now, time_t /*epoch*/) {
 	
 	// Colors (you can tweak)
 	const uint8_t rHour = 180, gHour = 0,   bHour = 0;	// Red
-	const uint8_t rMin  = 0,   gMin  = 160, bMin  = 0;      // Green
-	const uint8_t rSec  = 0,   gSec  = 0,   bSec  = 180;	// B;ue
+	const uint8_t rMin  = 0,   gMin  = 160, bMin  = 0;	// Green
+	const uint8_t rSec  = 0,   gSec  = 0,   bSec  = 180;	// Blue
 	
 	clearAll();
 	
@@ -185,17 +185,18 @@ void ws2812bUpdate(const tm& now, time_t /*epoch*/) {
 	// Hours on 24-ring
 	addPix(idx24(posHour), rHour, gHour, bHour);
 	
-	//// Optionally: show minute-progress on hour ring (subtle)
-	//// E.g., light the next hour slot dimly proportional to minutes progress.
-	//{
-	//	const uint8_t nextHour = (uint8_t)((posHour + 1) % 24);
-	//
-	//	// 0..177 approx
-	//	const uint8_t dim = (uint8_t)(now.tm_min * 3);
-	//
-	//	// subtle red
-	//	addPix(idx24(nextHour), dim / 8, 0, 0);
-	//}
+	// Optionally: show minute-progress on hour ring (subtle)
+	// E.g., light the next hour slot dimly proportional to minutes progress.
+	{
+		const uint8_t nextHour = (uint8_t)((posHour + 1) % 24);
+	
+		// 0..177 approx
+		const uint8_t dim = (uint8_t)(now.tm_min * 3);
+	
+		// subtle red
+		addPix(idx24(nextHour), dim / 8, 0, 0);
+	}
+	
 	
 	strip.show();
 }

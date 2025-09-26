@@ -15,6 +15,9 @@
 
 void setup()
 {
+  // Wacht 5 seconden.
+	hal_delay_ms(5000);
+
 	Serial.begin(115200);
 	hal_delay_ms(50);
 	Serial.println("\r[Boot] Start (FreeRTOS)");
@@ -30,6 +33,16 @@ void setup()
 	xTaskCreatePinnedToCore(task_time,   "time",   STACK_TIME,   nullptr, PRIO_TIME,   nullptr, 1);
 	xTaskCreatePinnedToCore(task_portal, "portal", STACK_PORTAL, nullptr, PRIO_PORTAL, nullptr, 0);
 	xTaskCreatePinnedToCore(task_render, "render", STACK_RENDER, nullptr, PRIO_RENDER, nullptr, 0);
+
+	// --- Stack debug boot summary ---
+	hal_delay_ms(500);					 // even wachten zodat alle tasks gestart zijn
+	Serial.println("[stack] first samples:");
+	LOG_STACK_WATERMARK("time");
+	LOG_STACK_WATERMARK("wifi");
+	LOG_STACK_WATERMARK("render");
+	LOG_STACK_WATERMARK("led");
+	LOG_STACK_WATERMARK("portal");
+
 }
 
 

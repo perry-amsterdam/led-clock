@@ -20,6 +20,8 @@
 
 void task_wifi(void*)
 {
+	vTaskDelay(pdMS_TO_TICKS(50));
+	LOG_STACK_WATERMARK("wifi:init");
 
 	Preferences prefs;
 
@@ -44,6 +46,7 @@ void task_wifi(void*)
 		if(wpsConnect())
 		{
 			xEventGroupSetBits(g_sysEvents, EVT_WIFI_UP);
+			LOG_STACK_WATERMARK("wifi:ip");
 		}
 		else
 		{
@@ -56,6 +59,8 @@ void task_wifi(void*)
 	{
 		for(;;)
 		{
+			LOG_STACK_WATERMARK("wifi:loop");
+
 			// keep task alive, no portal
 			hal_delay_ms(250);
 		}

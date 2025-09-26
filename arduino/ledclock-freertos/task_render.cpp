@@ -6,6 +6,8 @@
 
 void task_render(void*)
 {
+	vTaskDelay(pdMS_TO_TICKS(50));
+	LOG_STACK_WATERMARK("render:init");
 
 	// Wait until time is ready (prevents jumping display)
 	rtos_wait_bits(EVT_TIME_READY);
@@ -13,6 +15,7 @@ void task_render(void*)
 
 	for(;;)
 	{
+		LOG_STACK_WATERMARK("render:loop");
 		struct tm now;
 		time_t epoch = time(nullptr);
 		if(getLocalTime(&now))
@@ -32,7 +35,7 @@ void task_render(void*)
 			}
 		}
 
-		// ~30 FPS animation (adjust inside ws2812bUpdate if static)
-		vTaskDelay(pdMS_TO_TICKS(33));
+		// ~2 FPS animation (adjust inside ws2812bUpdate if static)
+		vTaskDelay(pdMS_TO_TICKS(1000));
 	}
 }
