@@ -197,6 +197,5 @@ void ws2812bUpdate(const tm& now, time_t /*epoch*/) {
 		addPix(idx24(nextHour), dim / 8, 0, 0);
 	}
 	
-	
 	strip.show();
 }
