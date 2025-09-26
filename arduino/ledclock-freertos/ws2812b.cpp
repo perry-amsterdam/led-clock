@@ -8,7 +8,7 @@
 // Hardware configuration
 // -----------------------------
 #ifndef LED_PIN
-#define LED_PIN           8		 // Data pin for the WS2812B strip
+#define LED_PIN           8	 // Data pin for the WS2812B strip
 #endif
 
 #ifndef LED_COUNT
@@ -26,14 +26,14 @@ static constexpr uint16_t RING24_COUNT = 24;
 // Orientation controls  change to match your physical clock orientation.
 // Position 0 is considered "12 o'clock". Increase pos clockwise if DIR = +1, counter-clockwise if DIR = -1.
 #ifndef RING60_OFFSET
-#define RING60_OFFSET     0		 // shift (0..59) so that position 0 maps to your 12 o'clock LED
+#define RING60_OFFSET     0	 // shift (0..59) so that position 0 maps to your 12 o'clock LED
 #endif
 #ifndef RING60_DIR
 #define RING60_DIR        +1	 // +1 for clockwise, -1 for counter-clockwise
 #endif
 
 #ifndef RING24_OFFSET
-#define RING24_OFFSET     0		 // shift (0..23) so that hour position 0 maps to your top LED on the inner ring
+#define RING24_OFFSET     0	 // shift (0..23) so that hour position 0 maps to your top LED on the inner ring
 #endif
 #ifndef RING24_DIR
 #define RING24_DIR        +1	 // +1 for clockwise, -1 for counter-clockwise
@@ -41,13 +41,13 @@ static constexpr uint16_t RING24_COUNT = 24;
 
 // Appearance
 #ifndef TICK_BRIGHTNESS
-#define TICK_BRIGHTNESS   8		 // brightness for 5-minute tick marks on the 60-ring
+#define TICK_BRIGHTNESS   8	 // brightness for 5-minute tick marks on the 60-ring
 #endif
 #ifndef TRAIL_LENGTH_SEC
-#define TRAIL_LENGTH_SEC  2		 // how many LEDs trail behind seconds hand (0 = no trail)
+#define TRAIL_LENGTH_SEC  2	 // how many LEDs trail behind seconds hand (0 = no trail)
 #endif
 #ifndef TRAIL_LENGTH_MIN
-#define TRAIL_LENGTH_MIN  1		 // trail for minutes hand
+#define TRAIL_LENGTH_MIN  1	 // trail for minutes hand
 #endif
 
 // ---------------------------------
@@ -167,12 +167,9 @@ void ws2812bUpdate(const tm& now, time_t /*epoch*/) {
 	const uint8_t posHour = (uint8_t)(now.tm_hour % 24);
 	
 	// Colors (you can tweak)
-									 // red
-	const uint8_t rHour = 180, gHour = 0,   bHour = 0;
-									 // green
-	const uint8_t rMin  = 0,   gMin  = 160, bMin  = 0;
-									 // blue
-	const uint8_t rSec  = 0,   gSec  = 0,   bSec  = 180;
+	const uint8_t rHour = 180, gHour = 0,   bHour = 0;	// Red
+	const uint8_t rMin  = 0,   gMin  = 160, bMin  = 0;      // Green
+	const uint8_t rSec  = 0,   gSec  = 0,   bSec  = 180;	// B;ue
 	
 	clearAll();
 	
@@ -188,17 +185,17 @@ void ws2812bUpdate(const tm& now, time_t /*epoch*/) {
 	// Hours on 24-ring
 	addPix(idx24(posHour), rHour, gHour, bHour);
 	
-	// Optionally: show minute-progress on hour ring (subtle)
-	// E.g., light the next hour slot dimly proportional to minutes progress.
-	{
-		const uint8_t nextHour = (uint8_t)((posHour + 1) % 24);
-	
-		// 0..177 approx
-		const uint8_t dim = (uint8_t)(now.tm_min * 3);
-	
-		// subtle red
-		addPix(idx24(nextHour), dim / 8, 0, 0);
-	}
+	//// Optionally: show minute-progress on hour ring (subtle)
+	//// E.g., light the next hour slot dimly proportional to minutes progress.
+	//{
+	//	const uint8_t nextHour = (uint8_t)((posHour + 1) % 24);
+	//
+	//	// 0..177 approx
+	//	const uint8_t dim = (uint8_t)(now.tm_min * 3);
+	//
+	//	// subtle red
+	//	addPix(idx24(nextHour), dim / 8, 0, 0);
+	//}
 	
 	strip.show();
 }
