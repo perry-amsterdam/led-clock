@@ -35,7 +35,7 @@ void task_led(void* arg)
 		}
 		else
 		{
-			// Alles OK  heartbeat (groene)
+			// Alles OK (groene)
 			ledGreen();
 		}
 		hal_delay_ms(500);

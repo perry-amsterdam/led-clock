@@ -18,6 +18,18 @@ void task_render(void*)
 		if(getLocalTime(&now))
 		{
 			ws2812bUpdate(now, epoch);
+
+			if (getLocalTime(&now))
+			{
+				#if DEBUG_TIMING
+				unsigned long start = micros();
+				ws2812bUpdate(now, epoch);
+				unsigned long duration = micros() - start;
+				Serial.printf("ws2812bUpdate took %.3f ms\n", duration / 1000.0);
+				#else
+				ws2812bUpdate(now, epoch);
+				#endif
+			}
 		}
 
 		// ~30 FPS animation (adjust inside ws2812bUpdate if static)
