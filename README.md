@@ -2,7 +2,6 @@
 
 # LED Clock met ESP32, FreeRTOS & WS2812B
 
-![GitHub License](https://img.shields.io/github/license/<jouw-username>/<jouw-repo>)
 ![Platform ESP32](https://img.shields.io/badge/platform-ESP32-orange)
 ![WS2812B LEDs](https://img.shields.io/badge/LEDs-WS2812B-green)
 
@@ -65,7 +64,9 @@ De hardware (klokfront, lasercut) is klaar ✅. De software draait op een modern
 
 ## ⚙️ Hardware Setup
 
-* **Klokfront** (lasergesneden ✅):
+* **Klokfront** (lasergesneden ✅, ontworpen in LibreCAD):  
+  ![Clock Front Example](images/clockfront-preview.png)  
+  👉 Voorbeeldbestand: [clockfront-example.dxf](files/clockfront-example.dxf)
   ![Clock Face](images/led-clock-face.svg)
 
 * **WS2812B connectors**:
@@ -73,6 +74,7 @@ De hardware (klokfront, lasercut) is klaar ✅. De software draait op een modern
 
 * **Onderdelenlijst**:
   * IKEA frame 23x23cm  
+
   * WS2812B LED-strip of ring (5V)  
   * ESP32 devkit (WROOM/WROVER/S3)  
   * Kartonnen/lasergesneden frontplaat  
@@ -185,3 +187,31 @@ Tips: documenteer hardware/software toevoegingen, voeg schema’s of afbeeldinge
 
 * **Perry Couprie** – initiële ontwikkeling  
   GitHub: [perry-amsterdam](https://github.com/perry-amsterdam)
+
+---
+
+## 📐 CAD Tools
+
+Voor het ontwerpen van onderdelen zoals de klokfrontplaat en behuizing kun je gebruik maken van gratis open-source CAD tools:
+
+### LibreCAD
+* 2D CAD software, ideaal voor het tekenen van de **lasergesneden frontplaat**.
+* Website: [https://librecad.org](https://librecad.org)
+
+**Installatie op Ubuntu:**
+```bash
+sudo apt update
+sudo apt install librecad
+```
+
+### OpenSCAD
+* 3D CAD software, geschikt voor het ontwerpen van **behuizingen en 3D-printbare onderdelen**.
+* Website: [https://openscad.org](https://openscad.org)
+
+**Installatie op Ubuntu:**
+```bash
+sudo apt update
+sudo apt install openscad
+```
+
+Beide programma’s zijn lichtgewicht en beschikbaar in de standaard Ubuntu repositories.
