@@ -1,69 +1,70 @@
-[Nederlandse versie](README.md)
+[Dutch version](README.md)
 
 # LED Clock with ESP32, FreeRTOS & WS2812B
 
-![GitHub License](https://img.shields.io/github/license/<your-username>/<your-repo>)
 ![Platform ESP32](https://img.shields.io/badge/platform-ESP32-orange)
 ![WS2812B LEDs](https://img.shields.io/badge/LEDs-WS2812B-green)
 
-A **DIY LED clock** built with WS2812B LEDs, an IKEA photo frame, laser‑cut parts and an **ESP32** running on **FreeRTOS**.  
-The hardware (clock face, lasercut parts) is ready ✅. The software runs on a modern ESP32 + FreeRTOS platform and can be configured via a built‑in Wi‑Fi captive portal.
+A **DIY LED clock** built met WS2812B LEDs, een IKEA fotolijst, lasergesneden onderdelen en een **ESP32** die draait op **FreeRTOS**.  
+De hardware (klokfront, lasercut) is klaar ✅. The software runs op een modern ESP32 + FreeRTOS platform en is fully configurable via a captive Wi-Fi portal.
 
 ---
 
 ## ✨ Features
 
 * Automatic time via **NTP** synchronization
-* **Timezone detection** via IP geolocation
-* **mDNS** discovery on the local network
-* Wi‑Fi setup: if no connection, the clock starts an **Access Point + captive portal**
-* Written in **C/C++ with FreeRTOS**
-* Extendable platform: animations, integrations, artistic clockfaces
-* Future **API server** + **Flutter app** for remote control
+* **Timezone-detectie** via IP-geolocatie
+* **mDNS** discovery op het lokale netwerk
+* **WPS** verbindingsoptie (Wi-Fi Protected Setup)
 
-### FreeRTOS Tasks
-- `task_wifi` – handle network connection and reconnection  
-- `task_time` – synchronize and maintain time  
+* Wi-Fi setup: bij geen verbinding start de klok een **Access Point + captive portal**
+* Geschreven in **C/C++ met FreeRTOS**
+* Uitbreidbaar platform: animaties, integraties en artistieke varianten
+* Toekomstige **API server** + **Flutter app** voor externe bediening
+
+### FreeRTOS-taken
+- `task_wifi` – connect to Wi-Fi and handle reconnects  
+- `task_time` – synchronize and monitor time  
 - `task_render` – render the clock on the LED strip  
-- `task_portal` – run captive portal if no Wi‑Fi connection  
-- `task_led` – drive the status LED  
+- `task_portal` – captive portal when no Wi-Fi connection  
+- `task_led` – update status LED  
 
 ---
 
 ## 🖥️ Software Setup
 
-1. Install required tools:
-   * [Arduino CLI](https://arduino.github.io/arduino-cli/latest/) or [Arduino IDE](https://www.arduino.cc/en/software)  
+1. Install the required tools:
+   * [Arduino CLI](https://arduino.github.io/arduino-cli/latest/) of [Arduino IDE](https://www.arduino.cc/en/software)  
    * ESP32 board support (via Board Manager)
-   * `make` (for the workflow with the Makefile)
-   * [Flutter](https://flutter.dev/) (optional, for the mobile app)
+   * `make` (voor de workflow met de Makefile)
+   * [Flutter](https://flutter.dev/) (optioneel, voor de mobiele app)
 
-2. Use the **Makefile** for a quick workflow:
+2. Usage de **Makefile** voor een snelle workflow:
 
    ```bash
-   make deps       # install esp32 core + libs (Adafruit NeoPixel)
+   make deps       # installeer esp32 core + libs (Adafruit NeoPixel)
    make build      # compile
    make upload     # flash (PORT=/dev/ttyUSB0)
-   make monitor    # open serial monitor (115200 baud)
+   make monitor    # serial monitor (115200 baud)
    ```
 
-   Variables:
-   - `PORT` – default `/dev/ttyACM0`
+   Variabelen:
+   - `PORT` – standaard `/dev/ttyACM0`
    - `BOARD` – default `esp32:esp32:esp32s3`
    - `FLASH_OPTS` – flash/PSRAM/partition settings
 
-   Example:
+   Voorbeeld:
    ```bash
    make PORT=/dev/ttyUSB0 MONITOR_BAUD=115200 monitor
    ```
 
-3. On first boot → configure Wi‑Fi via captive portal (`ESP32-Setup` / `configwifi`).
+3. First start → configure Wi-Fi via captive portal (`ESP32-Setup` / `configwifi`).
 
 ---
 
 ## ⚙️ Hardware Setup
 
-* **Clock front** (lasercut ✅):
+* **Clock Face** (lasergesneden ✅, ontworpen in LibreCAD):  
   ![Clock Face](images/led-clock-face.svg)
 
 * **WS2812B connectors**:
@@ -71,75 +72,76 @@ The hardware (clock face, lasercut parts) is ready ✅. The software runs on a m
 
 * **Parts list**:
   * IKEA frame 23x23cm  
-  * WS2812B LED strip or ring (5V)  
+
+  * WS2812B LED-strip of ring (5V)  
   * ESP32 devkit (WROOM/WROVER/S3)  
-  * Cardboard/laser‑cut front plate  
+  * Kartonnen/lasergesneden frontplaat  
 
 ### Connections
 
-- **GPIO 8** → DIN of the **clock LED strip**  
-- **GPIO 48** → DIN of the **status LED**  
-- **5V & GND** shared between ESP32 and all LEDs
+- **GPIO 8** → DIN van de **klok-LED-strip**  
+- **GPIO 48** → DIN van de **status-LED**  
+- **5V & GND** gedeeld tussen ESP32 en alle LEDs
 
 ### 📷 Wiring Diagram
 
 ![Wiring Diagram](images/wiring_diagram.png)
 
-> ℹ️ The status LED (GPIO 48) is built into the ESP32-S3 DevKit (on-board RGB LED).
+> ℹ️ De status-LED (GPIO 48) zit al op de ESP32-S3 DevKit zelf (ingebouwde RGB LED).
 
-### 📋 Pinout Table
+### 📋 Pinout-tabel
 
-| GPIO | Function      | Note                                 |
-|------|---------------|--------------------------------------|
-| 8    | Clock LEDs DIN| Data input of WS2812B strip/matrix   |
-| 48   | Status LED (on-board)| Built-in RGB LED on ESP32 DevKit   |
-| 5V   | LED Power     | Ensure sufficient power supply       |
-| GND  | Ground        | Must be shared with LED power supply |
+| GPIO | Function        | Note                           |
+|------|----------------|-------------------------------------|
+| 8    | Klok-LEDs DIN  | Data-in van WS2812B strip/matrix    |
+| 48   | Status-LED (onboard) | Ingebouwde RGB LED op ESP32 DevKit       |
+| 5V   | LED Power   | Zorg voor voldoende stroomcapaciteit |
+| GND  | Ground          | Moet gedeeld worden met LED-voeding |
 
-### 🔌 Power Consumption (estimates)
+### 🔌 Power consumption (reference values)
 
-| LEDs | 100% brightness (mA) | 100% (A) | ~30% brightness (mA) | ~30% (A) |
-|-----:|----------------------:|---------:|----------------------:|---------:|
-| 1    | 60                    | 0.06     | 18                    | 0.018    |
-| 8    | 480                   | 0.48     | 144                   | 0.144    |
-| 30   | 1800                  | 1.80     | 540                   | 0.54     |
-| 60   | 3600                  | 3.60     | 1080                  | 1.08     |
-| 100  | 6000                  | 6.00     | 1800                  | 1.80     |
+| Aantal LEDs | 100% helderheid (mA) | 100% (A) | ~30% helderheid (mA) | ~30% (A) |
+|------------:|----------------------:|---------:|----------------------:|---------:|
+| 1           | 60                    | 0.06     | 18                    | 0.018    |
+| 8           | 480                   | 0.48     | 144                   | 0.144    |
+| 30          | 1800                  | 1.80     | 540                   | 0.54     |
+| 60          | 3600                  | 3.60     | 1080                  | 1.08     |
+| 100         | 6000                  | 6.00     | 1800                  | 1.80     |
 
 **Tips**  
-- Choose a power supply with **20–30% margin**  
-- Use a **level shifter** for long LED strips  
-- **GND** of LED power must be connected to ESP32 GND  
-- Lower `LED_BRIGHTNESS` to save power and heat
+- Kies voeding met **20–30% marge**  
+- Usage een **level shifter** voor lange strips  
+- **GND** van voeding moet verbonden zijn met ESP32  
+- Zet `LED_BRIGHTNESS` lager voor minder stroom en warmte
 
-### NeoPixel Guidelines
-1. **Capacitor** – 1000µF, 6.3V+ between V+ and GND  
-2. **Resistor** – 300–500Ω in the data line  
-3. **Level shifter** – recommended (3.3V → 5V)  
+### Richtlijnen NeoPixels
+1. **Condensator** – 1000µF, 6.3V+ tussen V+ en GND  
+2. **Weerstand** – 300–500Ω in de datalijn  
+3. **Level shifter** – aanbevolen bij 3.3V → 5V  
 
 ---
 
 
 ### 📡 Wi-Fi via WPS
 
-In addition to the captive portal, the clock also supports **WPS (Wi-Fi Protected Setup)** for connecting to your network.  
-This can be useful if you don’t want to enter Wi-Fi credentials manually.
+Naast het captive portal ondersteunt de klok ook **WPS (Wi-Fi Protected Setup)** om verbinding te maken met je netwerk.  
+Dit is handig als je de Wi-Fi gegevens niet handmatig wilt invoeren.
 
-- **WPS PBC (Push Button Configuration)**: press the WPS button on your router and start the clock in WPS mode.  
-- If the ESP32 successfully performs the WPS handshake, the credentials are automatically stored in the ESP32’s NVS memory.  
-- On the next boot, the clock will use the stored credentials to connect immediately.
+- **WPS PBC (Push Button Configuration)**: druk op de WPS-knop van je router en start de klok in WPS-modus.  
+- Als de ESP32 succesvol een WPS-handshake uitvoert, worden de netwerkgegevens automatisch opgeslagen in het NVS-geheugen van de chip.  
+- Bij de volgende start gebruikt de klok deze opgeslagen gegevens direct om verbinding te maken.
 
-⚠️ Note: not every ESP32 Arduino core supports WPS.  
-Since **ESP32 Arduino core v3+**, `WiFi.beginWPSConfig()` has been removed. For those versions, you must use the captive portal for Wi-Fi configuration.
+⚠️ Let op: niet elke ESP32 Arduino core ondersteunt WPS.  
+Vanaf **ESP32 Arduino core v3+** is `WiFi.beginWPSConfig()` verwijderd. Voor die versies moet je het captive portal gebruiken om Wi-Fi te configureren.
 
 
 ## 🚀 Usage
 
-1. Flash the firmware.  
-2. On first boot: connect to **ESP32-Setup**.  
-3. Open `http://192.168.4.1` and set Wi‑Fi credentials.  
-4. ESP32 connects → fetches time → displays clock on LED strip (GPIO 8).  
-5. Status LED (GPIO 48) shows connection state.  
+1. Flash de firmware.  
+2. First boot: verbind met **ESP32-Setup**.  
+3. Open `http://192.168.4.1` en stel Wi-Fi in.  
+4. ESP32 verbindt → haalt tijd op → klok op LED-strip (GPIO 8).  
+5. Status-LED (GPIO 48) geeft verbindingsstatus.  
 
 ---
 
@@ -152,34 +154,62 @@ Since **ESP32 Arduino core v3+**, `WiFi.beginWPSConfig()` has been removed. For 
 
 ## 🗺️ Roadmap
 
-* [x] Clock front lasercut  
-* [x] Wi‑Fi captive portal & NTP synchronization  
-* [x] Automatic timezone detection via IP  
+* [x] Clock Face lasercutten  
+* [x] Wi-Fi captive portal & NTP synchronisatie  
+* [x] Automatische timezone-detectie via IP  
 * [x] mDNS service  
 * [x] Wifi wps
-* [ ] API server on ESP32  
-* [ ] Flutter app integration  
-* [ ] Artistic clockface variants  
-* [ ] Animations & LED effects  
-* [ ] Integration with Home Assistant / MQTT  
-* [ ] Public release of PCB & 3D files  
+* [ ] API server op ESP32  
+* [ ] Flutter app koppeling  
+* [ ] Artistieke klokvarianten  
+* [ ] Animaties & LED-effecten  
+* [ ] Integratie met Home Assistant / MQTT  
+* [ ] Public release van PCB & 3D files  
 
 ---
 
 ## 🤝 Contributing
 
-1. Fork the repo and create a feature branch:
+1. Fork de repo en maak een feature branch:
    ```bash
-   git checkout -b feature/new-feature
+   git checkout -b feature/nieuwe-functie
    ```
-2. Commit changes with clear messages  
-3. Submit a Pull Request 🚀  
+2. Commit je wijzigingen met duidelijke messages  
+3. Stuur een Pull Request 🚀  
 
-Tips: document hardware/software additions, add diagrams/images, keep commits short.
+Tips: documenteer hardware/software toevoegingen, voeg schema’s of afbeeldingen toe, houd commit messages kort.
 
 ---
 
 ## 👤 Author
 
-* **Perry Couprie** – initial development  
+* **Perry Couprie** – initiële ontwikkeling  
   GitHub: [perry-amsterdam](https://github.com/perry-amsterdam)
+
+---
+
+## 📐 CAD Tools
+
+For designing parts zoals de klokfrontplaat en behuizing kun je gebruik maken van gratis open-source CAD tools:
+
+### LibreCAD
+* 2D CAD software, ideal for drawing van de **lasergesneden frontplaat**.
+* Website: [https://librecad.org](https://librecad.org)
+
+**Install on Ubuntu:**
+```bash
+sudo apt update
+sudo apt install librecad
+```
+
+### OpenSCAD
+* 3D CAD software, ideal for designing van **behuizingen en 3D-printbare onderdelen**.
+* Website: [https://openscad.org](https://openscad.org)
+
+**Install on Ubuntu:**
+```bash
+sudo apt update
+sudo apt install openscad
+```
+
+Both programs are lightweight and available in the standard Ubuntu repositories.

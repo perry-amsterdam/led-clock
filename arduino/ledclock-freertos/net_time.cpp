@@ -232,6 +232,6 @@ void netTimeMaintain()
 	// If epoch looks invalid (< 8 hours since boot default), try to resync.
 	if (now < 8 * 3600)
 	{
-		setupTimeFromInternet(false);
+		setupTimeFromInternet(true);
 	}
 }
