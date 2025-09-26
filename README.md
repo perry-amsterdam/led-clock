@@ -65,8 +65,6 @@ De hardware (klokfront, lasercut) is klaar ✅. De software draait op een modern
 ## ⚙️ Hardware Setup
 
 * **Klokfront** (lasergesneden ✅, ontworpen in LibreCAD):  
-  ![Clock Front Example](images/clockfront-preview.png)  
-  👉 Voorbeeldbestand: [clockfront-example.dxf](files/clockfront-example.dxf)
   ![Clock Face](images/led-clock-face.svg)
 
 * **WS2812B connectors**:
