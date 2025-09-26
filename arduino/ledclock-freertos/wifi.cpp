@@ -31,7 +31,7 @@ bool connectWiFi(const String& ssid, const String& pass, uint32_t timeoutMs)
 	if(WiFi.status()==WL_CONNECTED)
 	{
 		if(DEBUG_NET){ Serial.print("[WiFi] OK IP="); Serial.println(WiFi.localIP()); }
-		return true;
+		ledGreen(); return true;
 	}
 
 	Serial.println("[WiFi] FAILED"); return false;
@@ -52,42 +52,49 @@ static bool waitFor(std::function<bool()> pred, uint32_t timeoutMs, uint32_t ste
 }
 
 
-static Preferences prefs;
-
 bool wpsConnect(uint32_t timeoutMs)
 {
-	Serial.println("Starting WPS...");
+	// Alleen core v3+: voorkom per ongeluk bouwen met v2.x
+	#if !(defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION_MAJOR >= 3))
+	#error "Dit project vereist Arduino-ESP32 core v3+. Update je ESP32 core."
+	#endif
 
-	// Start WPS (Push Button Config)
-	if (!WiFi.beginWPSConfig())
+	Serial.println("[WiFi] SmartConfig starten (core v3+)");
+	WiFi.mode(WIFI_STA);
+	WiFi.disconnect(true, true);
+	WiFi.beginSmartConfig();
+
+	// Wacht tot credentials binnen zijn (via ESP-Touch/AirKiss in de telefoon-app)
+	if (!waitFor([]
 	{
-		Serial.println("WPS failed to start.");
+		return WiFi.smartConfigDone();
+	}
+	, timeoutMs))
+	{
+		Serial.println("[WiFi] SmartConfig timeout (geen credentials ontvangen)");
+		return false;
+	}
+	Serial.println("[WiFi] Credentials ontvangen; verbinden...");
+
+	// Wacht op daadwerkelijke connect + IP
+	if (!waitFor([]
+	{
+		return WiFi.status() == WL_CONNECTED;
+	}
+	, timeoutMs))
+	{
+		Serial.println("[WiFi] Verbinden mislukt na SmartConfig");
 		return false;
 	}
 
-	uint32_t start = millis();
-	while (WiFi.status() != WL_CONNECTED && millis() - start < timeoutMs)
-	{
-		delay(500);
-		Serial.print(".");
-	}
-	Serial.println();
+	Serial.printf("[WiFi] OK  SSID='%s'  IP=%s\n", WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
+	ledGreen();
 
-	if (WiFi.status() == WL_CONNECTED)
-	{
-		Serial.printf("WPS success. SSID='%s' IP=%s\n", WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
+	// SSID bewaren voor UI; wachtwoord laat je aan SmartConfig over
+	Preferences prefs;
+	prefs.begin(PREF_NS, false);
+	prefs.putString("ssid", WiFi.SSID());
+	prefs.end();
 
-		// SSID en wachtwoord opslaan in NVS
-		prefs.begin(PREF_NS, false);
-		prefs.putString("ssid", WiFi.SSID());
-		prefs.putString("pass", WiFi.psk());
-		prefs.end();
-
-		return true;
-	}
-	else
-	{
-		Serial.println("WPS failed: no connection.");
-		return false;
-	}
+	return true;
 }

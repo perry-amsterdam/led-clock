@@ -28,13 +28,11 @@ void task_wifi(void*)
 	String ssid = prefs.getString("ssid","");
 	String pass = prefs.getString("pass","");
 	prefs.end();
-
 	// One-shot WPS: read and clear flag
 	bool wpsOnce = false;
 	prefs.begin(PREF_NS, true);
 	wpsOnce = prefs.getBool("wps_once", false);
 	prefs.end();
-
 	if(wpsOnce)
 	{
 		// clear immediately to ensure one-time
@@ -97,4 +95,4 @@ void task_wifi(void*)
 		}
 		hal_delay_ms(250);
 	}
- -
+}
