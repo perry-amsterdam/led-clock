@@ -32,9 +32,9 @@ void ledColor(uint8_t r, uint8_t g, uint8_t b)
 
 // Convenience helpers
 void ledOff()   { ledColor(0,   0,   0); }
-void ledRed()   { ledColor(255, 0,   0); }
-void ledGreen() { ledColor(0,   255, 0); }
-void ledBlue()  { ledColor(0,   0,   255); }
+void ledRed()   { ledColor(50, 0,   0); }
+void ledGreen() { ledColor(0,   50, 0); }
+void ledBlue()  { ledColor(0,   0,  50); }
 
 // -----------------------------------------------------------------------------
 // Pulse-helpers (blokkerend binnen de status-LED taak)
