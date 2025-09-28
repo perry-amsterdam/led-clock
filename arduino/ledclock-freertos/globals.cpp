@@ -5,7 +5,6 @@
 #include <Preferences.h>
 #include <Adafruit_NeoPixel.h>
 #include <time.h>
-#include "config.h"
 #include "globals.h"
 
 // ===== Constant definitions =====
