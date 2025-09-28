@@ -15,10 +15,11 @@
 
 void setup()
 {
-  // Wacht 5 seconden.
-  if (DEBUG_START_DELAY) {
-	  hal_delay_ms(5000);
-  }
+	// Wacht 5 seconden.
+	if (DEBUG_START_DELAY)
+	{
+		hal_delay_ms(5000);
+	}
 
 	Serial.begin(115200);
 	hal_delay_ms(50);
@@ -37,7 +38,7 @@ void setup()
 	xTaskCreatePinnedToCore(task_render, "render", STACK_RENDER, nullptr, PRIO_RENDER, nullptr, 0);
 
 	// --- Stack debug boot summary ---
-	hal_delay_ms(500);					 // even wachten zodat alle tasks gestart zijn
+	hal_delay_ms(500);			 // even wachten zodat alle tasks gestart zijn
 	Serial.println("[stack] first samples:");
 	LOG_STACK_WATERMARK("time");
 	LOG_STACK_WATERMARK("wifi");

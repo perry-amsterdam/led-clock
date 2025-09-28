@@ -167,9 +167,12 @@ void ws2812bUpdate(const tm& now, time_t /*epoch*/) {
 	const uint8_t posHour = (uint8_t)(now.tm_hour % 24);
 	
 	// Colors (you can tweak)
-	const uint8_t rHour = 180, gHour = 0,   bHour = 0;	// Red
-	const uint8_t rMin  = 0,   gMin  = 160, bMin  = 0;	// Green
-	const uint8_t rSec  = 0,   gSec  = 0,   bSec  = 180;	// Blue
+									 // Red
+	const uint8_t rHour = 180, gHour = 0,   bHour = 0;
+									 // Green
+	const uint8_t rMin  = 0,   gMin  = 160, bMin  = 0;
+									 // Blue
+	const uint8_t rSec  = 0,   gSec  = 0,   bSec  = 180;
 	
 	clearAll();
 	
