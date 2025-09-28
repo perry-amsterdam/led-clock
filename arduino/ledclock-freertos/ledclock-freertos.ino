@@ -16,7 +16,9 @@
 void setup()
 {
   // Wacht 5 seconden.
-	hal_delay_ms(5000);
+  if (DEBUG_START_DELAY) {
+	  hal_delay_ms(5000);
+  }
 
 	Serial.begin(115200);
 	hal_delay_ms(50);

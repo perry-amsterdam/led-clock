@@ -14,6 +14,13 @@ void task_led(void* arg)
 {
 	(void)arg;
 
+	// Wacht totdat er minstens n eventbit gezet is
+	while (xEventGroupGetBits(g_sysEvents) == 0)
+	{
+		// kort wachten om CPU niet te belasten
+		vTaskDelay(pdMS_TO_TICKS(100));
+	}
+
 	for (;;)
 	{
 		LOG_STACK_WATERMARK("led:loop");
