@@ -25,7 +25,7 @@ void ledBegin()
 // Stelt de status-LED (index 0) in op (r,g,b) en toont direct
 void ledColor(uint8_t r, uint8_t g, uint8_t b)
 {
-	pixel.setPixelColor(0, pixel.Color(r, g, b));
+	pixel.setPixelColor(LED_BRIGHTNESS, pixel.Color(r, g, b));
 	pixel.show();
 }
 

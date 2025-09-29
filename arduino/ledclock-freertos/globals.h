@@ -1,9 +1,6 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-// ==== Merged config.h and globals.h ====
-
-// ---- From config.h ----
 #pragma once
 
 // ==== Configuration, debug flags, pins ====

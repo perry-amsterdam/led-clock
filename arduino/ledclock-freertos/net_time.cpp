@@ -194,10 +194,6 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 			Serial.printf("\r[TZ] Re-kicking SNTP at attempt %d via configTime()\n", i + 1);
 			#endif
 			configTime(gmt, dst, NTP1, NTP2, NTP3);
-			// If you prefer lwIP directly (optional, requires header):
-			// extern "C" { #include "lwip/apps/sntp.h" }
-			// sntp_stop();
-			// sntp_init();
 		}
 
 		hal_delay_ms(1000);
