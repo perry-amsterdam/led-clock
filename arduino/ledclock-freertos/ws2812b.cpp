@@ -1,148 +1,174 @@
 #include "ws2812b.h"
-
-// Library: Adafruit NeoPixel (recommended on ESP32/Arduino)
-// Install via Library Manager: "Adafruit NeoPixel"
 #include <Adafruit_NeoPixel.h>
 
 // -----------------------------
 // Hardware configuration
 // -----------------------------
-#ifndef LED_PIN
-#define LED_PIN           8	 // Data pin for the WS2812B strip
+#ifndef LED_PIN_60
+#define LED_PIN_60       8		 // Data pin voor de 60-leds ring (minuten + seconden)
+#endif
+#ifndef LED_PIN_24
+#define LED_PIN_24       9		 // Data pin voor de 24-leds ring (uren)
 #endif
 
-#ifndef LED_COUNT
-#define LED_COUNT         84	 // Total LEDs in a single chain (60 + 24)
+#ifndef GLOBAL_BRIGHTNESS
+#define GLOBAL_BRIGHTNESS  64	 // 0..255
 #endif
 
-#ifndef LED_BRIGHTNESS
-#define LED_BRIGHTNESS    48	 // 0..255
+#ifndef TRAIL_LENGTH_SEC
+#define TRAIL_LENGTH_SEC   2
+#endif
+#ifndef TRAIL_LENGTH_MIN
+#define TRAIL_LENGTH_MIN   1
 #endif
 
-// Strip layout: first 60 LEDs are the outer ring (seconds+minutes), next 24 LEDs are the inner ring (hours).
-static constexpr uint16_t RING60_COUNT = 60;
-static constexpr uint16_t RING24_COUNT = 24;
-
-// Orientation controls  change to match your physical clock orientation.
-// Position 0 is considered "12 o'clock". Increase pos clockwise if DIR = +1, counter-clockwise if DIR = -1.
 #ifndef RING60_OFFSET
-#define RING60_OFFSET     0	 // shift (0..59) so that position 0 maps to your 12 o'clock LED
+#define RING60_OFFSET      0
 #endif
 #ifndef RING60_DIR
-#define RING60_DIR        +1	 // +1 for clockwise, -1 for counter-clockwise
+#define RING60_DIR         +1	 // +1 clockwise, -1 counter-clockwise
 #endif
 
 #ifndef RING24_OFFSET
-#define RING24_OFFSET     0	 // shift (0..23) so that hour position 0 maps to your top LED on the inner ring
+#define RING24_OFFSET      0
 #endif
 #ifndef RING24_DIR
-#define RING24_DIR        +1	 // +1 for clockwise, -1 for counter-clockwise
+#define RING24_DIR         +1	 // +1 clockwise, -1 counter-clockwise
 #endif
 
-// Appearance
+#ifndef COLOR_SEC_R
+#define COLOR_SEC_R        0
+#endif
+#ifndef COLOR_SEC_G
+#define COLOR_SEC_G        0
+#endif
+#ifndef COLOR_SEC_B
+#define COLOR_SEC_B        150
+#endif
+
+#ifndef COLOR_MIN_R
+#define COLOR_MIN_R        0
+#endif
+#ifndef COLOR_MIN_G
+#define COLOR_MIN_G        80
+#endif
+#ifndef COLOR_MIN_B
+#define COLOR_MIN_B        0
+#endif
+
+#ifndef COLOR_HOUR_R
+#define COLOR_HOUR_R       140
+#endif
+#ifndef COLOR_HOUR_G
+#define COLOR_HOUR_G       0
+#endif
+#ifndef COLOR_HOUR_B
+#define COLOR_HOUR_B       0
+#endif
+
 #ifndef TICK_BRIGHTNESS
-#define TICK_BRIGHTNESS   8	 // brightness for 5-minute tick marks on the 60-ring
-#endif
-#ifndef TRAIL_LENGTH_SEC
-#define TRAIL_LENGTH_SEC  2	 // how many LEDs trail behind seconds hand (0 = no trail)
-#endif
-#ifndef TRAIL_LENGTH_MIN
-#define TRAIL_LENGTH_MIN  1	 // trail for minutes hand
+#define TICK_BRIGHTNESS    8	 // helderheid van 5-minuten markeringen
 #endif
 
 // ---------------------------------
-// NeoPixel strip
+// NeoPixel strips
 // ---------------------------------
-static Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+static Adafruit_NeoPixel strip60(60, LED_PIN_60, NEO_GRB + NEO_KHZ800);
+static Adafruit_NeoPixel strip24(24, LED_PIN_24, NEO_GRB + NEO_KHZ800);
 
-// ---------------------------------
-// Helpers
-// ---------------------------------
-static inline uint32_t col(uint8_t r, uint8_t g, uint8_t b)
+// Helpers om index-orintatie te normaliseren
+static inline uint16_t idx60(uint8_t pos)
 {
-	return strip.Color(r, g, b);
+	// pos 0..59  ring-index met offset en richting
+	int16_t p = pos;
+	p = (int16_t)((p * (int8_t)RING60_DIR) + RING60_OFFSET);
+	p %= 60;
+	if (p < 0) p += 60;
+	return (uint16_t)p;
 }
 
 
-static inline uint16_t mod_wrap(int32_t x, uint16_t m)
+static inline uint16_t idx24(uint8_t pos)
 {
-	int32_t r = x % (int32_t)m;
-	if (r < 0) r += m;
-	return (uint16_t)r;
+	// pos 0..23  ring-index met offset en richting
+	int16_t p = pos;
+	p = (int16_t)((p * (int8_t)RING24_DIR) + RING24_OFFSET);
+	p %= 24;
+	if (p < 0) p += 24;
+	return (uint16_t)p;
 }
 
 
-// Map a logical position (0..59) on the 60-ring to the strip index
-static inline uint16_t idx60(int32_t pos)
+// Extract r,g,b uit NeoPixel packed kleur (GRB volgorde bij NEO_GRB)
+static inline void unpackGRB(uint32_t c, uint8_t& r, uint8_t& g, uint8_t& b)
 {
-	const int32_t logical = mod_wrap(RING60_OFFSET + (int32_t)RING60_DIR * pos, RING60_COUNT);
-	return (uint16_t)logical;
+	g = (uint8_t)(c >> 16);
+	r = (uint8_t)(c >> 8);
+	b = (uint8_t)(c);
 }
 
 
-// Map a logical position (0..23) on the 24-ring to the strip index (offset after the first 60)
-static inline uint16_t idx24(int32_t pos)
+// Saturating add voor een pixel op de 60-ring
+static inline void addPix60(uint16_t i, uint8_t r, uint8_t g, uint8_t b)
 {
-	const int32_t logical = mod_wrap(RING24_OFFSET + (int32_t)RING24_DIR * pos, RING24_COUNT);
-	return (uint16_t)(RING60_COUNT + logical);
+	uint8_t pr=0, pg=0, pb=0;
+	unpackGRB(strip60.getPixelColor(i), pr, pg, pb);
+	uint16_t nr = pr + r; if (nr > 255) nr = 255;
+	uint16_t ng = pg + g; if (ng > 255) ng = 255;
+	uint16_t nb = pb + b; if (nb > 255) nb = 255;
+	strip60.setPixelColor(i, strip60.Color((uint8_t)nr, (uint8_t)ng, (uint8_t)nb));
 }
 
 
-// Safe set/add pixel
-static inline void setPix(uint16_t i, uint32_t c)
+// Saturating add voor een pixel op de 24-ring
+static inline void addPix24(uint16_t i, uint8_t r, uint8_t g, uint8_t b)
 {
-	if (i < LED_COUNT) strip.setPixelColor(i, c);
-}
-
-
-static inline void addPix(uint16_t i, uint8_t r, uint8_t g, uint8_t b)
-{
-	if (i >= LED_COUNT) return;
-	uint32_t prev = strip.getPixelColor(i);
-	uint8_t pr = (prev >> 16) & 0xFF;
-	uint8_t pg = (prev >>  8) & 0xFF;
-	uint8_t pb = (prev >>  0) & 0xFF;
-	uint8_t nr = (uint16_t)pr + r > 255 ? 255 : pr + r;
-	uint8_t ng = (uint16_t)pg + g > 255 ? 255 : pg + g;
-	uint8_t nb = (uint16_t)pb + b > 255 ? 255 : pb + b;
-	strip.setPixelColor(i, col(nr, ng, nb));
+	uint8_t pr=0, pg=0, pb=0;
+	unpackGRB(strip24.getPixelColor(i), pr, pg, pb);
+	uint16_t nr = pr + r; if (nr > 255) nr = 255;
+	uint16_t ng = pg + g; if (ng > 255) ng = 255;
+	uint16_t nb = pb + b; if (nb > 255) nb = 255;
+	strip24.setPixelColor(i, strip24.Color((uint8_t)nr, (uint8_t)ng, (uint8_t)nb));
 }
 
 
 static inline void clearAll()
 {
-	strip.clear();
+	strip60.clear();
+	strip24.clear();
 }
 
 
-// Draw 5-minute tick marks on the 60-ring (dim white)
+// 5-minuten markeringen (60-ring) als dim wit
 static void drawMinuteTicks()
 {
 	for (int m = 0; m < 60; m += 5)
 	{
-		const uint16_t i = idx60(m);
-		addPix(i, TICK_BRIGHTNESS, TICK_BRIGHTNESS, TICK_BRIGHTNESS);
+		addPix60(idx60(m), TICK_BRIGHTNESS, TICK_BRIGHTNESS, TICK_BRIGHTNESS);
 	}
 }
 
 
-// Draw "hand" with optional trailing
+// 6-hour markeringen (24-ring) als dim wit
+static void drawHourTicks()
+{
+	for (int m = 0; m < 24; m += 6)
+	{
+		addPix24(idx24(m), TICK_BRIGHTNESS, TICK_BRIGHTNESS, TICK_BRIGHTNESS);
+	}
+}
+
+
+// Teken een wijzer op de 60-ring met trailing
 static void drawHand60(uint8_t position, uint8_t r, uint8_t g, uint8_t b, uint8_t trailLen)
 {
-	// tip
-	addPix(idx60(position), r, g, b);
-
-	// trail behind (wrapping)
-	for (uint8_t t = 1; t <= trailLen; ++t)
-	{
-		uint8_t fade = (uint8_t)((uint16_t)(r+g+b) ? (uint16_t)((trailLen - t + 1) * 255 / (trailLen + 1)) : 0);
-
-		// Apply fade proportionally to each channel if non-zero input channel
-		uint8_t tr = r ? (uint8_t)((uint16_t)r * (uint16_t)(trailLen - t + 1) / (trailLen + 1)) : 0;
-		uint8_t tg = g ? (uint8_t)((uint16_t)g * (uint16_t)(trailLen - t + 1) / (trailLen + 1)) : 0;
-		uint8_t tb = b ? (uint8_t)((uint16_t)b * (uint16_t)(trailLen - t + 1) / (trailLen + 1)) : 0;
-		addPix(idx60(mod_wrap((int)position - (int)t, 60)), tr, tg, tb);
-	}
+	addPix60(idx60(position), r, g, b);
+	//for (uint8_t t = 1; t <= trailLen; ++t)
+	//{
+	//	uint8_t p = (uint8_t)((int16_t)position - (int16_t)t);
+	//	p %= 60;
+	//	addPix60(idx60(p), r / (t + 1), g / (t + 1), b / (t + 1));
+	//}
 }
 
 
@@ -151,54 +177,55 @@ static void drawHand60(uint8_t position, uint8_t r, uint8_t g, uint8_t b, uint8_
 // ---------------------------------
 void ws2812bBegin()
 {
-	strip.begin();
-	strip.setBrightness(LED_BRIGHTNESS);
+	strip60.begin();
+	strip24.begin();
+	strip60.setBrightness(GLOBAL_BRIGHTNESS);
+	strip24.setBrightness(GLOBAL_BRIGHTNESS);
 	clearAll();
-	strip.show();
+	strip60.show();
+	strip24.show();
 }
 
 
-// now = civil time (local or UTC  you decide), epoch = seconds since epoch (optional for animations)
+// now = civil time (local of UTC  jij bepaalt), epoch = seconds since epoch (optioneel voor animaties)
 void ws2812bUpdate(const tm& now, time_t /*epoch*/) {
+	clearAll();
 	
-	// Extract time parts
+	// kleuren per wijzer
+	const uint8_t rSec  = COLOR_SEC_R,  gSec  = COLOR_SEC_G,  bSec  = COLOR_SEC_B;
+	const uint8_t rMin  = COLOR_MIN_R,  gMin  = COLOR_MIN_G,  bMin  = COLOR_MIN_B;
+	const uint8_t rHour = COLOR_HOUR_R, gHour = COLOR_HOUR_G, bHour = COLOR_HOUR_B;
+	
+	// posities
 	const uint8_t posSec  = (uint8_t)(now.tm_sec % 60);
 	const uint8_t posMin  = (uint8_t)(now.tm_min % 60);
 	const uint8_t posHour = (uint8_t)(now.tm_hour % 24);
 	
-	// Colors (you can tweak)
-									 // Red
-	const uint8_t rHour = 180, gHour = 0,   bHour = 0;
-									 // Green
-	const uint8_t rMin  = 0,   gMin  = 160, bMin  = 0;
-									 // Blue
-	const uint8_t rSec  = 0,   gSec  = 0,   bSec  = 180;
-	
-	clearAll();
-	
-	// Background ticks on the 60-ring every 5 minutes
+	// 60-ring: ticks, minuten en seconden
 	drawMinuteTicks();
-	
-	// Minutes hand on 60-ring (with a short trail)
 	drawHand60(posMin, rMin, gMin, bMin, TRAIL_LENGTH_MIN);
-	
-	// Seconds hand on 60-ring (with a short trail)
 	drawHand60(posSec, rSec, gSec, bSec, TRAIL_LENGTH_SEC);
 	
-	// Hours on 24-ring
-	addPix(idx24(posHour), rHour, gHour, bHour);
+	// 24-ring: uren + (optioneel) subtiele vooruitblik op volgende uur op basis van minutenprogressie
+	drawHourTicks();
+	addPix24(idx24(posHour), rHour, gHour, bHour);
+	//
+	//	{
+	//		const uint8_t nextHour = (uint8_t)((posHour + 1) % 24);
+	//									 // ~0..180
+	//		const uint8_t dim = (uint8_t)(now.tm_min * 3);
+	//		// zacht rood op volgende uur als progress-indicator
+	//		addPix24(idx24(nextHour), dim / 8, 0, 0);
+	//	}
 	
-	// Optionally: show minute-progress on hour ring (subtle)
-	// E.g., light the next hour slot dimly proportional to minutes progress.
-	{
-		const uint8_t nextHour = (uint8_t)((posHour + 1) % 24);
-	
-		// 0..177 approx
-		const uint8_t dim = (uint8_t)(now.tm_min * 3);
-	
-		// subtle red
-		addPix(idx24(nextHour), dim / 8, 0, 0);
-	}
-	
-	strip.show();
+	// Uitsturen
+	strip24.show();					 // mag in willekeurige volgorde; beide lijnen lopen parallel
+	strip60.show();
+}
+
+
+void ws2812bShow()
+{
+	strip24.show();
+	strip60.show();
 }

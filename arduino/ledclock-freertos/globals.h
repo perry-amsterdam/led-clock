@@ -59,5 +59,4 @@ extern int    g_gmtOffsetSec;
 extern int    g_daylightSec;
 extern bool   g_timeReady;
 extern unsigned long lastPrintMs;
-
-#endif // GLOBALS_H
+#endif							 // GLOBALS_H

@@ -222,11 +222,12 @@ void startPortal()
 
 
 void stopPortal()
-{ 
-	server.stop(); 
-	dns.stop(); 
-	WiFi.softAPdisconnect(true); 
-	if(DEBUG_NET) {
-		Serial.println("[Portal] Gestopt"); 
+{
+	server.stop();
+	dns.stop();
+	WiFi.softAPdisconnect(true);
+	if(DEBUG_NET)
+	{
+		Serial.println("[Portal] Gestopt");
 	}
 }
