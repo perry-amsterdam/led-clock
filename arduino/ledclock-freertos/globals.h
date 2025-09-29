@@ -44,8 +44,6 @@ extern const char* NTP3;
 #include <Preferences.h>
 #include <WiFi.h>
 
-#include "config.h"
-
 #if defined(ARDUINO)
 #define millis DO_NOT_USE_millis__use_hal_millis
 #define delay  DO_NOT_USE_delay__use_hal_delay_ms
