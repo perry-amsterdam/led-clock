@@ -15,6 +15,7 @@
 
 void setup()
 {
+
 	// Wacht 5 seconden.
 	if (DEBUG_START_DELAY)
 	{
@@ -45,7 +46,6 @@ void setup()
 	LOG_STACK_WATERMARK("render");
 	LOG_STACK_WATERMARK("led");
 	LOG_STACK_WATERMARK("portal");
-
 }
 
 
