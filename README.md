@@ -95,6 +95,7 @@ De hardware (klokfront, lasercut) is klaar ✅. De software draait op een modern
 | GPIO | Functie        | Opmerking                           |
 |------|----------------|-------------------------------------|
 | 8    | Klok-LEDs DIN  | Data-in van WS2812B strip/matrix    |
+| 9    | Klok-LEDs DIN  | Data-in van WS2812B strip/matrix    |
 | 48   | Status-LED (onboard) | Ingebouwde RGB LED op ESP32 DevKit       |
 | 5V   | Voeding LEDs   | Zorg voor voldoende stroomcapaciteit |
 | GND  | Massa          | Moet gedeeld worden met LED-voeding |
