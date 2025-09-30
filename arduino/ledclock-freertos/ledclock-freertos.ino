@@ -26,7 +26,7 @@ void setup()
 	hal_delay_ms(50);
 	Serial.println("\r[Boot] Start (FreeRTOS)");
 	ledBegin();
-	ledSelfTest();   // korte test van de status-LED
+	ledSelfTest();				 // korte test van de status-LED
 
 	// Create RTOS primitives
 	g_sysEvents = xEventGroupCreate();

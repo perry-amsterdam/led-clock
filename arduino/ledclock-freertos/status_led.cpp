@@ -27,8 +27,8 @@ void ledBegin()
 // Stelt de status-LED (index 0) in op (r,g,b) en toont direct
 void ledColor(uint8_t r, uint8_t g, uint8_t b)
 {
-    pixel.setPixelColor(0, pixel.Color(r, g, b));
-    pixel.show();
+	pixel.setPixelColor(0, pixel.Color(r, g, b));
+	pixel.show();
 }
 
 
@@ -85,11 +85,11 @@ void ledRedPulse()
 // Zelftest: laat de status-LED rood, groen, blauw en uit zien
 void ledSelfTest()
 {
-    ledRed();
-    vTaskDelay(pdMS_TO_TICKS(500));
-    ledGreen();
-    vTaskDelay(pdMS_TO_TICKS(500));
-    ledBlue();
-    vTaskDelay(pdMS_TO_TICKS(500));
-    ledOff();
+	ledRed();
+	vTaskDelay(pdMS_TO_TICKS(500));
+	ledGreen();
+	vTaskDelay(pdMS_TO_TICKS(500));
+	ledBlue();
+	vTaskDelay(pdMS_TO_TICKS(500));
+	ledOff();
 }

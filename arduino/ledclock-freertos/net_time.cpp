@@ -221,6 +221,7 @@ void netTimeMaintain()
 {
 	static uint32_t last = 0;
 	uint32_t now_ms = hal_millis();
+
 	// run roughly once per minute
 	if (now_ms - last < 60000) return;
 	last = now_ms;
