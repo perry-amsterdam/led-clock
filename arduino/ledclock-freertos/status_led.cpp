@@ -6,6 +6,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+Adafruit_NeoPixel pixel(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+
 // -----------------------------------------------------------------------------
 // Basis-implementatie status-LED
 // -----------------------------------------------------------------------------

@@ -24,7 +24,6 @@ const char* NTP2 = "1.europe.pool.ntp.org";
 const char* NTP3 = "2.europe.pool.ntp.org";
 
 // ===== Global objects =====
-Adafruit_NeoPixel pixel(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 Preferences prefs;
 WebServer server(80);
 DNSServer dns;

@@ -152,7 +152,7 @@ static void drawMinuteTicks()
 // 6-hour markeringen (24-ring) als dim wit
 static void drawHourTicks()
 {
-	for (int m = 0; m < 24; m += 6)
+	for (int m = 0; m < 24; m += 3)
 	{
 		addPix24(idx24(m), TICK_BRIGHTNESS, TICK_BRIGHTNESS, TICK_BRIGHTNESS);
 	}
