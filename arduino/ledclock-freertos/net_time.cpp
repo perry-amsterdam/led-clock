@@ -178,7 +178,7 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 	#endif
 
 	time_t now = 0;
-	for (int i = 0; i < 20; ++i)
+	for (int i = 0; i < 10; ++i)
 	{
 		now = time(nullptr);
 
@@ -197,7 +197,7 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 			configTime(gmt, dst, NTP1, NTP2, NTP3);
 		}
 
-		hal_delay_ms(500);
+		hal_delay_ms(1000);
 	}
 
 	#ifdef DEBUG_TZ
