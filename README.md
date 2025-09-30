@@ -79,7 +79,8 @@ De hardware (klokfront, lasercut) is klaar ✅. De software draait op een modern
 
 ### Aansluitingen
 
-- **GPIO 8** → DIN van de **klok-LED-strip**  
+- **GPIO 8** → DIN van de **klok-LED-strip 60 leds voor minute en secondes**
+- **GPIO 9** → DIN van de **klok-LED-strip 24 leds voor 24 uur**  
 - **GPIO 48** → DIN van de **status-LED**  
 - **5V & GND** gedeeld tussen ESP32 en alle LEDs
 
@@ -140,7 +141,7 @@ Vanaf **ESP32 Arduino core v3+** is `WiFi.beginWPSConfig()` verwijderd. Voor die
 1. Flash de firmware.  
 2. Eerste boot: verbind met **ESP32-Setup**.  
 3. Open `http://192.168.4.1` en stel Wi-Fi in.  
-4. ESP32 verbindt → haalt tijd op → klok op LED-strip (GPIO 8).  
+4. ESP32 verbindt → haalt tijd op → klok op LED-strips (GPIO 8 en 9).  
 5. Status-LED (GPIO 48) geeft verbindingsstatus.  
 
 ---

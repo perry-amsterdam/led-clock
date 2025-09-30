@@ -79,7 +79,7 @@ De hardware (klokfront, lasercut) is klaar ✅. The software runs op een modern 
 
 ### Connections
 
-- **GPIO 8** → DIN van de **klok-LED-strip**  
+- **GPIO 8 en 9** → DIN van de **klok-LED-strip**  
 - **GPIO 48** → DIN van de **status-LED**  
 - **5V & GND** gedeeld tussen ESP32 en alle LEDs
 
