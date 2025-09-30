@@ -100,6 +100,7 @@ bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bo
 		http.end();
 		return false;
 	}
+
 	if (code != HTTP_CODE_OK)
 	{
 		#ifdef DEBUG_TZ
@@ -177,7 +178,7 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 	#endif
 
 	time_t now = 0;
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 20; ++i)
 	{
 		now = time(nullptr);
 
@@ -196,7 +197,7 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 			configTime(gmt, dst, NTP1, NTP2, NTP3);
 		}
 
-		hal_delay_ms(1000);
+		hal_delay_ms(500);
 	}
 
 	#ifdef DEBUG_TZ
