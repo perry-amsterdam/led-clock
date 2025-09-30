@@ -8,6 +8,7 @@ void ledBlue();
 void ledRed();
 void ledGreen();
 void ledOff();
+void ledSelfTest();
 
 // Pulse-helpers (nieuw)
 void ledBluePulse();	// 120 ms aan, 380 ms uit

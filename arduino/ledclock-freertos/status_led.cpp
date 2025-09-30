@@ -1,8 +1,8 @@
 // status_led.cpp
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
-#include "status_led.h"
 #include "globals.h"			 // bevat extern Adafruit_NeoPixel pixel;
+#include "status_led.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -27,8 +27,10 @@ void ledBegin()
 // Stelt de status-LED (index 0) in op (r,g,b) en toont direct
 void ledColor(uint8_t r, uint8_t g, uint8_t b)
 {
-	pixel.setPixelColor(LED_BRIGHTNESS, pixel.Color(r, g, b));
-	pixel.show();
+    // FOUT: pixel.setPixelColor(LED_BRIGHTNESS, ...)
+    // FIX: altijd index 0 gebruiken voor de status-LED
+    pixel.setPixelColor(0, pixel.Color(r, g, b));
+    pixel.show();
 }
 
 
@@ -79,4 +81,17 @@ void ledRedPulse()
 	vTaskDelay(pdMS_TO_TICKS(120));
 	ledOff();
 	vTaskDelay(pdMS_TO_TICKS(380));
+}
+
+
+// Zelftest: laat de status-LED rood, groen, blauw en uit zien
+void ledSelfTest()
+{
+    ledRed();
+    vTaskDelay(pdMS_TO_TICKS(500));
+    ledGreen();
+    vTaskDelay(pdMS_TO_TICKS(500));
+    ledBlue();
+    vTaskDelay(pdMS_TO_TICKS(500));
+    ledOff();
 }

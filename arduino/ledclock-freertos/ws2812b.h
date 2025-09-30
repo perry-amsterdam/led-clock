@@ -4,7 +4,7 @@
 
 // Configuratie:
 // - Gebruik twee IO-pinnen: n voor de 60-leds ring (minuten/seconden)
-//   en n voor de 24-leds ring (uren).
+//   en een voor de 24-leds ring (uren).
 // - Pas deze defines eventueel aan in je build of voor je include van deze header:
 //
 //   #define LED_PIN_60   8     // data pin voor ring met 60 leds

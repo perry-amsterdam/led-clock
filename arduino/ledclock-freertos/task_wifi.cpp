@@ -9,15 +9,6 @@
 #include "portal.h"
 #include "hal_time_freertos.h"
 
-//static void push_led(uint8_t r,uint8_t g,uint8_t b,uint16_t ms)
-//{
-//	LedCmd c
-//	{
-//		r,g,b,ms
-//	};
-//	xQueueSend(g_ledQueue,&c,0);
-//}
-
 void task_wifi(void*)
 {
 	vTaskDelay(pdMS_TO_TICKS(50));
@@ -77,7 +68,6 @@ void task_wifi(void*)
 	{
 		if(!rtos_test_bits(EVT_WIFI_UP) && !rtos_test_bits(EVT_PORTAL_ON))
 		{
-			//push_led(0,0,32,50);
 			connectWiFi(ssid, pass);
 
 			// Wait up to 10s

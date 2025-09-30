@@ -163,12 +163,6 @@ static void drawHourTicks()
 static void drawHand60(uint8_t position, uint8_t r, uint8_t g, uint8_t b, uint8_t trailLen)
 {
 	addPix60(idx60(position), r, g, b);
-	//for (uint8_t t = 1; t <= trailLen; ++t)
-	//{
-	//	uint8_t p = (uint8_t)((int16_t)position - (int16_t)t);
-	//	p %= 60;
-	//	addPix60(idx60(p), r / (t + 1), g / (t + 1), b / (t + 1));
-	//}
 }
 
 
@@ -209,14 +203,6 @@ void ws2812bUpdate(const tm& now, time_t /*epoch*/) {
 	// 24-ring: uren + (optioneel) subtiele vooruitblik op volgende uur op basis van minutenprogressie
 	drawHourTicks();
 	addPix24(idx24(posHour), rHour, gHour, bHour);
-	//
-	//	{
-	//		const uint8_t nextHour = (uint8_t)((posHour + 1) % 24);
-	//									 // ~0..180
-	//		const uint8_t dim = (uint8_t)(now.tm_min * 3);
-	//		// zacht rood op volgende uur als progress-indicator
-	//		addPix24(idx24(nextHour), dim / 8, 0, 0);
-	//	}
 	
 	// Uitsturen
 	strip24.show();					 // mag in willekeurige volgorde; beide lijnen lopen parallel
