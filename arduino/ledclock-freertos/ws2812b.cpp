@@ -2,9 +2,9 @@
 #define TICK_MIN_G   9
 #define TICK_MIN_B   4
 
-#define TICK_HOUR_R 10
-#define TICK_HOUR_G  6
-#define TICK_HOUR_B  2
+#define TICK_HOUR_R 14
+#define TICK_HOUR_G  9
+#define TICK_HOUR_B  4
 
 #include "ws2812b.h"
 #include <Adafruit_NeoPixel.h>
