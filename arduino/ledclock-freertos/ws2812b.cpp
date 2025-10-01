@@ -1,91 +1,35 @@
+#define TICK_MIN_R  14
+#define TICK_MIN_G   9
+#define TICK_MIN_B   4
+
+#define TICK_HOUR_R 10
+#define TICK_HOUR_G  6
+#define TICK_HOUR_B  2
+
 #include "ws2812b.h"
 #include <Adafruit_NeoPixel.h>
 
 // ---------------------------------------------------
-// Hardware instellingen
+// Hardware pins (mag je overschrijven vr de include)
 // ---------------------------------------------------
 #ifndef LED_PIN_60
-#define LED_PIN_60  8			 // datapin voor 60-leds ring (seconden + minuten)
+#define LED_PIN_60  8			 // datapin voor 60-leds ring (minuten + seconden)
 #endif
-
 #ifndef LED_PIN_24
 #define LED_PIN_24  9			 // datapin voor 24-leds ring (uren)
 #endif
 
-#ifndef GLOBAL_BRIGHTNESS
-#define GLOBAL_BRIGHTNESS  64	 // standaard helderheid (0..255)
-#endif
-
-// Trail-instellingen (lengte van staarten bij bewegende wijzers)
-#ifndef TRAIL_LENGTH_SEC
-#define TRAIL_LENGTH_SEC   2
-#endif
-#ifndef TRAIL_LENGTH_MIN
-#define TRAIL_LENGTH_MIN   1
-#endif
-
-// Orintatie en richting van de ringen
-#ifndef RING60_OFFSET
-#define RING60_OFFSET      0
-#endif
-#ifndef RING60_DIR
-#define RING60_DIR         +1	 // +1 = met de klok mee, -1 = tegen de klok in
-#endif
-
-#ifndef RING24_OFFSET
-#define RING24_OFFSET      0
-#endif
-#ifndef RING24_DIR
-#define RING24_DIR         +1
-#endif
-
-// Kleuren van wijzers
-#ifndef COLOR_SEC_R
-#define COLOR_SEC_R        0
-#endif
-#ifndef COLOR_SEC_G
-#define COLOR_SEC_G        0
-#endif
-#ifndef COLOR_SEC_B
-#define COLOR_SEC_B        150
-#endif
-
-#ifndef COLOR_MIN_R
-#define COLOR_MIN_R        0
-#endif
-#ifndef COLOR_MIN_G
-#define COLOR_MIN_G        80
-#endif
-#ifndef COLOR_MIN_B
-#define COLOR_MIN_B        0
-#endif
-
-#ifndef COLOR_HOUR_R
-#define COLOR_HOUR_R       140
-#endif
-#ifndef COLOR_HOUR_G
-#define COLOR_HOUR_G       0
-#endif
-#ifndef COLOR_HOUR_B
-#define COLOR_HOUR_B       0
-#endif
-
-// Helderheid van tick-markeringen (bv. 5-minuten stipjes)
-#ifndef TICK_BRIGHTNESS
-#define TICK_BRIGHTNESS    8
-#endif
-
 // ---------------------------------------------------
-// Initialiseer LED-strips
+// NeoPixel strip instances
 // ---------------------------------------------------
 static Adafruit_NeoPixel strip60(60, LED_PIN_60, NEO_GRB + NEO_KHZ800);
 static Adafruit_NeoPixel strip24(24, LED_PIN_24, NEO_GRB + NEO_KHZ800);
 
 // ---------------------------------------------------
-// Helper functies
+// Helpers: index mapping, kleur extractie, additief tekenen
 // ---------------------------------------------------
 
-// Bereken correcte index voor 60-leds ring met offset/richting
+// 60-ring index met offset/richting
 static inline uint16_t idx60(uint8_t pos)
 {
 	int16_t p = pos;
@@ -96,7 +40,7 @@ static inline uint16_t idx60(uint8_t pos)
 }
 
 
-// Bereken correcte index voor 24-leds ring
+// 24-ring index met offset/richting
 static inline uint16_t idx24(uint8_t pos)
 {
 	int16_t p = pos;
@@ -107,7 +51,7 @@ static inline uint16_t idx24(uint8_t pos)
 }
 
 
-// Kleur uit NeoPixel-pakket (kleur zit in GRB volgorde ipv RGB)
+// Haal r,g,b uit door NeoPixel opgeslagen kleur (GRB volgorde bij NEO_GRB)
 static inline void unpackGRB(uint32_t c, uint8_t& r, uint8_t& g, uint8_t& b)
 {
 	g = (uint8_t)(c >> 16);
@@ -116,7 +60,7 @@ static inline void unpackGRB(uint32_t c, uint8_t& r, uint8_t& g, uint8_t& b)
 }
 
 
-// Voeg kleur toe aan pixel op 60-ring, zonder dat waarden boven 255 gaan
+// Additief tekenen (saturating add) op 60-ring
 static inline void addPix60(uint16_t i, uint8_t r, uint8_t g, uint8_t b)
 {
 	uint8_t pr=0, pg=0, pb=0;
@@ -128,7 +72,7 @@ static inline void addPix60(uint16_t i, uint8_t r, uint8_t g, uint8_t b)
 }
 
 
-// Zelfde als hierboven maar voor 24-ring
+// Additief tekenen (saturating add) op 24-ring
 static inline void addPix24(uint16_t i, uint8_t r, uint8_t g, uint8_t b)
 {
 	uint8_t pr=0, pg=0, pb=0;
@@ -140,7 +84,7 @@ static inline void addPix24(uint16_t i, uint8_t r, uint8_t g, uint8_t b)
 }
 
 
-// Maak beide ringen leeg (alles uit)
+// Alles uit
 static inline void clearAll()
 {
 	strip60.clear();
@@ -148,37 +92,39 @@ static inline void clearAll()
 }
 
 
-// Teken 5-minuten stipjes (dim wit) op 60-leds ring
+// ---------------------------------------------------
+// Tekenen: ticks & wijzers
+// ---------------------------------------------------
+
+// 5-minuten ticks (warm wit, gedimd) op 60-ring
 static void drawMinuteTicks()
 {
 	for (int m = 0; m < 60; m += 5)
 	{
-		addPix60(idx60(m), TICK_BRIGHTNESS, TICK_BRIGHTNESS, TICK_BRIGHTNESS);
+		addPix60(idx60(m), TICK_MIN_R, TICK_MIN_G, TICK_MIN_B);
 	}
 }
 
 
-// Teken 3-uurs markeringen (dim wit) op 24-leds ring
+// 3-uur ticks (warm wit, gedimd) op 24-ring
 static void drawHourTicks()
 {
-	for (int m = 0; m < 24; m += 3)
+	for (int h = 0; h < 24; h += 3)
 	{
-		addPix24(idx24(m), TICK_BRIGHTNESS, TICK_BRIGHTNESS, TICK_BRIGHTNESS);
+		addPix24(idx24(h), TICK_HOUR_R, TICK_HOUR_G, TICK_HOUR_B);
 	}
 }
 
 
-// Teken wijzer (nu zonder echte trail, maar wel voorzien van parameter)
+// Wijzer op 60-ring (trailLen gereserveerd  nu enkel hoofdpixel)
 static void drawHand60(uint8_t position, uint8_t r, uint8_t g, uint8_t b, uint8_t /*trailLen*/) {
 addPix60(idx60(position), r, g, b);
 }
 
 
 // ---------------------------------------------------
-// Publieke functies
+// Publieke API
 // ---------------------------------------------------
-
-// Initialisatie: strips starten en helderheid zetten
 void ws2812bBegin()
 {
 	strip60.begin();
@@ -191,36 +137,37 @@ void ws2812bBegin()
 }
 
 
-// Update klokweergave
-void ws2812bUpdate(const tm& now, time_t /*epoch*/) {
+// now = civil time (lokaal of UTC), epoch = seconds since epoch (optioneel)
+void ws2812bUpdate(const tm& now, time_t)
+{
 	clearAll();
-	
-	// Kleuren instellen per wijzer
+
+	// Wijzerkleuren ophalen
 	const uint8_t rSec  = COLOR_SEC_R,  gSec  = COLOR_SEC_G,  bSec  = COLOR_SEC_B;
 	const uint8_t rMin  = COLOR_MIN_R,  gMin  = COLOR_MIN_G,  bMin  = COLOR_MIN_B;
 	const uint8_t rHour = COLOR_HOUR_R, gHour = COLOR_HOUR_G, bHour = COLOR_HOUR_B;
-	
-	// Huidige posities bepalen
+
+	// Posities bepalen
 	const uint8_t posSec  = (uint8_t)(now.tm_sec % 60);
 	const uint8_t posMin  = (uint8_t)(now.tm_min % 60);
 	const uint8_t posHour = (uint8_t)(now.tm_hour % 24);
-	
-	// 60-led ring: ticks, minuten- en secondenwijzer
+
+	// 60-ring: minuten-ticks + wijzers
 	drawMinuteTicks();
 	drawHand60(posMin, rMin, gMin, bMin, TRAIL_LENGTH_MIN);
 	drawHand60(posSec, rSec, gSec, bSec, TRAIL_LENGTH_SEC);
-	
-	// 24-led ring: urenwijzer en tickmarks
+
+	// 24-ring: uur-ticks + urenwijzer
 	drawHourTicks();
 	addPix24(idx24(posHour), rHour, gHour, bHour);
-	
-	// Data naar LEDs sturen
+
+	// Naar de leds sturen
 	strip24.show();
 	strip60.show();
 }
 
 
-// Handmatig forceren van refresh
+// Handmatig refresh (als je zelf iets getekend hebt buiten ws2812bUpdate)
 void ws2812bShow()
 {
 	strip24.show();
