@@ -17,11 +17,11 @@
 void setup()
 {
 
-  // Clear the minuts/seconds and hour leds.
-  ws2812bBegin();
+	// Clear the minuts/seconds and hour leds.
+	ws2812bBegin();
 
-  // Clear the status led.
-  ledOff();
+	// Clear the status led.
+	ledOff();
 
 	// Wacht 5 seconden.
 	if (DEBUG_START_DELAY)

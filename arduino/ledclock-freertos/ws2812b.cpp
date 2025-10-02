@@ -122,7 +122,6 @@ void drawStatusTicks_Rotated_Static(uint8_t r, uint8_t g, uint8_t b)
 		addPix24(idx24(index), r, g, b);
 	}
 
-
 	strip24.show();
 	strip60.show();
 
