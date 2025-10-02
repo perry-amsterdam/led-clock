@@ -92,6 +92,47 @@ static inline void clearAll()
 }
 
 
+void drawStatusTicks(uint8_t r, uint8_t g, uint8_t b)
+{
+	for (int m = 0; m < 60; m += 5)
+	{
+		for (int index = 0; index < 60; index += 5)
+		{
+			addPix60(idx60(m+index), r, g, b);
+		}
+	}
+}
+
+
+// Nieuwe functie met ingebouwde rotatie-logica
+void drawStatusTicks_Rotated_Static(uint8_t r, uint8_t g, uint8_t b)
+{
+	clearAll();
+
+	// De 'offset' is nu static: hij wordt maar n keer genitialiseerd (op 0)
+	// en behoudt zijn waarde tussen de functie-aanroepen.
+	static int offset = 0;
+
+	// Stap 1: Teken de ticks met de huidige offset
+	for (int index = 0; index < 60; index += 5)
+	{
+		// Positie = (statische offset + lus-index)
+		addPix60(idx60(offset + index), r, g, b);
+	}
+
+	// Stap 2: Update de offset voor de volgende aanroep
+	offset += 5;
+
+	// Stap 3: Wrap-around (zorg ervoor dat de offset binnen 0-55 blijft)
+	if (offset >= 60)
+	{
+		offset = 0;
+	}
+
+	strip60.show();
+}
+
+
 // ---------------------------------------------------
 // Tekenen: ticks & wijzers
 // ---------------------------------------------------
@@ -117,8 +158,9 @@ static void drawHourTicks()
 
 
 // Wijzer op 60-ring (trailLen gereserveerd  nu enkel hoofdpixel)
-static void drawHand60(uint8_t position, uint8_t r, uint8_t g, uint8_t b, uint8_t /*trailLen*/) {
-addPix60(idx60(position), r, g, b);
+static void drawHand60(uint8_t position, uint8_t r, uint8_t g, uint8_t b, uint8_t)
+{
+	addPix60(idx60(position), r, g, b);
 }
 
 

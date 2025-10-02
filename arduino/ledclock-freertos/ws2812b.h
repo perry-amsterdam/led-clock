@@ -101,6 +101,9 @@
 // Publieke API
 // ---------------------------------------------------
 
+// Draw led clock status.
+void drawStatusTicks_Rotated_Static(uint8_t r, uint8_t g, uint8_t b);
+
 // Init strips. Aanroepen in setup().
 void ws2812bBegin();
 
