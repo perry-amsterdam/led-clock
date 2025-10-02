@@ -8,6 +8,7 @@
 
 #include "ws2812b.h"
 #include <Adafruit_NeoPixel.h>
+#include "hal_time_freertos.h"
 
 // ---------------------------------------------------
 // Hardware pins (mag je overschrijven vr de include)
@@ -85,7 +86,7 @@ static inline void addPix24(uint16_t i, uint8_t r, uint8_t g, uint8_t b)
 
 
 // Alles uit
-static inline void clearAll()
+inline void clearAll()
 {
 	strip60.clear();
 	strip24.clear();
@@ -109,27 +110,27 @@ void drawStatusTicks_Rotated_Static(uint8_t r, uint8_t g, uint8_t b)
 {
 	clearAll();
 
-	// De 'offset' is nu static: hij wordt maar n keer genitialiseerd (op 0)
-	// en behoudt zijn waarde tussen de functie-aanroepen.
-	static int offset = 0;
-
-	// Stap 1: Teken de ticks met de huidige offset
 	for (int index = 0; index < 60; index += 5)
 	{
 		// Positie = (statische offset + lus-index)
-		addPix60(idx60(offset + index), r, g, b);
+		addPix60(idx60(index), r, g, b);
 	}
 
-	// Stap 2: Update de offset voor de volgende aanroep
-	offset += 5;
-
-	// Stap 3: Wrap-around (zorg ervoor dat de offset binnen 0-55 blijft)
-	if (offset >= 60)
+	for (int index = 0; index < 24; index += 3)
 	{
-		offset = 0;
+		// Positie = (statische offset + lus-index)
+		addPix24(idx24(index), r, g, b);
 	}
 
+
+	strip24.show();
 	strip60.show();
+
+	hal_delay_ms(500);
+
+	clearAll();
+	strip60.show();
+	strip24.show();
 }
 
 

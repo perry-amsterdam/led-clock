@@ -3,6 +3,7 @@
 #include "hal_time_freertos.h"
 #include "globals.h"
 #include "status_led.h"
+#include "ws2812b.h"
 #include "task_led.h"
 #include "task_wifi.h"
 #include "task_time.h"
@@ -15,6 +16,12 @@
 
 void setup()
 {
+
+  // Clear the minuts/seconds and hour leds.
+  ws2812bBegin();
+
+  // Clear the status led.
+  ledOff();
 
 	// Wacht 5 seconden.
 	if (DEBUG_START_DELAY)
