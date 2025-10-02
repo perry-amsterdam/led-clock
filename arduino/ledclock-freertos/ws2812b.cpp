@@ -92,21 +92,8 @@ inline void clearAll()
 	strip24.clear();
 }
 
-
-void drawStatusTicks(uint8_t r, uint8_t g, uint8_t b)
-{
-	for (int m = 0; m < 60; m += 5)
-	{
-		for (int index = 0; index < 60; index += 5)
-		{
-			addPix60(idx60(m+index), r, g, b);
-		}
-	}
-}
-
-
 // Nieuwe functie met ingebouwde rotatie-logica
-void drawStatusTicks_Rotated_Static(uint8_t r, uint8_t g, uint8_t b)
+void drawStatusTicks(uint8_t r, uint8_t g, uint8_t b)
 {
 	clearAll();
 
