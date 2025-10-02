@@ -41,7 +41,10 @@ void setup()
 
 	// --- Stack debug boot summary ---
 	hal_delay_ms(500);			 // even wachten zodat alle tasks gestart zijn
-	Serial.println("[stack] first samples:");
+	if (STACK_DEBUG)
+	{
+		Serial.println("[stack] first samples:");
+	}
 	LOG_STACK_WATERMARK("time");
 	LOG_STACK_WATERMARK("wifi");
 	LOG_STACK_WATERMARK("render");
