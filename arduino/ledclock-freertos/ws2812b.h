@@ -3,14 +3,14 @@
 #include <time.h>				 // voor struct tm
 
 // ---------------------------------------------------
-// Basisconfiguratie (kan je overschrijven vr include)
+// Hardware pins (mag je overschrijven vr de include)
 // ---------------------------------------------------
-// Hardware: twee ringen  60 leds (seconden + minuten), 24 leds (uren).
-// Voorbeeld overrides in je sketch:
-//   #define LED_PIN_60 8
-//   #define LED_PIN_24 9
-//   #define GLOBAL_BRIGHTNESS 64
-//   #include "ws2812b.h"
+#ifndef LED_PIN_60
+#define LED_PIN_60  8            // datapin voor 60-leds ring (minuten + seconden)
+#endif
+#ifndef LED_PIN_24
+#define LED_PIN_24  9            // datapin voor 24-leds ring (uren)
+#endif
 
 #ifndef GLOBAL_BRIGHTNESS
 #define GLOBAL_BRIGHTNESS  64	 // 0..255, globale dimmer voor lle pixels
@@ -28,14 +28,6 @@
 #endif
 #ifndef RING24_DIR
 #define RING24_DIR     +1
-#endif
-
-// Trails voor wijzers (nu gereserveerd; hand-lengte/staart kan later uitgebreid)
-#ifndef TRAIL_LENGTH_SEC
-#define TRAIL_LENGTH_SEC  2
-#endif
-#ifndef TRAIL_LENGTH_MIN
-#define TRAIL_LENGTH_MIN  1
 #endif
 
 // ---------------------------------------------------
@@ -78,23 +70,23 @@
 // Tip: verhoog/verlaag alle drie samen als je ze feller/zachter wil.
 // ---------------------------------------------------
 #ifndef TICK_MIN_R
-#define TICK_MIN_R  28
+#define TICK_MIN_R  20
 #endif
 #ifndef TICK_MIN_G
-#define TICK_MIN_G  18
+#define TICK_MIN_G  16
 #endif
 #ifndef TICK_MIN_B
-#define TICK_MIN_B   8
+#define TICK_MIN_B  10
 #endif
 
 #ifndef TICK_HOUR_R
-#define TICK_HOUR_R 20
+#define TICK_HOUR_R  20
 #endif
 #ifndef TICK_HOUR_G
-#define TICK_HOUR_G 12
+#define TICK_HOUR_G  16
 #endif
 #ifndef TICK_HOUR_B
-#define TICK_HOUR_B  5
+#define TICK_HOUR_B  10
 #endif
 
 // ---------------------------------------------------
@@ -114,6 +106,3 @@ void ws2812bUpdate(const tm& now, time_t epoch);
 
 // Hard flush als je zelf pixels set en direct wilt pushen.
 void ws2812bShow();
-
-// Gamma-correctie (ingeschakeld in implementatie)
-bool ws2812bGammaEnabled();

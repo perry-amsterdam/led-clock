@@ -1,69 +1,6 @@
-#define TICK_MIN_R  14
-#define TICK_MIN_G   9
-#define TICK_MIN_B   4
-
-#define TICK_HOUR_R 14
-#define TICK_HOUR_G  9
-#define TICK_HOUR_B  4
-
 #include "ws2812b.h"
 #include <Adafruit_NeoPixel.h>
 #include "hal_time_freertos.h"
-#include <pgmspace.h>
-
-// ---- Gamma tabel ----
-static const uint8_t gammaTable[256] PROGMEM =
-{
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2,
-	3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6,
-	6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10, 11, 11, 11, 12,
-	12, 13, 13, 13, 14, 14, 15, 15, 16, 16, 17, 17, 18, 18, 19, 19,
-	20, 20, 21, 22, 22, 23, 23, 24, 24, 25, 26, 26, 27, 27, 28, 29,
-	29, 30, 31, 31, 32, 33, 33, 34, 35, 35, 36, 37, 38, 39, 39, 40,
-	41, 42, 43, 43, 44, 45, 46, 47, 48, 49, 49, 50, 51, 52, 53, 54,
-	55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
-	71, 73, 74, 75, 76, 77, 78, 79, 81, 82, 83, 84, 85, 87, 88, 89,
-	90, 91, 93, 94, 95, 97, 98, 99, 100, 102, 103, 105, 106, 107, 109, 110,
-	111, 113, 114, 116, 117, 119, 120, 121, 123, 124, 126, 127, 129, 130, 132, 133,
-	135, 137, 138, 140, 141, 143, 145, 146, 148, 149, 151, 153, 154, 156, 158, 159,
-	161, 163, 165, 166, 168, 170, 172, 173, 175, 177, 179, 181, 182, 184, 186, 188,
-	190, 192, 194, 196, 197, 199, 201, 203, 205, 207, 209, 211, 213, 215, 217, 219,
-	221, 223, 225, 227, 229, 231, 234, 236, 238, 240, 242, 244, 246, 248, 251, 253
-};
-
-static inline uint8_t gammaCorrect(uint8_t v)
-{
-	return pgm_read_byte(&gammaTable[v]);
-}
-
-
-static inline void applyGammaToStrip(Adafruit_NeoPixel& strip)
-{
-	const int n = strip.numPixels();
-	for (int i = 0; i < n; ++i)
-	{
-		uint32_t c = strip.getPixelColor(i);
-		uint8_t r = (c >> 16) & 0xFF;
-		uint8_t g = (c >> 8) & 0xFF;
-		uint8_t b = (c) & 0xFF;
-		r = gammaCorrect(r);
-		g = gammaCorrect(g);
-		b = gammaCorrect(b);
-		strip.setPixelColor(i, (uint32_t)r << 16 | (uint32_t)g << 8 | b);
-	}
-}
-
-
-// ---------------------------------------------------
-// Hardware pins (mag je overschrijven vr de include)
-// ---------------------------------------------------
-#ifndef LED_PIN_60
-#define LED_PIN_60  8			 // datapin voor 60-leds ring (minuten + seconden)
-#endif
-#ifndef LED_PIN_24
-#define LED_PIN_24  9			 // datapin voor 24-leds ring (uren)
-#endif
 
 // ---------------------------------------------------
 // NeoPixel strip instances
@@ -191,7 +128,7 @@ static void drawHourTicks()
 
 
 // Wijzer op 60-ring (trailLen gereserveerd  nu enkel hoofdpixel)
-static void drawHand60(uint8_t position, uint8_t r, uint8_t g, uint8_t b, uint8_t)
+static void drawHand60(uint8_t position, uint8_t r, uint8_t g, uint8_t b)
 {
 	addPix60(idx60(position), r, g, b);
 }
@@ -229,17 +166,15 @@ void ws2812bUpdate(const tm& now, time_t)
 
 	// 60-ring: minuten-ticks + wijzers
 	drawMinuteTicks();
-	drawHand60(posMin, rMin, gMin, bMin, TRAIL_LENGTH_MIN);
-	drawHand60(posSec, rSec, gSec, bSec, TRAIL_LENGTH_SEC);
+	drawHand60(posMin, rMin, gMin, bMin);
+	drawHand60(posSec, rSec, gSec, bSec);
 
 	// 24-ring: uur-ticks + urenwijzer
 	drawHourTicks();
 	addPix24(idx24(posHour), rHour, gHour, bHour);
 
 	// Naar de leds sturen
-	applyGammaToStrip(strip24);
 	strip24.show();
-	applyGammaToStrip(strip60);
 	strip60.show();
 }
 
@@ -247,11 +182,6 @@ void ws2812bUpdate(const tm& now, time_t)
 // Handmatig refresh (als je zelf iets getekend hebt buiten ws2812bUpdate)
 void ws2812bShow()
 {
-	applyGammaToStrip(strip24);
 	strip24.show();
-	applyGammaToStrip(strip60);
 	strip60.show();
 }
-
-
-bool ws2812bGammaEnabled() { return true; }
