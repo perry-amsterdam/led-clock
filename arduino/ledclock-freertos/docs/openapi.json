@@ -1,0 +1,71 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "LED Clock REST API",
+    "version": "1.0.0",
+    "description": "Mini-API om de verbinding te testen. Geen authenticatie. Uitbreidbaar met meer endpoints in volgende versies."
+  },
+  "servers": [
+    {
+      "url": "http://{host}",
+      "description": "ESP32 device",
+      "variables": {
+        "host": {
+          "default": "192.168.4.1"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/api/ping": {
+      "get": {
+        "summary": "Ping het device",
+        "description": "Retourneert een pong met enkele statusvelden, voor health/latency checks.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "pong",
+                    "now",
+                    "uptime_ms"
+                  ],
+                  "properties": {
+                    "pong": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "now": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "Unix epoch (ms)",
+                      "example": 1733246400000
+                    },
+                    "uptime_ms": {
+                      "type": "integer",
+                      "format": "int64",
+                      "example": 52341
+                    },
+                    "heap_free": {
+                      "type": "integer",
+                      "description": "Vrije heap in bytes",
+                      "example": 187264
+                    },
+                    "wifi_mode": {
+                      "type": "string",
+                      "description": "Huidige Wi-Fi modus",
+                      "example": "AP"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
