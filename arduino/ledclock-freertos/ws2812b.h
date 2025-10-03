@@ -114,3 +114,6 @@ void ws2812bUpdate(const tm& now, time_t epoch);
 
 // Hard flush als je zelf pixels set en direct wilt pushen.
 void ws2812bShow();
+
+// Gamma-correctie (ingeschakeld in implementatie)
+bool ws2812bGammaEnabled();
