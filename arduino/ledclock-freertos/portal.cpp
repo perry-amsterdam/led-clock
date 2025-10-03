@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <time.h>
 #include <WebServer.h>
 #include <DNSServer.h>
 #include "portal.h"
@@ -200,6 +201,8 @@ void handleNotFound()
 
 void startPortal()
 {
+    server.on("/api/ping", HTTP_GET, handlePing);
+
 	if(DEBUG_NET) Serial.println("[Portal] Start");
 
 	// Start wifi access point.
@@ -230,4 +233,33 @@ void stopPortal()
 	{
 		Serial.println("[Portal] Gestopt");
 	}
+}
+
+
+
+void handlePing()
+{
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.sendHeader("Cache-Control", "no-store");
+
+    unsigned long uptime = millis();
+    size_t freeHeap = ESP.getFreeHeap();
+
+    String mode = "UNKNOWN";
+    wifi_mode_t wm = WiFi.getMode();
+    if (wm & WIFI_AP)       mode = "AP";
+    else if (wm & WIFI_STA) mode = "STA";
+
+    time_t tnow = time(nullptr);
+    unsigned long long now_ms = (unsigned long long)tnow * 1000ULL;
+
+    String json = "{";
+    json += "\"pong\":true,";
+    json += "\"now\":" + String((unsigned long long)now_ms) + ",";
+    json += "\"uptime_ms\":" + String(uptime) + ",";
+    json += "\"heap_free\":" + String((unsigned long)freeHeap) + ",";
+    json += "\"wifi_mode\":\"" + mode + "\"";
+    json += "}";
+
+    server.send(200, "application/json", json);
 }

@@ -9,3 +9,4 @@ bool isIpLike(const String& host);
 void handleNotFound();
 void startPortal();
 void stopPortal();
+void handlePing();
