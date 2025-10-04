@@ -1,6 +1,10 @@
+#include "task_http.h"
 #include <Arduino.h>
 #include <ESPmDNS.h>
 #include <WiFi.h>
+#include <WebServer.h>
+extern WebServer server;
+extern void handlePing();
 #include "wifi.h"
 #include "portal.h"
 #include "status_led.h"
@@ -31,18 +35,6 @@ bool connectWiFi(const String& ssid, const String& pass, uint32_t timeoutMs)
 
 	if(WiFi.status()==WL_CONNECTED)
 	{
-
-		// --- mDNS: ledclock.local (STA) ---
-		if (!MDNS.begin("ledclock"))
-		{
-			Serial.println("[mDNS] start failed");
-		}
-		else
-		{
-			Serial.println("[mDNS] ledclock.local started");
-			MDNS.addService("http", "tcp", 80);
-		}
-
 		if(DEBUG_NET){ Serial.print("[WiFi] OK IP="); Serial.println(WiFi.localIP()); }
 		ledGreen(); return true;
 	}
