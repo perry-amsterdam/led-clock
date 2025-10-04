@@ -1,5 +1,3 @@
-[English version](README.en.md)
-
 # LED Clock met ESP32, FreeRTOS & WS2812B
 
 ![Platform ESP32](https://img.shields.io/badge/platform-ESP32-orange)
@@ -160,7 +158,7 @@ Vanaf **ESP32 Arduino core v3+** is `WiFi.beginWPSConfig()` verwijderd. Voor die
 * [x] Wi-Fi captive portal & NTP synchronisatie  
 * [x] Automatische timezone-detectie via IP  
 * [x] mDNS service  
-* [x] Wifi wps
+* [ ] Wifi wps
 * [ ] API server op ESP32  
 * [ ] Flutter app koppeling  
 * [ ] Artistieke klokvarianten  
