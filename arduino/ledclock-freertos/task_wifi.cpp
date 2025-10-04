@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <ESPmDNS.h>
 #include <WiFi.h>
 #include <Preferences.h>
 #include "rtos.h"
@@ -48,6 +49,18 @@ void task_wifi(void*)
 	// If connected via WPS, skip normal connection attempts
 	if (WiFi.status()==WL_CONNECTED)
 	{
+
+		// --- mDNS: ledclock.local (STA) ---
+		if (!MDNS.begin("ledclock"))
+		{
+			Serial.println("[mDNS] start failed");
+		}
+		else
+		{
+			Serial.println("[mDNS] ledclock.local started");
+			MDNS.addService("http", "tcp", 80);
+		}
+
 		for(;;)
 		{
 			LOG_STACK_WATERMARK("wifi:loop");

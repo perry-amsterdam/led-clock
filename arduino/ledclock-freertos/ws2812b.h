@@ -6,10 +6,10 @@
 // Hardware pins (mag je overschrijven vr de include)
 // ---------------------------------------------------
 #ifndef LED_PIN_60
-#define LED_PIN_60  8            // datapin voor 60-leds ring (minuten + seconden)
+#define LED_PIN_60  8			 // datapin voor 60-leds ring (minuten + seconden)
 #endif
 #ifndef LED_PIN_24
-#define LED_PIN_24  9            // datapin voor 24-leds ring (uren)
+#define LED_PIN_24  9			 // datapin voor 24-leds ring (uren)
 #endif
 
 #ifndef GLOBAL_BRIGHTNESS

@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <ESPmDNS.h>
 #include <WiFi.h>
 #include "wifi.h"
 #include "portal.h"
@@ -30,6 +31,18 @@ bool connectWiFi(const String& ssid, const String& pass, uint32_t timeoutMs)
 
 	if(WiFi.status()==WL_CONNECTED)
 	{
+
+		// --- mDNS: ledclock.local (STA) ---
+		if (!MDNS.begin("ledclock"))
+		{
+			Serial.println("[mDNS] start failed");
+		}
+		else
+		{
+			Serial.println("[mDNS] ledclock.local started");
+			MDNS.addService("http", "tcp", 80);
+		}
+
 		if(DEBUG_NET){ Serial.print("[WiFi] OK IP="); Serial.println(WiFi.localIP()); }
 		ledGreen(); return true;
 	}
