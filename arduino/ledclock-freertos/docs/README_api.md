@@ -41,9 +41,9 @@ oapi-codegen -generate types,client -o ledclock_client.gen.go -package ledclock 
 ```
 
 ### 4. Curl testen (zonder tooling)
-Als je verbonden bent met de ESP32 (bijv. via AP-modus op `192.168.4.1`):
+Als je verbonden bent met de ESP32 (bijv. via AP-modus op `ledclock.local`):
 ```bash
-curl http://192.168.4.1/api/ping
+curl http://ledclock.local/api/ping
 ```
 
 ## Roadmap
