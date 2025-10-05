@@ -80,6 +80,30 @@ format: ## Format all .cpp, .h and .ino files with bcpp
 	done
 
 # ----- Help -----
+# =========================================================
+# 🧹 Linting & Code Quality
+# =========================================================
+
+SRC_DIRS := src include
+CLANG_TIDY_FLAGS := -- -std=c++17 -Iinclude
+
+.PHONY: lint lint-cppcheck lint-clang install-linters
+
+lint: lint-cppcheck lint-clang ## Run both cppcheck and clang-tidy
+	@echo "✅ Linting complete."
+
+lint-cppcheck: ## Run cppcheck on source files
+	@echo "🔍 Running cppcheck..."
+	@cppcheck --enable=all --inconclusive --std=c++17 --quiet $(SRC_DIRS) || true
+
+lint-clang: ## Run clang-tidy on source files
+	@echo "🔍 Running clang-tidy..."
+	@find $(SRC_DIRS) -name '*.cpp' | xargs -r clang-tidy $(CLANG_TIDY_FLAGS) || true
+
+install-linters: ## Install cppcheck and clang-tidy via apt
+	@echo "📦 Installing cppcheck and clang-tidy..."
+	sudo apt update && sudo apt install -y cppcheck clang-tidy
+
 help: ## Show this help
 	@echo "Available targets (vars: SKETCH, PORT, UPLOAD_SPEED, MONITOR_BAUD, BUILD_DIR, FLASH_OPTS, LIBS_FILE):"
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-14s %s\n", $$1, $$2}'
@@ -88,11 +112,4 @@ help: ## Show this help
 # ====== Extra tools ======
 
 .PHONY: lint cppcheck check
-
-lint:
-	arduino-lint --recursive --project .
-
-cppcheck:
-	cppcheck --enable=all --std=c++17 --platform=arduino --suppress=missingIncludeSystem $(SKETCH)
-
 check: lint cppcheck
