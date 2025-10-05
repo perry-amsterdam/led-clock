@@ -5,6 +5,7 @@
 #include "rtos.h"
 #include "task_http.h"
 #include "portal.h"
+#include "hal_time_freertos.h"
 #include "http_api.h"
 extern void handlePing();
 static bool s_api_running = false;

@@ -7,7 +7,6 @@
 #include "task_led.h"
 #include "task_wifi.h"
 #include "task_time.h"
-#include "task_portal.h"
 #include "task_render.h"
 
 #if !defined(ESP_ARDUINO_VERSION_MAJOR) || (ESP_ARDUINO_VERSION_MAJOR < 3)

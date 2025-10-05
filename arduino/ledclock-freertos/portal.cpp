@@ -10,6 +10,17 @@
 #include "rtos.h"
 #include "http_api.h"
 
+extern "C"
+{
+	#include "freertos/FreeRTOS.h"
+	#include "freertos/task.h"
+}
+
+
+static TaskHandle_t s_portalTask = nullptr;
+static volatile bool s_portalOn = false;
+static void portalTask(void* pvParameters);
+
 String htmlWrap(const String& body)
 {
 	return String(F(
@@ -187,38 +198,25 @@ void handleNotFound()
 
 void startPortal()
 {
-	// Ensure the portal task is (re)started via explicit commands.
-	// Create the task if it's not running yet, otherwise just set the bit.
-	extern "C" void vTaskDelete(TaskHandle_t task);
-	extern "C" BaseType_t xTaskCreate(TaskFunction_t pxTaskCode, const char * const pcName, const uint32_t usStackDepth, void * const pvParameters, UBaseType_t uxPriority, TaskHandle_t * const pxCreatedTask);
-
-	static TaskHandle_t s_portalTask = nullptr;
-
-	static void portalTask(void *arg)
+	// --- Ensure portal task is running ---
+	s_portalOn = true;
+	if (s_portalTask == nullptr)
 	{
-		(void)arg;
-		for(;;)
+		BaseType_t ok = xTaskCreate(
+			portalTask,
+			"task_portal",
+			4096,
+			nullptr,
+			tskIDLE_PRIORITY + 2,
+			&s_portalTask
+			);
+		if (ok != pdPASS)
 		{
-			EventBits_t bits = xEventGroupGetBits(g_sysEvents);
-			if((bits & EVT_PORTAL_ON)==0)
-			{
-				// Bit cleared -> exit task
-				break;
-			}
-			// Service DNS & HTTP
-			dns.processNextRequest();
-			server.handleClient();
-			vTaskDelay(pdMS_TO_TICKS(10));
+			s_portalTask = nullptr;
 		}
-		TaskHandle_t self = xTaskGetCurrentTaskHandle();
-		if(self==s_portalTask) s_portalTask = nullptr;
-		vTaskDelete(nullptr);
-	}
-	if(s_portalTask==nullptr)
-	{
-		xTaskCreate(portalTask, "task_portal", 4096, nullptr, tskIDLE_PRIORITY+2, &s_portalTask);
 	}
 
+	/*__STARTPORTAL_MUTEX__*/
 	stopApi();
 	xEventGroupSetBits(g_sysEvents, EVT_PORTAL_ON);
 
@@ -257,22 +255,20 @@ void startPortal()
 
 void stopPortal()
 {
-	// Signal the task to stop and wait briefly for it to exit.
-	if(s_portalTask!=nullptr)
+	// --- Request portal task to stop and wait briefly ---
+	s_portalOn = false;
+	TickType_t deadline = xTaskGetTickCount() + pdMS_TO_TICKS(250);
+	while (s_portalTask != nullptr && xTaskGetTickCount() < deadline)
 	{
-		// Task loop exits when this bit is cleared; give it a moment to clean up.
-		for(int i=0;i<20 && s_portalTask!=nullptr;i++)
-		{
-			vTaskDelay(pdMS_TO_TICKS(10));
-		}
-		// As a safety, if still running, force delete.
-		if(s_portalTask!=nullptr)
-		{
-			vTaskDelete(s_portalTask);
-			s_portalTask = nullptr;
-		}
+		vTaskDelay(pdMS_TO_TICKS(10));
+	}
+	if (s_portalTask != nullptr)
+	{
+		vTaskDelete(s_portalTask);
+		s_portalTask = nullptr;
 	}
 
+	/*__STOPPORTAL_BITS__*/
 	xEventGroupClearBits(g_sysEvents, EVT_PORTAL_ON);
 
 	server.stop();
@@ -282,4 +278,22 @@ void stopPortal()
 	{
 		Serial.println("[Portal] Gestopt");
 	}
+}
+
+
+// ===== Portal FreeRTOS task implementation =====
+static void portalTask(void*)
+{
+	while (s_portalOn)
+	{
+		dns.processNextRequest();
+		server.handleClient();
+		#if defined(ESPmDNS_H)
+		MDNS.update();
+		#endif
+		vTaskDelay(pdMS_TO_TICKS(10));
+	}
+
+	s_portalTask = nullptr;
+	vTaskDelete(nullptr);
 }

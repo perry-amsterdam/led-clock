@@ -9,7 +9,6 @@
 #include "task_wifi.h"
 #include "task_http.h"
 #include "wifi.h"				 // connectWiFi(...)
-#include "task_portal.h"
 #include "portal.h"				 // startPortal/stopPortal
 #include "http_api.h"			 // startApi/stopApi
 #include "hal_time_freertos.h"
