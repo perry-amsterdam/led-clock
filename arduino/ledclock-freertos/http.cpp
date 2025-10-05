@@ -11,7 +11,8 @@
 #include "portal.h"
 #include "hal_time_freertos.h"
 #include "http.h"
-extern void handlePing();
+
+//extern void handlePing();
 static bool s_api_running = false;
 
 void startApi()
@@ -77,12 +78,6 @@ void handlePing()
 	server.send(200, "application/json", json);
 }
 
-
-// ---- task_http.cpp merged below ----
-
-#include <Arduino.h>
-#include <WebServer.h>
-#include "rtos.h"
 
 extern WebServer server;
 
