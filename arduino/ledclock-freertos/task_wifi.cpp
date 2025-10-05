@@ -34,23 +34,24 @@ void task_wifi(void*)
 		Serial.printf("[WiFi] Attempting to connect to saved SSID '%s'...\n", ssid.c_str());
 		// 15s timeout
 		connected = connectWiFi(ssid, pass, 15000);
-		xEventGroupSetBits(g_sysEvents, EVT_WIFI_UP);
 	}
 	else
 	{
-		Serial.println("[WiFi] No saved credentials found.");
 		xEventGroupClearBits(g_sysEvents, EVT_WIFI_UP);
+		Serial.println("[WiFi] No saved credentials found.");
 	}
 
 	// ----- 2) Bring up the right side based on result -----
 	if (connected)
 	{
+		xEventGroupSetBits(g_sysEvents, EVT_WIFI_UP);
 		Serial.println("[WiFi] Connected. Starting API...");
 		stopPortal();			 // make sure portal is OFF
 		startApi();				 // start REST API + mDNS
 	}
 	else
 	{
+		xEventGroupClearBits(g_sysEvents, EVT_WIFI_UP);
 		Serial.println("[WiFi] Not connected. Starting captive portal...");
 		stopApi();				 // make sure API is OFF
 		startPortal();			 // AP + DNS + setup UI
