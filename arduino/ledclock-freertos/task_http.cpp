@@ -26,3 +26,14 @@ void startHttpTask()
 		xTaskCreatePinnedToCore(httpTask, "http", 4096, nullptr, 1, &httpTaskHandle, 1);
 	}
 }
+
+
+void stopHttpTask()
+{
+	if (httpTaskHandle != nullptr)
+	{
+		TaskHandle_t toDelete = httpTaskHandle;
+		httpTaskHandle = nullptr;
+		vTaskDelete(toDelete);
+	}
+}

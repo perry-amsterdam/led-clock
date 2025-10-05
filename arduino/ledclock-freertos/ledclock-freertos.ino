@@ -43,7 +43,6 @@ void setup()
 	xTaskCreatePinnedToCore(task_led,    "led",    STACK_LED,    nullptr, PRIO_LED,    nullptr, 1);
 	xTaskCreatePinnedToCore(task_wifi,   "wifi",   STACK_WIFI,   nullptr, PRIO_WIFI,   nullptr, 1);
 	xTaskCreatePinnedToCore(task_time,   "time",   STACK_TIME,   nullptr, PRIO_TIME,   nullptr, 1);
-	xTaskCreatePinnedToCore(task_portal, "portal", STACK_PORTAL, nullptr, PRIO_PORTAL, nullptr, 0);
 	xTaskCreatePinnedToCore(task_render, "render", STACK_RENDER, nullptr, PRIO_RENDER, nullptr, 0);
 
 	// --- Stack debug boot summary ---

@@ -7,6 +7,8 @@
 #include "portal.h"
 #include "status_led.h"
 #include "hal_time_freertos.h"
+#include "rtos.h"
+#include "http_api.h"
 
 String htmlWrap(const String& body)
 {
@@ -184,6 +186,10 @@ void handleNotFound()
 
 void startPortal()
 {
+	/*__STARTPORTAL_MUTEX__*/
+	stopApi();
+	xEventGroupSetBits(g_sysEvents, EVT_PORTAL_ON);
+
 
 	// --- mDNS (AP/portal) ---
 	// Laat clients http://ledclock.local gebruiken tijdens portal
@@ -222,6 +228,9 @@ void startPortal()
 
 void stopPortal()
 {
+	/*__STOPPORTAL_BITS__*/
+	xEventGroupClearBits(g_sysEvents, EVT_PORTAL_ON);
+
 	server.stop();
 	dns.stop();
 	WiFi.softAPdisconnect(true);
