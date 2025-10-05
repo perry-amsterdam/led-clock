@@ -154,6 +154,7 @@ void handleSave()
 	server.send(302);
 }
 
+
 void handleReset()
 {
 	if(DEBUG_NET) Serial.println("[HTTP] GET /reset -> clear creds");
@@ -190,7 +191,6 @@ void startPortal()
 	stopApi();
 	xEventGroupSetBits(g_sysEvents, EVT_PORTAL_ON);
 
-
 	// --- mDNS (AP/portal) ---
 	// Laat clients http://ledclock.local gebruiken tijdens portal
 	if (!MDNS.begin("ledclock"))
@@ -202,8 +202,6 @@ void startPortal()
 		Serial.println("[mDNS] AP mDNS ledclock.local");
 		MDNS.addService("http", "tcp", 80);
 	}
-
-	server.on("/api/ping", HTTP_GET, handlePing);
 
 	if(DEBUG_NET) Serial.println("[Portal] Start");
 
@@ -238,38 +236,4 @@ void stopPortal()
 	{
 		Serial.println("[Portal] Gestopt");
 	}
-}
-
-
-void handlePing()
-{
-	server.sendHeader("Access-Control-Allow-Origin", "*");
-	server.sendHeader("Cache-Control", "no-store");
-
-	unsigned long uptime = hal_millis();
-	size_t freeHeap = ESP.getFreeHeap();
-
-	String mode = "UNKNOWN";
-	wifi_mode_t wm = WiFi.getMode();
-	if (wm & WIFI_AP)
-	{
-		mode = "AP";
-	}
-	else if (wm & WIFI_STA)
-	{
-		mode = "STA";
-	}
-
-	time_t tnow = time(nullptr);
-	unsigned long long now_ms = (unsigned long long)tnow * 1000ULL;
-
-	String json = "{";
-	json += "\"pong\":true,";
-	json += "\"now\":" + String((unsigned long long)now_ms) + ",";
-	json += "\"uptime_ms\":" + String(uptime) + ",";
-	json += "\"heap_free\":" + String((unsigned long)freeHeap) + ",";
-	json += "\"wifi_mode\":\"" + mode + "\"";
-	json += "}";
-
-	server.send(200, "application/json", json);
 }

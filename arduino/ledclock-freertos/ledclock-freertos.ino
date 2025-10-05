@@ -55,7 +55,6 @@ void setup()
 	LOG_STACK_WATERMARK("wifi");
 	LOG_STACK_WATERMARK("render");
 	LOG_STACK_WATERMARK("led");
-	LOG_STACK_WATERMARK("portal");
 }
 
 
