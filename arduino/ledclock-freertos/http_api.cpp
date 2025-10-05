@@ -13,6 +13,7 @@ static bool s_api_running = false;
 void startApi()
 {
 	if (s_api_running) return;
+	if(DEBUG_NET) Serial.println("[HTTP] Starting API");
 	xEventGroupClearBits(g_sysEvents, EVT_PORTAL_ON);
 	stopPortal();
 	server.on("/api/ping", HTTP_GET, handlePing);
@@ -21,6 +22,7 @@ void startApi()
 	MDNS.end();
 	if (MDNS.begin("ledclock"))
 	{
+		if(DEBUG_NET) Serial.println("[HTTP] Starting MDNS");
 		MDNS.setInstanceName("LED Clock");
 		MDNS.addService("http", "tcp", 80);
 	}
