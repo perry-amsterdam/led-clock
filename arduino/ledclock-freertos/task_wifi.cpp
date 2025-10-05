@@ -32,12 +32,14 @@ void task_wifi(void*)
 	if (!ssid.isEmpty())
 	{
 		Serial.printf("[WiFi] Attempting to connect to saved SSID '%s'...\n", ssid.c_str());
-								 // 15s timeout
+		// 15s timeout
 		connected = connectWiFi(ssid, pass, 15000);
+		xEventGroupSetBits(g_sysEvents, EVT_WIFI_UP);
 	}
 	else
 	{
 		Serial.println("[WiFi] No saved credentials found.");
+		xEventGroupClearBits(g_sysEvents, EVT_WIFI_UP);
 	}
 
 	// ----- 2) Bring up the right side based on result -----
@@ -63,6 +65,7 @@ void task_wifi(void*)
 
 		if (link_up && !last_link_up)
 		{
+			xEventGroupSetBits(g_sysEvents, EVT_WIFI_UP);
 			Serial.println("[WiFi] Connection restored.");
 			stopPortal();
 			startApi();
@@ -70,6 +73,7 @@ void task_wifi(void*)
 		}
 		else if (!link_up && last_link_up)
 		{
+			xEventGroupClearBits(g_sysEvents, EVT_WIFI_UP);
 			Serial.println("[WiFi] Connection lost.");
 			stopApi();
 			startPortal();
