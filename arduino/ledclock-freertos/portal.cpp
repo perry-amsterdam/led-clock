@@ -187,7 +187,38 @@ void handleNotFound()
 
 void startPortal()
 {
-	/*__STARTPORTAL_MUTEX__*/
+	// Ensure the portal task is (re)started via explicit commands.
+	// Create the task if it's not running yet, otherwise just set the bit.
+	extern "C" void vTaskDelete(TaskHandle_t task);
+	extern "C" BaseType_t xTaskCreate(TaskFunction_t pxTaskCode, const char * const pcName, const uint32_t usStackDepth, void * const pvParameters, UBaseType_t uxPriority, TaskHandle_t * const pxCreatedTask);
+
+	static TaskHandle_t s_portalTask = nullptr;
+
+	static void portalTask(void *arg)
+	{
+		(void)arg;
+		for(;;)
+		{
+			EventBits_t bits = xEventGroupGetBits(g_sysEvents);
+			if((bits & EVT_PORTAL_ON)==0)
+			{
+				// Bit cleared -> exit task
+				break;
+			}
+			// Service DNS & HTTP
+			dns.processNextRequest();
+			server.handleClient();
+			vTaskDelay(pdMS_TO_TICKS(10));
+		}
+		TaskHandle_t self = xTaskGetCurrentTaskHandle();
+		if(self==s_portalTask) s_portalTask = nullptr;
+		vTaskDelete(nullptr);
+	}
+	if(s_portalTask==nullptr)
+	{
+		xTaskCreate(portalTask, "task_portal", 4096, nullptr, tskIDLE_PRIORITY+2, &s_portalTask);
+	}
+
 	stopApi();
 	xEventGroupSetBits(g_sysEvents, EVT_PORTAL_ON);
 
@@ -226,7 +257,22 @@ void startPortal()
 
 void stopPortal()
 {
-	/*__STOPPORTAL_BITS__*/
+	// Signal the task to stop and wait briefly for it to exit.
+	if(s_portalTask!=nullptr)
+	{
+		// Task loop exits when this bit is cleared; give it a moment to clean up.
+		for(int i=0;i<20 && s_portalTask!=nullptr;i++)
+		{
+			vTaskDelay(pdMS_TO_TICKS(10));
+		}
+		// As a safety, if still running, force delete.
+		if(s_portalTask!=nullptr)
+		{
+			vTaskDelete(s_portalTask);
+			s_portalTask = nullptr;
+		}
+	}
+
 	xEventGroupClearBits(g_sysEvents, EVT_PORTAL_ON);
 
 	server.stop();
