@@ -7,10 +7,9 @@
 #include "rtos.h"
 #include "globals.h"
 #include "task_wifi.h"
-#include "task_http.h"
 #include "wifi.h"				 // connectWiFi(...)
 #include "portal.h"				 // startPortal/stopPortal
-#include "http_api.h"			 // startApi/stopApi
+#include "http.h"				 // startApi/stopApi
 #include "hal_time_freertos.h"
 
 // This task attempts to connect using saved credentials once,
