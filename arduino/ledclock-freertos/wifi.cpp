@@ -1,4 +1,3 @@
-#include "http.h"
 #include <Arduino.h>
 #include <ESPmDNS.h>
 #include <WiFi.h>
@@ -6,7 +5,8 @@
 extern WebServer server;
 extern void handlePing();
 #include "wifi.h"
-#include "portal.h"
+#include "http_api.h"
+#include "http_portal.h"
 #include "status_led.h"
 #include "net_time.h"
 #include "hal_time_freertos.h"
