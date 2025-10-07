@@ -20,7 +20,6 @@ extern "C"
 // ======================================================
 // Globals
 // ======================================================
-//WebServer server(80);
 extern DNSServer dns;			 // captive portal DNS server
 static TaskHandle_t httpTaskHandle = nullptr;
 static bool s_api_running = false;
@@ -51,11 +50,11 @@ static void sendJson(int code, const String& json)
 }
 
 
-
 // ======================================================
 // /api/timezones (GET) - compacte lijst (uitbreidbaar)
 // ======================================================
-static const char* kTimezones[] PROGMEM = {
+static const char* kTimezones[] PROGMEM =
+{
 	"UTC",
 
 	// Europe
@@ -105,13 +104,7 @@ static void apiHandleTimezonesGet()
 	client.stop();
 }
 
-static void apiHandleTimezonesOptions()
-{
-	server.sendHeader("Access-Control-Allow-Origin", "*");
-	server.sendHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-	server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
-	server.send(204);
-}
+
 // ======================================================
 // /api/ping
 // ======================================================
@@ -275,7 +268,6 @@ void startApi()
 	server.on("/api/timezone", HTTP_GET, apiHandleTimezoneGet);
 	server.on("/api/timezone", HTTP_POST, apiHandleTimezonePost);
 	server.on("/api/timezones", HTTP_GET, apiHandleTimezonesGet);
-	server.on("/api/timezones", HTTP_OPTIONS, apiHandleTimezonesOptions);
 
 	server.begin();
 	s_api_running = true;
