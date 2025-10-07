@@ -16,6 +16,7 @@ extern "C"
 	#include "freertos/task.h"
 }
 
+
 static TaskHandle_t s_portalTask = nullptr;
 static volatile bool s_portalOn = false;
 static void portalTask(void* pvParameters);
@@ -129,6 +130,9 @@ void handleRoot()
 		"</form>"
 		);
 
+	// In de buttons-row:
+	page += F("<button class='btn-ghost' type='button' id='rebootBtn'>Herstart apparaat</button>");
+
 	// Script to prefill SSID and wire up UI logic
 	page += F("<script>");
 
@@ -141,6 +145,15 @@ void handleRoot()
 	// Password show/hide
 	page += "var s=document.getElementById('showpw'),p=document.getElementById('pass');"
 		"if(s&&p){s.addEventListener('change',function(){p.type=this.checked?'text':'password';});}";
+
+	// Reboot-knop (bevestiging + POST)
+	page += F("document.getElementById('rebootBtn').addEventListener('click',function(){"
+		" if(!confirm('Zeker weten dat je het apparaat wilt herstarten?')) return;"
+		" fetch('/reboot',{method:'POST'}).then(function(r){return r.text();}).then(function(html){"
+		"   document.open(); document.write(html); document.close();"
+		" }).catch(function(){ alert('Kon herstart niet triggeren'); });"
+		"});");
+
 	page += F("</script>");
 
 	server.send(200,"text/html", htmlWrap(page));
@@ -172,6 +185,24 @@ void handleReset()
 	prefs.begin(PREF_NS,false); prefs.clear(); prefs.end();
 	server.send(200,"text/html",htmlWrap("<h1>Gewist \342\234\205</h1><p>Herstart...</p>"));
 	hal_delay_ms(500); ESP.restart();
+}
+
+
+void handleReboot()
+{
+	if (DEBUG_NET) Serial.println("[HTTP] POST /reboot -> restarting device");
+
+	// Toon meteen feedback aan de gebruiker
+	String body = F("<h1>Herstarten\342\200\246</h1><p>De klok start nu opnieuw op.</br>" 
+			        "Je verliest zo de verbinding met dit netwerk (AP) of de portal.</p>");
+
+	// Connection: close voorkomt dat de browser de socket open probeert te houden
+	server.sendHeader("Connection", "close");
+	server.send(200, "text/html", htmlWrap(body));
+
+	// Restart in een korte, uitgestelde FreeRTOS-task zodat de response eerst de lucht in gaat
+	vTaskDelay(pdMS_TO_TICKS(800));
+	ESP.restart();
 }
 
 
@@ -247,6 +278,7 @@ void startPortal()
 	server.on("/save",HTTP_POST,handleSave);
 	server.on("/reset",HTTP_GET,handleReset);
 	server.on("/scan", HTTP_GET,handleScan);
+	server.on("/reboot", HTTP_POST, handleReboot);
 	server.onNotFound(handleNotFound);
 	server.begin();
 
