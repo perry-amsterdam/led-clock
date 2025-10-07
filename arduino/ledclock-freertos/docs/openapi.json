@@ -11,7 +11,7 @@
       "description": "ESP32 device",
       "variables": {
         "host": {
-          "default": "192.168.4.1"
+          "default": "ledclock.local"
         }
       }
     }
