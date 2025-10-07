@@ -16,7 +16,6 @@ extern "C"
 	#include "freertos/task.h"
 }
 
-
 static TaskHandle_t s_portalTask = nullptr;
 static volatile bool s_portalOn = false;
 static void portalTask(void* pvParameters);
@@ -132,11 +131,13 @@ void handleRoot()
 
 	// Script to prefill SSID and wire up UI logic
 	page += F("<script>");
+
 	// Prefill SSID (escape simple quotes/backslashes)
 	String esc = savedSsid; esc.replace("\\", "\\\\"); esc.replace("'", "\\'");
 	page += "var ss=document.getElementById('ssid'); if(ss){ ss.value='";
 	page += esc;
 	page += "'; }";
+
 	// Password show/hide
 	page += "var s=document.getElementById('showpw'),p=document.getElementById('pass');"
 		"if(s&&p){s.addEventListener('change',function(){p.type=this.checked?'text':'password';});}";
@@ -161,8 +162,7 @@ void handleSave()
 	prefs.putString("pass", server.arg("pass"));
 	prefs.end();
 
-	server.sendHeader("Location","/");
-	server.send(302);
+	hal_delay_ms(500); ESP.restart();
 }
 
 
@@ -246,6 +246,7 @@ void startPortal()
 	server.on("/",HTTP_GET,handleRoot);
 	server.on("/save",HTTP_POST,handleSave);
 	server.on("/reset",HTTP_GET,handleReset);
+	server.on("/scan", HTTP_GET,handleScan);
 	server.onNotFound(handleNotFound);
 	server.begin();
 
@@ -296,4 +297,55 @@ static void portalTask(void*)
 
 	s_portalTask = nullptr;
 	vTaskDelete(nullptr);
+}
+
+
+// ---------- Nieuwe functie: handleScan ----------
+// Retourneert JSON array: [{ "ssid":"...", "rssi":-60, "enc":"WPA2" }, ...]
+void handleScan()
+{
+	if (DEBUG_NET) Serial.println("[HTTP] GET /scan -> starting wifi scan");
+
+	// Zet gateway/AP mode tijdelijk niet nodig  de AP draait al wanneer portal on
+	// Gebruik blocking scan (scheelt complexiteit). Dit kan een paar 100..1000 ms duren.
+	// blocking, include hidden
+	int n = WiFi.scanNetworks(false, true);
+
+	// WiFi.scanNetworks() returns number of networks found
+	String json = "[";
+	for (int i = 0; i < n; ++i)
+	{
+		if (i) json += ",";
+		String ssid = WiFi.SSID(i);
+		int rssi = WiFi.RSSI(i);
+		// ENC_TYPE_NONE, ENC_TYPE_WEP, ENC_TYPE_TKIP, ENC_TYPE_CCMP, ENC_TYPE_AUTO
+		int enc = WiFi.encryptionType(i);
+		const char *encstr = "UNKNOWN";
+		switch (enc)
+		{
+			case WIFI_AUTH_OPEN: encstr = "OPEN"; break;
+			case WIFI_AUTH_WEP: encstr = "WEP"; break;
+			case WIFI_AUTH_WPA_PSK: encstr = "WPA-PSK"; break;
+			case WIFI_AUTH_WPA2_PSK: encstr = "WPA2-PSK"; break;
+			case WIFI_AUTH_WPA_WPA2_PSK: encstr = "WPA/WPA2-PSK"; break;
+			case WIFI_AUTH_WPA2_ENTERPRISE: encstr = "WPA2-ENT"; break;
+			default: encstr = "UNKNOWN"; break;
+		}
+
+		// Basic JSON escaping for SSID
+		String esc = ssid;
+		esc.replace("\\", "\\\\");
+		esc.replace("\"", "\\\"");
+		json += "{";
+		json += "\"ssid\":\"" + esc + "\"";
+		json += ",\"rssi\":" + String(rssi);
+		json += ",\"enc\":\"" + String(encstr) + "\"";
+		json += "}";
+	}
+	json += "]";
+
+	server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+	server.send(200, "application/json", json);
+
+	if (DEBUG_NET) Serial.printf("[HTTP] /scan returned %d AP(s)\n", n);
 }
