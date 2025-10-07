@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <ESPmDNS.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
 #include <DNSServer.h>
@@ -192,6 +193,9 @@ static void httpTask(void* arg)
 	{
 		server.handleClient();
 		dns.processNextRequest();
+		#if defined(ESPmDNS_H)
+		MDNS.update();
+		#endif
 		vTaskDelay(pdMS_TO_TICKS(2));
 	}
 }
