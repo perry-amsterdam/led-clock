@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "LED Clock REST API",
-    "version": "1.0.0",
-    "description": "Mini-API om de verbinding te testen. Geen authenticatie. Uitbreidbaar met meer endpoints in volgende versies."
+    "version": "1.2.0",
+    "description": "REST API voor ESP32 LED Clock. Bevat ping, reboot en tijdzone endpoints."
   },
   "servers": [
     {
@@ -28,16 +28,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "pong",
-                    "now",
-                    "uptime_ms"
-                  ],
+                  "required": ["pong", "now", "uptime_ms"],
                   "properties": {
-                    "pong": {
-                      "type": "boolean",
-                      "example": true
-                    },
+                    "pong": { "type": "boolean", "example": true },
                     "now": {
                       "type": "integer",
                       "format": "int64",
@@ -66,6 +59,94 @@
           }
         }
       }
+    },
+    "/api/system/reboot": {
+      "post": {
+        "summary": "Herstart het apparaat",
+        "description": "Start de ESP32 opnieuw op.",
+        "responses": {
+          "200": {
+            "description": "Herstart wordt uitgevoerd",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "rebooting": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Rebooting system..." }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/timezone": {
+      "get": {
+        "summary": "Haal de ingestelde tijdzone op",
+        "description": "Geeft de huidige IANA tijdzone en berekende UTC-offset (sec) terug.",
+        "responses": {
+          "200": {
+            "description": "Tijdzone-informatie ontvangen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["timezone", "utc_offset_sec"],
+                  "properties": {
+                    "timezone": { "type": "string", "example": "Europe/Amsterdam" },
+                    "utc_offset_sec": {
+                      "type": "integer",
+                      "description": "Offset t.o.v. UTC in seconden (inclusief DST indien actief).",
+                      "example": 7200
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Stel de tijdzone in",
+        "description": "Past alleen de tijdzone (IANA) aan. De klok zelf blijft door NTP/RTC bepaald.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["timezone"],
+                "properties": {
+                  "timezone": {
+                    "type": "string",
+                    "description": "Nieuwe tijdzone, bv. Europe/Amsterdam",
+                    "example": "Europe/Amsterdam"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tijdzone succesvol ingesteld",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Timezone updated successfully" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
+
