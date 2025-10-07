@@ -41,17 +41,3 @@ bool connectWiFi(const String& ssid, const String& pass, uint32_t timeoutMs)
 
 	Serial.println("[WiFi] FAILED"); return false;
 }
-
-
-//// Klein hulpfunctietje om met timeout te wachten
-//static bool waitFor(std::function<bool()> pred, uint32_t timeoutMs, uint32_t stepMs = 100)
-//{
-//	const uint32_t start = hal_millis();
-//	while (!pred())
-//	{
-//		if (hal_millis() - start >= timeoutMs) return false;
-//		hal_delay_ms(stepMs);
-//		yield();
-//	}
-//	return true;
-//}
