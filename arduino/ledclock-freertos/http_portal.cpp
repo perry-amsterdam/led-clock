@@ -193,8 +193,8 @@ void handleReboot()
 	if (DEBUG_NET) Serial.println("[HTTP] POST /reboot -> restarting device");
 
 	// Toon meteen feedback aan de gebruiker
-	String body = F("<h1>Herstarten\342\200\246</h1><p>De klok start nu opnieuw op.</br>" 
-			        "Je verliest zo de verbinding met dit netwerk (AP) of de portal.</p>");
+	String body = F("<h1>Herstarten\342\200\246</h1><p>De klok start nu opnieuw op.</br>"
+		"Je verliest zo de verbinding met dit netwerk (AP) of de portal.</p>");
 
 	// Connection: close voorkomt dat de browser de socket open probeert te houden
 	server.sendHeader("Connection", "close");

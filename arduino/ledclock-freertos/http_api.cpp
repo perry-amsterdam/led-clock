@@ -1,95 +1,241 @@
-
 #include <Arduino.h>
-#include <ESPmDNS.h>
+#include <WiFi.h>
 #include <WebServer.h>
+#include <ESPmDNS.h>
+#include <DNSServer.h>
+#include <Preferences.h>
+#include <time.h>
+extern "C"
+{
+	#include "freertos/FreeRTOS.h"
+	#include "freertos/task.h"
+}
+
+
 #include "globals.h"
-#include "rtos.h"
-#include "hal_time_freertos.h"
 #include "http_api.h"
-#include "http_portal.h"
+#include "hal_time_freertos.h"
 
-// extern void handlePing();
-static bool s_api_running = false;
-extern WebServer server;
+// ======================================================
+// Globals
+// ======================================================
+//WebServer server(80);
+extern DNSServer dns;			 // captive portal DNS server
 static TaskHandle_t httpTaskHandle = nullptr;
+static bool s_api_running = false;
 
+// ======================================================
+// Helper functies
+// ======================================================
+
+static String wifiModeStr()
+{
+	wifi_mode_t m = WiFi.getMode();
+	switch (m)
+	{
+		case WIFI_MODE_NULL: return "OFF";
+		case WIFI_MODE_STA:  return "STA";
+		case WIFI_MODE_AP:   return "AP";
+		case WIFI_MODE_APSTA:return "APSTA";
+		default: return "UNKNOWN";
+	}
+}
+
+
+static void sendJson(int code, const String& json)
+{
+	server.sendHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+	server.sendHeader("Pragma", "no-cache");
+	server.send(code, "application/json", json);
+}
+
+
+// ======================================================
+// /api/ping
+// ======================================================
+static void apiHandlePing()
+{
+	uint64_t epoch_ms = (uint64_t)(time(nullptr)) * 1000ULL;
+	String json = "{";
+	json += "\"pong\":true";
+	json += ",\"now\":" + String((long long)epoch_ms);
+	json += ",\"uptime_ms\":" + String((uint32_t)hal_millis());
+	json += ",\"heap_free\":" + String((int)ESP.getFreeHeap());
+	json += ",\"wifi_mode\":\"" + wifiModeStr() + "\"";
+	json += "}";
+	sendJson(200, json);
+}
+
+
+// ======================================================
+// /api/system/reboot (POST)
+// ======================================================
+static void apiHandleReboot()
+{
+	sendJson(200, "{\"rebooting\":true,\"message\":\"Rebooting system...\"}");
+	xTaskCreate(
+		[](void*)
+	{
+		vTaskDelay(pdMS_TO_TICKS(250));
+			ESP.restart();
+			vTaskDelete(nullptr);
+	},
+		"reboot_task", 2048, nullptr, tskIDLE_PRIORITY + 3, nullptr
+		);
+}
+
+
+// ======================================================
+// Tijdzone helpers
+// ======================================================
+static String nvsReadTimezone()
+{
+	Preferences p;
+	if (!p.begin("sys", true)) return "";
+	String tz = p.getString("tz", "");
+	p.end();
+	return tz;
+}
+
+
+static void nvsWriteTimezone(const String& tz)
+{
+	Preferences p;
+	if (p.begin("sys", false))
+	{
+		p.putString("tz", tz);
+		p.end();
+	}
+}
+
+
+// ======================================================
+// /api/timezone (GET)
+// ======================================================
+static void apiHandleTimezoneGet()
+{
+	String tz = g_timezoneIANA;
+	if (tz.length() == 0) tz = nvsReadTimezone();
+
+	time_t now = time(nullptr);
+	struct tm lt;
+	localtime_r(&now, &lt);
+
+	long off = 0;
+	#if defined(__USE_MISC) || defined(__GLIBC__) || defined(__APPLE__)
+	off = lt.tm_gmtoff;
+	#else
+	struct tm gmt = *gmtime(&now);
+	off = (long)difftime(mktime(&lt), mktime(&gmt));
+	#endif
+
+	String json = "{";
+	json += "\"timezone\":\"" + (tz.length() ? tz : String("")) + "\"";
+	json += ",\"utc_offset_sec\":" + String((long)off);
+	json += "}";
+	sendJson(200, json);
+}
+
+
+// ======================================================
+// /api/timezone (POST)
+// ======================================================
+static void apiHandleTimezonePost()
+{
+	if (server.method() != HTTP_POST)
+	{
+		sendJson(405, "{\"success\":false,\"message\":\"Method Not Allowed\"}");
+		return;
+	}
+	if (!server.hasArg("plain"))
+	{
+		sendJson(400, "{\"success\":false,\"message\":\"Missing body\"}");
+		return;
+	}
+	String body = server.arg("plain");
+	int k = body.indexOf("\"timezone\"");
+	if (k < 0)
+	{
+		sendJson(400, "{\"success\":false,\"message\":\"Missing 'timezone'\"}");
+		return;
+	}
+	k = body.indexOf(':', k);
+	int q1 = body.indexOf('"', k);
+	int q2 = (q1 >= 0) ? body.indexOf('"', q1 + 1) : -1;
+	if (q1 < 0 || q2 <= q1)
+	{
+		sendJson(400, "{\"success\":false,\"message\":\"Invalid 'timezone'\"}");
+		return;
+	}
+	String tz = body.substring(q1 + 1, q2);
+	tz.trim();
+
+	if (tz.length() < 3 || tz.length() > 64)
+	{
+		sendJson(400, "{\"success\":false,\"message\":\"Invalid timezone format\"}");
+		return;
+	}
+
+	g_timezoneIANA = tz;
+	nvsWriteTimezone(tz);
+
+	sendJson(200, "{\"success\":true,\"message\":\"Timezone updated successfully\"}");
+}
+
+
+// ======================================================
+// HTTP task (FreeRTOS)
+// ======================================================
+static void httpTask(void* arg)
+{
+	for (;;)
+	{
+		server.handleClient();
+		dns.processNextRequest();
+		vTaskDelay(pdMS_TO_TICKS(2));
+	}
+}
+
+
+// ======================================================
+// startApi / stopApi / startHttpTask / stopHttpTask
+// ======================================================
 void startApi()
 {
 	if (s_api_running) return;
-	if(DEBUG_NET) Serial.println("[HTTP] Starting API");
-	xEventGroupClearBits(g_sysEvents, EVT_PORTAL_ON);
-	stopPortal();
-	server.on("/api/ping", HTTP_GET, handlePing);
+
+	Serial.println("[HTTP] Starting API...");
+	server.on("/api/ping", HTTP_GET, apiHandlePing);
+	server.on("/api/system/reboot", HTTP_POST, apiHandleReboot);
+	server.on("/api/timezone", HTTP_GET, apiHandleTimezoneGet);
+	server.on("/api/timezone", HTTP_POST, apiHandleTimezonePost);
+
 	server.begin();
-	startHttpTask();
-	MDNS.end();
-	if (MDNS.begin("ledclock"))
-	{
-		if(DEBUG_NET) Serial.println("[HTTP] Starting MDNS");
-		MDNS.setInstanceName("LED Clock");
-		MDNS.addService("http", "tcp", 80);
-	}
 	s_api_running = true;
+
+	// Start mDNS
+	if (!MDNS.begin("ledclock"))
+	{
+		Serial.println("[mDNS] Fout bij starten van mDNS");
+	}
+	else
+	{
+		MDNS.addService("http", "tcp", 80);
+		Serial.println("[mDNS] Service gestart: http://ledclock.local");
+	}
+
+	Serial.println("[HTTP] API gestart");
 }
 
 
 void stopApi()
 {
 	if (!s_api_running) return;
-	stopHttpTask();
-	server.stop();
+	Serial.println("[HTTP] Stopt API...");
+	server.close();
 	MDNS.end();
 	s_api_running = false;
-}
-
-
-void handlePing()
-{
-	server.sendHeader("Access-Control-Allow-Origin", "*");
-	server.sendHeader("Cache-Control", "no-store");
-
-	unsigned long uptime = hal_millis();
-	size_t freeHeap = ESP.getFreeHeap();
-
-	String mode = "UNKNOWN";
-	wifi_mode_t wm = WiFi.getMode();
-	if (wm & WIFI_AP)
-	{
-		mode = "AP";
-	}
-	else if (wm & WIFI_STA)
-	{
-		mode = "STA";
-	}
-
-	time_t tnow = time(nullptr);
-	unsigned long long now_ms = (unsigned long long)tnow * 1000ULL;
-
-	String json = "{";
-	json += "\"pong\":true,";
-	json += "\"now\":" + String((unsigned long long)now_ms) + ",";
-	json += "\"uptime_ms\":" + String(uptime) + ",";
-	json += "\"heap_free\":" + String((unsigned long)freeHeap) + ",";
-	json += "\"wifi_mode\":\"" + mode + "\"";
-	json += "}";
-
-	server.send(200, "application/json", json);
-}
-
-
-static void httpTask(void*)
-{
-	for (;;)
-	{
-		server.handleClient();
-		dns.processNextRequest();
-		#if defined(ESPmDNS_H)
-		MDNS.update();
-		#endif
-
-		// ~100 Hz
-		vTaskDelay(pdMS_TO_TICKS(10));
-	}
+	Serial.println("[HTTP] API gestopt");
 }
 
 
@@ -98,6 +244,7 @@ void startHttpTask()
 	if (httpTaskHandle == nullptr)
 	{
 		xTaskCreatePinnedToCore(httpTask, "http", 4096, nullptr, 1, &httpTaskHandle, 1);
+		Serial.println("[HTTP] Task gestart");
 	}
 }
 
@@ -106,8 +253,9 @@ void stopHttpTask()
 {
 	if (httpTaskHandle != nullptr)
 	{
-		TaskHandle_t toDelete = httpTaskHandle;
+		TaskHandle_t t = httpTaskHandle;
 		httpTaskHandle = nullptr;
-		vTaskDelete(toDelete);
+		vTaskDelete(t);
+		Serial.println("[HTTP] Task gestopt");
 	}
 }
