@@ -51,6 +51,67 @@ static void sendJson(int code, const String& json)
 }
 
 
+
+// ======================================================
+// /api/timezones (GET) - compacte lijst (uitbreidbaar)
+// ======================================================
+static const char* kTimezones[] PROGMEM = {
+	"UTC",
+
+	// Europe
+	"Europe/Amsterdam", "Europe/London", "Europe/Berlin", "Europe/Paris",
+	"Europe/Madrid", "Europe/Rome", "Europe/Warsaw", "Europe/Athens",
+	"Europe/Istanbul", "Europe/Moscow", "Europe/Zurich", "Europe/Stockholm",
+
+	// America
+	"America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles",
+	"America/Phoenix", "America/Toronto", "America/Mexico_City", "America/Sao_Paulo",
+
+	// Africa
+	"Africa/Cairo", "Africa/Johannesburg", "Africa/Nairobi",
+
+	// Asia
+	"Asia/Dubai", "Asia/Karachi", "Asia/Kolkata", "Asia/Bangkok",
+	"Asia/Singapore", "Asia/Hong_Kong", "Asia/Taipei",
+	"Asia/Shanghai", "Asia/Tokyo", "Asia/Seoul",
+
+	// Oceania / Pacific
+	"Australia/Sydney", "Australia/Melbourne", "Australia/Perth",
+	"Pacific/Auckland", "Pacific/Honolulu",
+
+	// Atlantic
+	"Atlantic/Reykjavik"
+};
+static constexpr size_t kTimezoneCount = sizeof(kTimezones) / sizeof(kTimezones[0]);
+
+static void apiHandleTimezonesGet()
+{
+	server.sendHeader("Access-Control-Allow-Origin", "*");
+	server.sendHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+	server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
+	server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+	server.send(200, "application/json", "");
+
+	WiFiClient client = server.client();
+	client.print("{\"timezones\":[");
+	for (size_t i = 0; i < kTimezoneCount; ++i)
+	{
+		if (i > 0) client.print(',');
+		client.print('\"');
+		client.print(kTimezones[i]);
+		client.print('\"');
+	}
+	client.print("]}");
+	client.stop();
+}
+
+static void apiHandleTimezonesOptions()
+{
+	server.sendHeader("Access-Control-Allow-Origin", "*");
+	server.sendHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+	server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
+	server.send(204);
+}
 // ======================================================
 // /api/ping
 // ======================================================
@@ -213,6 +274,8 @@ void startApi()
 	server.on("/api/system/reboot", HTTP_POST, apiHandleReboot);
 	server.on("/api/timezone", HTTP_GET, apiHandleTimezoneGet);
 	server.on("/api/timezone", HTTP_POST, apiHandleTimezonePost);
+	server.on("/api/timezones", HTTP_GET, apiHandleTimezonesGet);
+	server.on("/api/timezones", HTTP_OPTIONS, apiHandleTimezonesOptions);
 
 	server.begin();
 	s_api_running = true;
