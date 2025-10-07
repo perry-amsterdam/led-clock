@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "LED Clock REST API",
-    "version": "1.2.0",
-    "description": "REST API voor ESP32 LED Clock. Bevat ping, reboot en tijdzone endpoints."
+    "version": "1.3.0",
+    "description": "REST API voor ESP32 LED Clock. Bevat ping, reboot, tijdzone endpoints en een compacte tijdzones-lijst."
   },
   "servers": [
     {
@@ -19,6 +19,9 @@
   "paths": {
     "/api/ping": {
       "get": {
+        "tags": [
+          "Health"
+        ],
         "summary": "Ping het device",
         "description": "Retourneert een pong met enkele statusvelden, voor health/latency checks.",
         "responses": {
@@ -28,9 +31,16 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["pong", "now", "uptime_ms"],
+                  "required": [
+                    "pong",
+                    "now",
+                    "uptime_ms"
+                  ],
                   "properties": {
-                    "pong": { "type": "boolean", "example": true },
+                    "pong": {
+                      "type": "boolean",
+                      "example": true
+                    },
                     "now": {
                       "type": "integer",
                       "format": "int64",
@@ -62,6 +72,9 @@
     },
     "/api/system/reboot": {
       "post": {
+        "tags": [
+          "System"
+        ],
         "summary": "Herstart het apparaat",
         "description": "Start de ESP32 opnieuw op.",
         "responses": {
@@ -72,8 +85,14 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "rebooting": { "type": "boolean", "example": true },
-                    "message": { "type": "string", "example": "Rebooting system..." }
+                    "rebooting": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Rebooting system..."
+                    }
                   }
                 }
               }
@@ -84,6 +103,9 @@
     },
     "/api/timezone": {
       "get": {
+        "tags": [
+          "Time"
+        ],
         "summary": "Haal de ingestelde tijdzone op",
         "description": "Geeft de huidige IANA tijdzone en berekende UTC-offset (sec) terug.",
         "responses": {
@@ -93,9 +115,15 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["timezone", "utc_offset_sec"],
+                  "required": [
+                    "timezone",
+                    "utc_offset_sec"
+                  ],
                   "properties": {
-                    "timezone": { "type": "string", "example": "Europe/Amsterdam" },
+                    "timezone": {
+                      "type": "string",
+                      "example": "Europe/Amsterdam"
+                    },
                     "utc_offset_sec": {
                       "type": "integer",
                       "description": "Offset t.o.v. UTC in seconden (inclusief DST indien actief).",
@@ -109,6 +137,9 @@
         }
       },
       "post": {
+        "tags": [
+          "Time"
+        ],
         "summary": "Stel de tijdzone in",
         "description": "Past alleen de tijdzone (IANA) aan. De klok zelf blijft door NTP/RTC bepaald.",
         "requestBody": {
@@ -117,7 +148,9 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["timezone"],
+                "required": [
+                  "timezone"
+                ],
                 "properties": {
                   "timezone": {
                     "type": "string",
@@ -137,8 +170,48 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean", "example": true },
-                    "message": { "type": "string", "example": "Timezone updated successfully" }
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Timezone updated successfully"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/timezones": {
+      "get": {
+        "tags": [
+          "Time"
+        ],
+        "summary": "Lijst van ondersteunde tijdzones",
+        "description": "Retourneert een verkorte lijst van IANA-tijdzones die het systeem ondersteunt. Kan later worden uitgebreid.",
+        "responses": {
+          "200": {
+            "description": "Tijdzones ontvangen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "timezones": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "Europe/Amsterdam",
+                        "America/New_York",
+                        "Asia/Tokyo"
+                      ]
+                    }
                   }
                 }
               }
@@ -147,6 +220,19 @@
         }
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Status en health-checks"
+    },
+    {
+      "name": "System",
+      "description": "Systeembeheer en device-acties"
+    },
+    {
+      "name": "Time",
+      "description": "Tijdzone-instellingen en tijdinformatie"
+    }
+  ]
 }
-
