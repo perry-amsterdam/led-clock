@@ -7,7 +7,7 @@
 #include "rtos.h"
 #include "globals.h"
 #include "task_wifi.h"
-#include "wifi.h"			 // connectWiFi(...)
+#include "wifi.h"				 // connectWiFi(...)
 #include "http_api.h"			 // startApi/stopApi
 #include "http_portal.h"		 // startPortal/stopPortal
 #include "hal_time_freertos.h"
@@ -23,7 +23,7 @@ void task_wifi(void*)
 	String ssid, pass;
 
 	// Use the global Preferences instance declared in globals.cpp
-	prefs.begin(PREF_NS, true);	// read-only
+	prefs.begin(PREF_NS, true);	 // read-only
 	ssid = prefs.getString(PREF_SSID, "");
 	pass = prefs.getString(PREF_PASS, "");
 	prefs.end();
@@ -45,15 +45,15 @@ void task_wifi(void*)
 	{
 		xEventGroupSetBits(g_sysEvents, EVT_WIFI_UP);
 		Serial.println("[WiFi] Connected. Starting API...");
-		stopPortal();	// make sure portal is OFF
-		startApi();	// start REST API + mDNS
+		stopPortal();			 // make sure portal is OFF
+		startApi();				 // start REST API + mDNS
 	}
 	else
 	{
 		xEventGroupClearBits(g_sysEvents, EVT_WIFI_UP);
 		Serial.println("[WiFi] Not connected. Starting captive portal...");
-		stopApi();	// make sure API is OFF
-		startPortal();	// AP + DNS + setup UI
+		stopApi();				 // make sure API is OFF
+		startPortal();			 // AP + DNS + setup UI
 	}
 
 	bool last_link_up = connected;

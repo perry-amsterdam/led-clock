@@ -3,7 +3,7 @@
 # - Bouwt een kleine CLI (cmd/ledclockctl)
 
 # ===== Config =====
-OPENAPI_FILE := ../docs/openapi.json
+OPENAPI_FILE := ../api-docs/openapi.json
 OUTPUT_DIR   := gen
 PACKAGE_NAME := ledclock
 

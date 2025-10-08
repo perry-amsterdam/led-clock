@@ -37,7 +37,8 @@ func main() {
 		log.Fatalf("GET /api/ping: %v", err)
 	}
 	if ping.JSON200 != nil {
-		fmt.Printf("pong=%v now(ms)=%d uptime(ms)=%d heap_free=%d wifi_mode=%s\n",
+		fmt.Printf("Ping Result:\n-----------\n");
+		fmt.Printf("pong=%v\nrnow(ms)=%d\nuptime(ms)=%d\nheap_free=%d\nwifi_mode=%s\n",
 			ping.JSON200.Pong,
 			ping.JSON200.Now,        // int64
 			ping.JSON200.UptimeMs,   // int64

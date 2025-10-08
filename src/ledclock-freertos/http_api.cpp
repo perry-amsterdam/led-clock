@@ -20,7 +20,7 @@ extern "C"
 // ======================================================
 // Globals
 // ======================================================
-extern DNSServer dns;			 // captive portal DNS server
+extern DNSServer dns;	// captive portal DNS server
 static TaskHandle_t httpTaskHandle = nullptr;
 static bool s_api_running = false;
 
@@ -88,20 +88,23 @@ static void apiHandleTimezonesGet()
 	server.sendHeader("Access-Control-Allow-Origin", "*");
 	server.sendHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
 	server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
-	server.setContentLength(CONTENT_LENGTH_UNKNOWN);
-	server.send(200, "application/json", "");
 
-	WiFiClient client = server.client();
-	client.print("{\"timezones\":[");
+	String body;
+	body.reserve(2048);
+	body += "{\"timezones\":[";
 	for (size_t i = 0; i < kTimezoneCount; ++i)
 	{
-		if (i > 0) client.print(',');
-		client.print('\"');
-		client.print(kTimezones[i]);
-		client.print('\"');
+		if (i) body += ',';
+		body += '"';
+
+		// PROGMEM safe
+		const char* tz = (const char*)pgm_read_ptr(&kTimezones[i]);
+		body += tz;
+		body += '"';
 	}
-	client.print("]}");
-	client.stop();
+	body += "]}";
+
+	server.send(200, "application/json; charset=utf-8", body);
 }
 
 
@@ -270,6 +273,7 @@ void startApi()
 	server.on("/api/timezones", HTTP_GET, apiHandleTimezonesGet);
 
 	server.begin();
+	startHttpTask();
 	s_api_running = true;
 
 	// Start mDNS
