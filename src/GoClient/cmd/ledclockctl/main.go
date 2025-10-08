@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"time"
 
-	// ↘️ Zet dit op je eigen modulepad, bv:
-	// ledclock "github.com/perry-couprie/GoClient/gen"
 	ledclock "GoClient/gen"
 )
 

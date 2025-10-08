@@ -20,7 +20,7 @@ extern "C"
 // ======================================================
 // Globals
 // ======================================================
-extern DNSServer dns;	// captive portal DNS server
+extern DNSServer dns;			 // captive portal DNS server
 static TaskHandle_t httpTaskHandle = nullptr;
 static bool s_api_running = false;
 
@@ -178,7 +178,7 @@ static void apiHandleTimezoneGet()
 	// Compute current total UTC offset from localtime vs gmtime if time is valid
 	time_t now = time(nullptr);
 	long off = 0;
-	if (now > 8 * 3600) // sanity check
+	if (now > 8 * 3600)			 // sanity check
 	{
 		struct tm lt = *localtime(&now);
 		struct tm gmt = *gmtime(&now);
@@ -196,6 +196,7 @@ static void apiHandleTimezoneGet()
 	json += "}";
 	sendJson(200, json);
 }
+
 
 // ======================================================
 // /api/timezone (POST)
