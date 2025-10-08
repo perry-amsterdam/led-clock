@@ -171,6 +171,21 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 	}
 
 	// Configure NTP using offsets (ESP32 time.h)
+	
+	// Persist and publish timezone info so API & rest of system can use it
+	g_timezoneIANA = tz;
+	g_gmtOffsetSec = gmt;
+	g_daylightSec  = dst;
+	// Set libc TZ for localtime()/strftime()
+	setenv("TZ", tz.c_str(), 1);
+	tzset();
+	// Save to NVS (namespace "sys", key "tz") so it survives reboot
+	Preferences _p;
+	if (_p.begin("sys", false)) {
+		_p.putString("tz", tz);
+		_p.end();
+	}
+
 	configTime(gmt, dst, NTP1, NTP2, NTP3);
 
 	#ifdef DEBUG_TZ
@@ -194,7 +209,22 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 			#ifdef DEBUG_TZ
 			Serial.printf("\r[TZ] Re-kicking SNTP at attempt %d via configTime()\n", i + 1);
 			#endif
-			configTime(gmt, dst, NTP1, NTP2, NTP3);
+			
+	// Persist and publish timezone info so API & rest of system can use it
+	g_timezoneIANA = tz;
+	g_gmtOffsetSec = gmt;
+	g_daylightSec  = dst;
+	// Set libc TZ for localtime()/strftime()
+	setenv("TZ", tz.c_str(), 1);
+	tzset();
+	// Save to NVS (namespace "sys", key "tz") so it survives reboot
+	Preferences _p;
+	if (_p.begin("sys", false)) {
+		_p.putString("tz", tz);
+		_p.end();
+	}
+
+	configTime(gmt, dst, NTP1, NTP2, NTP3);
 		}
 
 		hal_delay_ms(1000);

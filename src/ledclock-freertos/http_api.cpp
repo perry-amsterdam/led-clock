@@ -172,20 +172,23 @@ static void nvsWriteTimezone(const String& tz)
 // ======================================================
 static void apiHandleTimezoneGet()
 {
-	String tz = g_timezoneIANA;
-	if (tz.length() == 0) tz = nvsReadTimezone();
+	// Prefer runtime globals filled at startup; fallback to NVS
+	String tz = g_timezoneIANA.length() ? g_timezoneIANA : nvsReadTimezone();
 
+	// Compute current total UTC offset from localtime vs gmtime if time is valid
 	time_t now = time(nullptr);
-	struct tm lt;
-	localtime_r(&now, &lt);
-
 	long off = 0;
-	#if defined(__USE_MISC) || defined(__GLIBC__) || defined(__APPLE__)
-	off = lt.tm_gmtoff;
-	#else
-	struct tm gmt = *gmtime(&now);
-	off = (long)difftime(mktime(&lt), mktime(&gmt));
-	#endif
+	if (now > 8 * 3600) // sanity check
+	{
+		struct tm lt = *localtime(&now);
+		struct tm gmt = *gmtime(&now);
+		off = (long)difftime(mktime(&lt), mktime(&gmt));
+	}
+	else
+	{
+		// if time not valid yet, use stored offsets if we have them
+		off = (long)g_gmtOffsetSec + (long)g_daylightSec;
+	}
 
 	String json = "{";
 	json += "\"timezone\":\"" + (tz.length() ? tz : String("")) + "\"";
@@ -193,7 +196,6 @@ static void apiHandleTimezoneGet()
 	json += "}";
 	sendJson(200, json);
 }
-
 
 // ======================================================
 // /api/timezone (POST)
@@ -236,6 +238,8 @@ static void apiHandleTimezonePost()
 
 	g_timezoneIANA = tz;
 	nvsWriteTimezone(tz);
+	setenv("TZ", tz.c_str(), 1);
+	tzset();
 
 	sendJson(200, "{\"success\":true,\"message\":\"Timezone updated successfully\"}");
 }
