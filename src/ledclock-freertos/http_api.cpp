@@ -236,6 +236,46 @@ static void apiHandleTimezonePost()
 	sendJson(200, "{\"success\":true,\"message\":\"Timezone updated successfully\"}");
 }
 
+// ======================================================
+// /api/timezone (DELETE)
+// ======================================================
+static void apiHandleTimezoneDelete()
+{
+	if (server.method() != HTTP_DELETE)
+	{
+		sendJson(405, "{\"success\":false,\"message\":\"Method Not Allowed\"}");
+		return;
+	}
+
+	// Clear user timezone in NVS en runtime
+	tz_user_clear();
+	g_timezoneIANA = "";
+
+	// Bouw response zoals GET
+	String tz = g_timezoneIANA.length() ? g_timezoneIANA : nvsReadTimezone();
+
+	time_t now = time(nullptr);
+	long off = 0;
+	if (now > 8 * 3600) // sanity check
+	{
+		struct tm lt = *localtime(&now);
+		struct tm gmt = *gmtime(&now);
+		off = (long)difftime(mktime(&lt), mktime(&gmt));
+	}
+	else
+	{
+		off = (long)g_gmtOffsetSec + (long)g_daylightSec;
+	}
+
+	String json = "{";
+	json += "\"success\":true";
+	json += ",\"message\":\"Timezone cleared; using default\"";
+	json += ",\"timezone\":\"" + (tz.length() ? tz : String("")) + "\"";
+	json += ",\"utc_offset_sec\":" + String((long)off);
+	json += "}";
+	sendJson(200, json);
+}
+
 
 // ======================================================
 // startApi / stopApi / startHttpTask / stopHttpTask
@@ -249,6 +289,7 @@ void startApi()
 	server.on("/api/system/reboot", HTTP_POST, apiHandleReboot);
 	server.on("/api/timezone", HTTP_GET, apiHandleTimezoneGet);
 	server.on("/api/timezone", HTTP_POST, apiHandleTimezonePost);
+	server.on("/api/timezone", HTTP_DELETE, apiHandleTimezoneDelete);
 	server.on("/api/timezones", HTTP_GET, apiHandleTimezonesGet);
 
 	server.begin();
