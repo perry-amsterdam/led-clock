@@ -51,6 +51,12 @@ static void sendJson(int code, const String& json)
 }
 
 
+static void sendJson(WebServer& server, int code, const String& json)
+{
+    server.send(code, "application/json", json);
+}
+
+
 // ======================================================
 // Compacte wereldlijst met veelgebruikte tijdzones
 // ======================================================
@@ -151,6 +157,7 @@ static void apiHandleReboot()
 // ======================================================
 static void apiHandleTimezoneGet()
 {
+	// TODO : Aanpassen.
 	// Prefer runtime globals filled at startup; fallback to NVS
 	String tz = g_timezoneIANA.length() ? g_timezoneIANA : nvsReadTimezone();
 
@@ -220,6 +227,7 @@ static void apiHandleTimezonePost()
 		return;
 	}
 
+	// TODO : Aanpassen.
 	g_timezoneIANA = tz;
 	nvsWriteTimezone(tz);
 	setenv("TZ", tz.c_str(), 1);

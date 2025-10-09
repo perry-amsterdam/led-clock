@@ -1,12 +1,30 @@
 #include <Arduino.h>
 #include <HTTPClient.h>
 #include <WiFiClientSecure.h>
-#include <time.h>
-#include "net_time.h"
 #include <WiFi.h>
+#include <time.h>
 #include "lwip/apps/sntp.h"
+
+#include "net_time.h"
 #include "hal_time_freertos.h"
 #include "timezone_storage.h"
+
+// --------- Configurable endpoints (overridable via -D defines) ----------
+#ifndef URL_TIMEINFO
+// IP-based fallback (detect timezone via uitgaande IP)
+#define URL_TIMEINFO "https://worldtimeapi.org/api/ip"
+#endif
+
+#ifndef URL_TZ_IANA_BASE
+// Handmatige TZ details (offsets) voor IANA string
+#define URL_TZ_IANA_BASE "https://worldtimeapi.org/api/timezone/"
+#endif
+
+#ifndef URL_COUNTRYCODE
+// Simpele country code resolver
+#define URL_COUNTRYCODE "https://ipapi.co/country/"
+#endif
+// ------------------------------------------------------------------------
 
 // Preview helper for HTTP payloads (guarded by DEBUG_TZ)
 void dumpPreview(const String& payload)
@@ -14,242 +32,309 @@ void dumpPreview(const String& payload)
 	#ifdef DEBUG_TZ
 	int n = payload.length();
 	int k = n > 160 ? 160 : n;
-	String head = payload.substring(0, k);
-	String tmp = head;
-	tmp.replace("\n", "\\n");
-	tmp.replace("\r", "\\r");
-	Serial.printf("[HTTP] len=%d preview=%s%s\n", n, tmp.c_str(), (n > k ? "..." : ""));
+	Serial.print("[HTTP PREVIEW] ");
+	for (int i = 0; i < k; ++i)
+	{
+		char c = payload[i];
+		if (c == '\n') { Serial.print("\\n"); }
+		else if (c == '\r') { Serial.print("\\r"); }
+		else { Serial.print(c); }
+	}
+	if (n > k) Serial.print(" ...");
+	Serial.println();
+	#else
+	(void)payload;
 	#endif
 }
 
 
-// Very small/robust extractor for flat JSON (string or numeric/bool token)
+// Very light-weight JSON string extractor: looks for "key":"value"
 String extractJsonString(const String& json, const String& key)
 {
-	String pat = "\"" + key + "\":";
+	String pat = "\"" + key + "\"";
 	int i = json.indexOf(pat);
 	if (i < 0) return "";
-	i += pat.length();
-	while (i < (int)json.length() && (json[i] == ' ' || json[i] == '\t')) i++;
-
-	// Case 1: quoted string value
-	if (i < (int)json.length() && json[i] == '\"')
-	{
-		int s = i + 1;
-		int e = json.indexOf('\"', s);
-		if (e > s) return json.substring(s, e);
-		return "";
-	}
-
-	// Case 2: raw token (number, true/false/null) until ',' or '}'
-	int e = json.indexOf(',', i);
-	if (e < 0) e = json.indexOf('}', i);
-	if (e < 0) e = json.length();
-	String v = json.substring(i, e);
-	v.trim();
-	return v;
+	i = json.indexOf(':', i);
+	if (i < 0) return "";
+	// skip whitespace
+	while (i + 1 < (int)json.length() && (json[i + 1] == ' ' || json[i + 1] == '\t')) i++;
+	// expect '"'
+	int q1 = json.indexOf('\"', i + 1);
+	if (q1 < 0) return "";
+	int q2 = json.indexOf('\"', q1 + 1);
+	if (q2 < 0) return "";
+	return json.substring(q1 + 1, q2);
 }
 
 
-// worldtimeapi.org: timezone (string), raw_offset (seconds), dst_offset (seconds)
-// ip-api.com: countryCode (string)
-bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bool acceptAllHttps)
+// Simple HTTP GET into String (TLS optional)
+static bool httpGetToString(const String& url, String& out, bool acceptAllHttps)
 {
 	WiFiClientSecure client;
-	if (acceptAllHttps)
-	{
-		client.setInsecure();
-	}
+	if (acceptAllHttps) client.setInsecure();
 
 	HTTPClient http;
-	if (!http.begin(client, URL_TIMEINFO))
-	{
-		#ifdef DEBUG_TZ
-		Serial.println("[TZ] http.begin failed");
-		#endif
-		return false;
-	}
 	http.setConnectTimeout(5000);
-	http.setTimeout(8000);
+	http.setTimeout(10000);
 	http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
 
-	// Retry time api to make sure it works. Some times it refuses connection.
-	int code = -1;
-	for (int i = 0;(i < 10 && code < 0);i++)
-	{
-		code = http.GET();
-
-		// Wait 1 second for retry.
-		if (code < 0)
-		{
-			hal_delay_ms(1000);
-		}
-	}
-
-	if (code <= 0)
+	if (!http.begin(client, url))
 	{
 		#ifdef DEBUG_TZ
-		Serial.printf("[TZ] HTTP GET failed: %d\n", code);
-		Serial.printf("[TZ] Reason: %s\n", HTTPClient::errorToString(code).c_str());
-		Serial.printf("[TZ] URL: %s\n", URL_TIMEINFO);
-		Serial.printf("[TZ] WiFi status: %d (WL_CONNECTED=%d)\n", WiFi.status(), WL_CONNECTED);
-		Serial.printf("[TZ] Local IP: %s DNS: %s Gateway: %s\n",
-			WiFi.localIP().toString().c_str(),
-			WiFi.dnsIP().toString().c_str(),
-			WiFi.gatewayIP().toString().c_str());
+		Serial.printf("[HTTP] begin() failed: %s\n", url.c_str());
 		#endif
-		http.end();
 		return false;
+	}
+
+	// retry a few times  sommige hosts weigeren soms verbinding
+	int code = -1;
+	for (int attempt = 0; attempt < 3; ++attempt)
+	{
+		code = http.GET();
+		if (code == HTTP_CODE_OK) break;
+		hal_delay_ms(200);
 	}
 
 	if (code != HTTP_CODE_OK)
 	{
 		#ifdef DEBUG_TZ
-		Serial.printf("[TZ] HTTP status: %d (expected 200)\n", code);
+		Serial.printf("[HTTP] GET %s -> %d\n", url.c_str(), code);
 		#endif
 		http.end();
 		return false;
 	}
 
-	//  Eerst payload ophalen, dan pas parsen
-	String payload = http.getString();
+	out = http.getString();
 	http.end();
-	dumpPreview(payload);
-
-	// JSON waarden parsen
-	String tz  = extractJsonString(payload, "timezone");
-	String raw = extractJsonString(payload, "raw_offset");
-	String dst = extractJsonString(payload, "dst_offset");
-
-	if (tz.length() == 0)
-	{
-		#ifdef DEBUG_TZ
-		Serial.println("[TZ] timezone missing in payload");
-		#endif
-		return false;
-	}
-
-	// Output params vullen
-	tzIana = tz;
-	gmtOffsetSec = raw.length() ? raw.toInt() : 0;
-	daylightOffsetSec = dst.length() ? dst.toInt() : 0;
 	return true;
 }
 
 
+// Fetch offsets for a given IANA TZ using WorldTimeAPI
+static bool fetchOffsetsForIanaFromWorldTimeAPI(const String& ianaTz,
+int& gmtOffsetSec,
+int& daylightOffsetSec,
+bool acceptAllHttps)
+{
+	String url = String(URL_TZ_IANA_BASE) + ianaTz;
+	String body;
+	if (!httpGetToString(url, body, acceptAllHttps))
+	{
+		return false;
+	}
+	dumpPreview(body);
+
+	// WorldTimeAPI velden: raw_offset (sec), dst_offset (sec)
+	// Gebruik string extractor (lichtgewicht) of parse ints snel:
+	// we pakken string values en converteren (robust genoeg voor WTA format)
+	String raw_s = extractJsonString(body, "raw_offset");
+	String dst_s = extractJsonString(body, "dst_offset");
+
+	// Sommige implementaties geven raw_offset/dst_offset als numeriek zonder quotes.
+	// Fallback: simpele zoek-naar sleutel gevolgd door nummer.
+	auto extractNumber = [&](const String& src, const String& k, long& outNum) -> bool
+	{
+		int p = src.indexOf("\"" + k + "\"");
+		if (p < 0) return false;
+		p = src.indexOf(':', p);
+		if (p < 0) return false;
+		// skip spaces
+		while (p + 1 < (int)src.length() && (src[p + 1] == ' ' || src[p + 1] == '\t')) p++;
+		int s = p + 1;
+		int e = s;
+		while (e < (int)src.length() && (isDigit(src[e]) || src[e] == '-' )) e++;
+		if (e <= s) return false;
+		outNum = src.substring(s, e).toInt();
+		return true;
+	};
+
+	long raw = 0, dst = 0;
+	bool okRaw = false, okDst = false;
+
+	if (raw_s.length() > 0) { raw = raw_s.toInt(); okRaw = true; }
+	if (dst_s.length() > 0) { dst = dst_s.toInt(); okDst = true; }
+
+	if (!okRaw) okRaw = extractNumber(body, "raw_offset", raw);
+	if (!okDst) okDst = extractNumber(body, "dst_offset", dst);
+
+	if (!okRaw || !okDst)
+	{
+		#ifdef DEBUG_TZ
+		Serial.println("[TZ] Missing raw_offset/dst_offset in WorldTimeAPI response");
+		#endif
+		return false;
+	}
+
+	gmtOffsetSec      = (int)raw;
+	daylightOffsetSec = (int)dst;
+	#ifdef DEBUG_TZ
+	Serial.printf("[TZ] IANA '%s' raw=%d dst_off=%d\n", ianaTz.c_str(), gmtOffsetSec, daylightOffsetSec);
+	#endif
+	return true;
+}
+
+
+// --- Public API ---
+
+// Haal country code op (2-letter) via eenvoudige endpoint
 String fetchCountryCode()
 {
-	HTTPClient http;
-	if (!http.begin(URL_COUNTRY))
-	{
-		return "";
-	}
-	int code = http.GET();
-	if (code <= 0) { http.end(); return ""; }
-	String payload = http.getString();
-	http.end();
-	dumpPreview(payload);
-	String cc = extractJsonString(payload, "countryCode");
-	return cc;
+	String body;
+	if (!httpGetToString(URL_COUNTRYCODE, body, /*acceptAllHttps*/ true)) {
+	return "";
 }
 
 
+// ipapi.co/country/ geeft letterlijk bv. "NL\n"
+body.trim();
+return body;
+}
+
+
+// Bepaalt tzIana en offsets.
+// 1) Als user-TZ gezet is: die gebruiken, offsets via WorldTimeAPI proberen (fallback 0/0).
+// 2) Anders: IP-based lookup via URL_TIMEINFO (WorldTimeAPI /api/ip), haal timezone+offsets daaruit.
+bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bool acceptAllHttps)
+{
+	// 1) Respecteer via-API ingestelde timezone
+	{
+		String manualTz;
+		if (tz_user_is_set() && tz_user_get(manualTz) && manualTz.length() > 0)
+		{
+			tzIana = manualTz;
+
+			// offsets via WorldTimeAPI voor exact deze IANA
+			if (!fetchOffsetsForIanaFromWorldTimeAPI(tzIana, gmtOffsetSec, daylightOffsetSec, acceptAllHttps))
+			{
+				gmtOffsetSec = 0;
+				daylightOffsetSec = 0;
+				#ifdef DEBUG_TZ
+				Serial.printf("[TZ] Using manual TZ without fetched offsets: %s\n", tzIana.c_str());
+				#endif
+			}
+			else
+			{
+				#ifdef DEBUG_TZ
+				Serial.printf("[TZ] Using manual TZ with fetched offsets: %s\n", tzIana.c_str());
+				#endif
+			}
+			return true;
+		}
+	}
+
+	// 2) Fallback: via uitgaande IP
+	String body;
+	if (!httpGetToString(URL_TIMEINFO, body, acceptAllHttps))
+	{
+		#ifdef DEBUG_TZ
+		Serial.println("[TZ] IP-based timeinfo request failed");
+		#endif
+		return false;
+	}
+
+	dumpPreview(body);
+
+	// WorldTimeAPI /api/ip velden: "timezone":"Europe/Amsterdam", "raw_offset":7200, "dst_offset":3600, "dst":true
+	String tz = extractJsonString(body, "timezone");
+	if (tz.length() == 0)
+	{
+		#ifdef DEBUG_TZ
+		Serial.println("[TZ] Could not find 'timezone' in response");
+		#endif
+		return false;
+	}
+
+	tzIana = tz;
+
+	long raw = 0, dst = 0;
+	bool okRaw = false, okDst = false;
+
+	// Probeert numeriek te pakken (zie helper hierboven)
+	auto extractNumber = [&](const String& src, const String& k, long& outNum) -> bool
+	{
+		int p = src.indexOf("\"" + k + "\"");
+		if (p < 0) return false;
+		p = src.indexOf(':', p);
+		if (p < 0) return false;
+		while (p + 1 < (int)src.length() && (src[p + 1] == ' ' || src[p + 1] == '\t')) p++;
+		int s = p + 1;
+		int e = s;
+		while (e < (int)src.length() && (isDigit(src[e]) || src[e] == '-' )) e++;
+		if (e <= s) return false;
+		outNum = src.substring(s, e).toInt();
+		return true;
+	};
+
+	okRaw = extractNumber(body, "raw_offset", raw);
+	okDst = extractNumber(body, "dst_offset", dst);
+
+	// Als offsets ontbreken, val terug op 0/0 (TZ string dekt DST-regels)
+	gmtOffsetSec      = okRaw ? (int)raw : 0;
+	daylightOffsetSec = okDst ? (int)dst : 0;
+
+	#ifdef DEBUG_TZ
+	Serial.printf("[TZ] From IP: tz=%s raw=%d dst_off=%d\n",
+		tzIana.c_str(), gmtOffsetSec, daylightOffsetSec);
+	#endif
+
+	return true;
+}
+
+
+// Configureer SNTP + TZ; Keert true terug als tijd plausibel gezet is
 bool setupTimeFromInternet(bool acceptAllHttps)
 {
-	String tz;
-	int gmt = 0, dst = 0;
-	if (!fetchTimeInfo(tz, gmt, dst, acceptAllHttps))
+	String tzIana;
+	int gmtOffset = 0;
+	int dstOffset = 0;
+
+	if (!fetchTimeInfo(tzIana, gmtOffset, dstOffset, acceptAllHttps))
 	{
 		#ifdef DEBUG_TZ
-		Serial.println("[TZ] fetchTimeInfo failed");
+		Serial.println("[TIME] fetchTimeInfo failed");
 		#endif
+		return false;
+	}
+
+	// Stel TZ in via IANA string  ESP32 libc ondersteunt POSIX TZ, maar
+	// recentere IDF builds accepteren ook IANA via setenv("TZ", "...").
+	// We vertrouwen op IANA; offsets worden door TZ-regels afgehandeld.
+	if (tzIana.length() > 0)
+	{
+		setenv("TZ", tzIana.c_str(), 1);
+		tzset();
 		#ifdef DEBUG_TZ
-		Serial.println("[TZ] worldtimeapi failed \342\200\224 fallback to configTzTime for Europe/Amsterdam");
+		Serial.printf("[TIME] TZ set to IANA: %s\n", tzIana.c_str());
 		#endif
-
-		// POSIX TZ for Europe/Amsterdam (CET/CEST with EU DST rules)
-		configTzTime("CET-1CEST,M3.5.0/2,M10.5.0/3", NTP1, NTP2, NTP3);
 	}
 
-	// Persist and publish timezone info so API & rest of system can use it
-	g_timezoneIANA = tz;
-	g_gmtOffsetSec = gmt;
-	g_daylightSec  = dst;
+	// SNTP configuratie
+	sntp_setoperatingmode(SNTP_OPMODE_POLL);
+	sntp_setservername(0, (char*)"pool.ntp.org");
+	sntp_setservername(1, (char*)"time.google.com");
+	sntp_init();
 
-	// Set libc TZ for localtime()/strftime()
-	setenv("TZ", tz.c_str(), 1);
-	tzset();
-
-	// Save to NVS (namespace "sys", key "tz") so it survives reboot
-	Preferences _p;
-	if (_p.begin("sys", false))
+	// Wacht even op tijd-sync (niet te lang)
+	const uint32_t start = hal_millis();
+	while ((time(nullptr) < 8 * 3600) && (hal_millis() - start < 5000))
 	{
-		_p.putString("tz", tz);
-		_p.end();
+		hal_delay_ms(150);
 	}
 
-	configTime(gmt, dst, NTP1, NTP2, NTP3);
-
+	time_t now = time(nullptr);
 	#ifdef DEBUG_TZ
-	Serial.printf("\r[TZ] configTime(gmt=%d, dst=%d) with tz=%s\r\n", gmt, dst, tz.c_str());
+	struct tm tm_now;
+	localtime_r(&now, &tm_now);
+	char buf[64];
+	strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", &tm_now);
+	Serial.printf("[TIME] now=%ld (%s)\n", (long)now, buf);
 	#endif
 
-	time_t now = 0;
-	for (int i = 0; i < 10; ++i)
-	{
-		now = time(nullptr);
-
-		if (now > 8 * 3600)
-		{
-			// success: time synced
-			break;
-		}
-
-		// Every 5th attempt (5 and 10), "restart" SNTP in a portable way
-		if ((i + 1) % 5 == 0)
-		{
-			#ifdef DEBUG_TZ
-			Serial.printf("\r[TZ] Re-kicking SNTP at attempt %d via configTime()\n", i + 1);
-			#endif
-
-			// Persist and publish timezone info so API & rest of system can use it
-			g_timezoneIANA = tz;
-			g_gmtOffsetSec = gmt;
-			g_daylightSec  = dst;
-			// Set libc TZ for localtime()/strftime()
-			setenv("TZ", tz.c_str(), 1);
-			tzset();
-			// Save to NVS (namespace "sys", key "tz") so it survives reboot
-			Preferences _p;
-			if (_p.begin("sys", false))
-			{
-				_p.putString("tz", tz);
-				_p.end();
-			}
-
-			configTime(gmt, dst, NTP1, NTP2, NTP3);
-		}
-
-		hal_delay_ms(1000);
-	}
-
-	#ifdef DEBUG_TZ
-	if (now > 8 * 3600)
-	{
-		struct tm t; localtime_r(&now, &t);
-		Serial.printf("\r[TZ] time synced: %04d-%02d-%02d %02d:%02d:%02d\r\n", t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
-	}
-	else
-	{
-		Serial.println("\r[TZ] time sync timeout\n");
-	}
-	#endif
-	return now > 8 * 3600;
+	return (now >= 8 * 3600);
 }
 
 
-// Periodic time maintenance: if time seems unsynced (epoch too small) retry NTP setup.
-// Called from task_time loop.
+// Eenvoudig onderhoud: check 1x per minuut of tijd nog ok is en resync zo nodig
 void netTimeMaintain()
 {
 	static uint32_t last = 0;
