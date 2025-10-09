@@ -16,6 +16,7 @@ func main() {
 	setTZ := flag.String("set-tz", "", "Stel tijdzone in (IANA, bv. Europe/Amsterdam)")
 	listTZ := flag.Bool("list-tz", false, "Toon ondersteunde tijdzones")
 	getTZ := flag.Bool("get-tz", false, "Toon huidige tijdzone en stop")
+	clearTZ := flag.Bool("clear-tz", false, "Verwijder de ingestelde tijdzone (fallback naar standaard)")
 	reboot := flag.Bool("reboot", false, "Reboot het device")
 	timeout := flag.Duration("timeout", 5*time.Second, "HTTP timeout")
 	showRaw := flag.Bool("raw", false, "Toon raw JSON van API responses")
@@ -32,8 +33,7 @@ func main() {
 	defer cancel()
 
 	// Bepaal of er expliciete acties gevraagd zijn
-	opSelected := *getTZ || *listTZ || *reboot || (*setTZ != "")
-
+	opSelected := *getTZ || *listTZ || *reboot || (*setTZ != "") || *clearTZ
 	// 0) Alleen huidige TZ opvragen en tonen
 	if *getTZ {
 		res, err := c.GetApiTimezoneWithResponse(ctx)
@@ -87,6 +87,30 @@ func main() {
 		}
 		fmt.Println("timezone updated:", derefString(res.JSON200.Message))
 	}
+
+
+	// 2b) Optioneel: TZ verwijderen (DELETE /api/timezone)
+	if *clearTZ {
+		res, err := c.DeleteApiTimezoneWithResponse(ctx)
+		if err != nil {
+			log.Fatalf("DELETE /api/timezone: %v", err)
+		}
+		if *showRaw && res.Body != nil {
+			fmt.Println(string(res.Body))
+		} else if res.JSON200 != nil && derefBool(res.JSON200.Success) {
+			// Toon samenvatting: bericht + actuele TZ/offset indien aanwezig
+			msg := derefString(res.JSON200.Message)
+			tz := derefString(res.JSON200.Timezone)
+			fmt.Printf("timezone cleared: %s\n", msg)
+			if tz != "" {
+				fmt.Printf("active timezone now: %s (utc_offset_sec=%d)\n",
+					tz, res.JSON200.UtcOffsetSec)
+			}
+		} else {
+			fmt.Println("timezone clear request sent (check device)")
+		}
+	}
+
 
 	// 3) Optioneel: lijst tijdzones
 	if *listTZ {
