@@ -110,6 +110,25 @@ All responses are in JSON format.
 
 ---
 
+
+### 🗑️ `DELETE /api/timezone`
+
+**Doel:** Verwijder de ingestelde tijdzone (reset naar standaard/auto).
+
+**Response Voorbeeld:**
+
+```json
+{
+  "success": true,
+  "message": "Timezone cleared; using default",
+  "timezone": "Etc/UTC",
+  "utc_offset_sec": 0
+}
+```
+
+**Gedrag:** Idempotent. Als er geen user-tijdzone was ingesteld, blijft de response `success: true` en wordt de actieve (fallback) tijdzone gerapporteerd.
+
+
 ### 🌐 `GET /api/timezones`
 
 **Purpose:** Retrieve a list of supported IANA timezones.
@@ -168,6 +187,7 @@ curl http://ledclock.local/api/ping
 curl -X POST http://ledclock.local/api/system/reboot
 curl http://ledclock.local/api/timezone
 curl -X POST -H "Content-Type: application/json" -d '{"timezone": "Europe/Amsterdam"}' http://ledclock.local/api/timezone
+curl -X DELETE http://ledclock.local/api/timezone
 curl http://ledclock.local/api/timezones
 ```
 
