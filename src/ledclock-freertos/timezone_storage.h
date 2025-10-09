@@ -1,9 +1,6 @@
 #pragma once
 #include <Arduino.h>
 
-//String nvsReadTimezone();
-//void nvsWriteTimezone(const String& tz);
-
 // Geeft aan of de gebruiker via de API een timezone heeft gezet.
 // Default = false (0) als nooit gezet.
 bool tz_user_is_set();

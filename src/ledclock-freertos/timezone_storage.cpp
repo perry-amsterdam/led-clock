@@ -4,38 +4,14 @@
 
 static const char* NS_SYS         = "sys";
 static const char* KEY_TZ_USER    = "tz_user";
-								 // 0/1
 static const char* KEY_TZ_USERSET = "tz_user_set";
 
-// ======================================================
-// Tijdzone opslag in NVS (Non-Volatile Storage)
-// ======================================================
-
-//String nvsReadTimezone()
-//{
-//	Preferences p;
-//	if (!p.begin("sys", true)) return "";
-//	String tz = p.getString("tz", "");
-//	p.end();
-//	return tz;
-//}
-//
-//
-//void nvsWriteTimezone(const String& tz)
-//{
-//	Preferences p;
-//	if (p.begin("sys", false))
-//	{
-//		p.putString("tz", tz);
-//		p.end();
-//	}
-//}
 
 bool tz_user_is_set()
 {
 	Preferences p;
 	if (!p.begin(NS_SYS, /*readOnly*/ true)) return false;
-								 // default = 0
+	// default = 0
 	uint8_t v = p.getUChar(KEY_TZ_USERSET, 0);
 	p.end();
 	return v != 0;
@@ -58,7 +34,7 @@ void tz_user_set(const String& tz)
 	Preferences p;
 	if (!p.begin(NS_SYS, /*readOnly*/ false)) return;
 	p.putString(KEY_TZ_USER, tz);
-								 // bit zetten
+	// bit zetten
 	p.putUChar(KEY_TZ_USERSET, 1);
 	p.end();
 }
@@ -70,7 +46,7 @@ void tz_user_clear()
 	if (!p.begin(NS_SYS, /*readOnly*/ false)) return;
 	// Leeg de string en reset flag
 	p.putString(KEY_TZ_USER, "");
-								 // default = 0
+	// default = 0
 	p.putUChar(KEY_TZ_USERSET, 0);
 	p.end();
 }
