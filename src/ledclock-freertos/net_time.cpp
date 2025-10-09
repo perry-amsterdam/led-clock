@@ -6,6 +6,7 @@
 #include <WiFi.h>
 #include "lwip/apps/sntp.h"
 #include "hal_time_freertos.h"
+#include "timezone_storage.h"
 
 // Preview helper for HTTP payloads (guarded by DEBUG_TZ)
 void dumpPreview(const String& payload)
@@ -150,29 +151,6 @@ String fetchCountryCode()
 	dumpPreview(payload);
 	String cc = extractJsonString(payload, "countryCode");
 	return cc;
-}
-
-// ======================================================
-// Tijdzone helpers
-// ======================================================
-static String nvsReadTimezone()
-{
-	Preferences p;
-	if (!p.begin("sys", true)) return "";
-	String tz = p.getString("tz", "");
-	p.end();
-	return tz;
-}
-
-
-static void nvsWriteTimezone(const String& tz)
-{
-	Preferences p;
-	if (p.begin("sys", false))
-	{
-		p.putString("tz", tz);
-		p.end();
-	}
 }
 
 bool setupTimeFromInternet(bool acceptAllHttps)

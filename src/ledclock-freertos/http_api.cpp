@@ -16,6 +16,7 @@ extern "C"
 #include "globals.h"
 #include "http_api.h"
 #include "hal_time_freertos.h"
+#include "timezone_storage.h"
 
 // ======================================================
 // Globals
@@ -58,28 +59,28 @@ static const char* kTimezones[] PROGMEM =
 	"UTC",
 
 	// Europe
-	"Europe/Amsterdam", "Europe/London", "Europe/Berlin", "Europe/Paris",
-	"Europe/Madrid", "Europe/Rome", "Europe/Warsaw", "Europe/Athens",
-	"Europe/Istanbul", "Europe/Moscow", "Europe/Zurich", "Europe/Stockholm",
+	"Europe/Amsterdam", "Europe/London", "Europe/Paris", "Europe/Berlin",
+	"Europe/Brussels", "Europe/Madrid", "Europe/Rome", "Europe/Warsaw",
+	"Europe/Athens", "Europe/Istanbul", "Europe/Moscow",
+	"Europe/Zurich", "Europe/Stockholm",
 
-	// America
+	// North America
 	"America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles",
-	"America/Phoenix", "America/Toronto", "America/Mexico_City", "America/Sao_Paulo",
+	"America/Mexico_City", "America/Toronto",
+
+	// South America
+	"America/Lima", "America/Bogota", "America/Santiago",
+	"America/Buenos_Aires", "America/Sao_Paulo", "America/Montevideo",
 
 	// Africa
 	"Africa/Cairo", "Africa/Johannesburg", "Africa/Nairobi",
 
 	// Asia
 	"Asia/Dubai", "Asia/Karachi", "Asia/Kolkata", "Asia/Bangkok",
-	"Asia/Singapore", "Asia/Hong_Kong", "Asia/Taipei",
-	"Asia/Shanghai", "Asia/Tokyo", "Asia/Seoul",
+	"Asia/Singapore", "Asia/Hong_Kong", "Asia/Tokyo", "Asia/Seoul",
 
-	// Oceania / Pacific
-	"Australia/Sydney", "Australia/Melbourne", "Australia/Perth",
-	"Pacific/Auckland", "Pacific/Honolulu",
-
-	// Atlantic
-	"Atlantic/Reykjavik"
+	// Oceania
+	"Australia/Sydney", "Pacific/Auckland", "Pacific/Honolulu"
 };
 static constexpr size_t kTimezoneCount = sizeof(kTimezones) / sizeof(kTimezones[0]);
 
@@ -144,30 +145,6 @@ static void apiHandleReboot()
 
 
 // ======================================================
-// Tijdzone helpers
-// ======================================================
-static String nvsReadTimezone()
-{
-	Preferences p;
-	if (!p.begin("sys", true)) return "";
-	String tz = p.getString("tz", "");
-	p.end();
-	return tz;
-}
-
-
-static void nvsWriteTimezone(const String& tz)
-{
-	Preferences p;
-	if (p.begin("sys", false))
-	{
-		p.putString("tz", tz);
-		p.end();
-	}
-}
-
-
-// ======================================================
 // /api/timezone (GET)
 // ======================================================
 static void apiHandleTimezoneGet()
@@ -208,11 +185,13 @@ static void apiHandleTimezonePost()
 		sendJson(405, "{\"success\":false,\"message\":\"Method Not Allowed\"}");
 		return;
 	}
+
 	if (!server.hasArg("plain"))
 	{
 		sendJson(400, "{\"success\":false,\"message\":\"Missing body\"}");
 		return;
 	}
+
 	String body = server.arg("plain");
 	int k = body.indexOf("\"timezone\"");
 	if (k < 0)
@@ -220,6 +199,7 @@ static void apiHandleTimezonePost()
 		sendJson(400, "{\"success\":false,\"message\":\"Missing 'timezone'\"}");
 		return;
 	}
+
 	k = body.indexOf(':', k);
 	int q1 = body.indexOf('"', k);
 	int q2 = (q1 >= 0) ? body.indexOf('"', q1 + 1) : -1;
@@ -228,6 +208,7 @@ static void apiHandleTimezonePost()
 		sendJson(400, "{\"success\":false,\"message\":\"Invalid 'timezone'\"}");
 		return;
 	}
+
 	String tz = body.substring(q1 + 1, q2);
 	tz.trim();
 
