@@ -153,6 +153,7 @@ String fetchCountryCode()
 	return cc;
 }
 
+
 bool setupTimeFromInternet(bool acceptAllHttps)
 {
 	String tz;

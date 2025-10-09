@@ -52,34 +52,36 @@ static void sendJson(int code, const String& json)
 
 
 // ======================================================
-// /api/timezones (GET) - compacte lijst (uitbreidbaar)
+// Compacte wereldlijst met veelgebruikte tijdzones
 // ======================================================
 static const char* kTimezones[] PROGMEM =
 {
+	// ---- Universeel ----
 	"UTC",
 
-	// Europe
+	// ---- Europa ----
 	"Europe/Amsterdam", "Europe/London", "Europe/Paris", "Europe/Berlin",
 	"Europe/Brussels", "Europe/Madrid", "Europe/Rome", "Europe/Warsaw",
 	"Europe/Athens", "Europe/Istanbul", "Europe/Moscow",
 	"Europe/Zurich", "Europe/Stockholm",
 
-	// North America
+	// ---- Noord-Amerika ----
 	"America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles",
-	"America/Mexico_City", "America/Toronto",
+	"America/Toronto", "America/Mexico_City",
 
-	// South America
-	"America/Lima", "America/Bogota", "America/Santiago",
-	"America/Buenos_Aires", "America/Sao_Paulo", "America/Montevideo",
+	// ---- Midden- & Zuid-Amerika ----
+	"America/Lima", "America/Bogota", "America/Santiago", "America/Buenos_Aires",
+	"America/Sao_Paulo", "America/Montevideo", "America/Paramaribo", "America/Costa_Rica",
+	"America/Curacao",
 
-	// Africa
+	// ---- Afrika ----
 	"Africa/Cairo", "Africa/Johannesburg", "Africa/Nairobi",
 
-	// Asia
+	// ---- Azi ----
 	"Asia/Dubai", "Asia/Karachi", "Asia/Kolkata", "Asia/Bangkok",
 	"Asia/Singapore", "Asia/Hong_Kong", "Asia/Tokyo", "Asia/Seoul",
 
-	// Oceania
+	// ---- Oceani ----
 	"Australia/Sydney", "Pacific/Auckland", "Pacific/Honolulu"
 };
 static constexpr size_t kTimezoneCount = sizeof(kTimezones) / sizeof(kTimezones[0]);
@@ -228,23 +230,6 @@ static void apiHandleTimezonePost()
 
 
 // ======================================================
-// HTTP task (FreeRTOS)
-// ======================================================
-static void httpTask(void* arg)
-{
-	for (;;)
-	{
-		server.handleClient();
-		dns.processNextRequest();
-		#if defined(ESPmDNS_H)
-		MDNS.update();
-		#endif
-		vTaskDelay(pdMS_TO_TICKS(2));
-	}
-}
-
-
-// ======================================================
 // startApi / stopApi / startHttpTask / stopHttpTask
 // ======================================================
 void startApi()
@@ -285,6 +270,23 @@ void stopApi()
 	MDNS.end();
 	s_api_running = false;
 	Serial.println("[HTTP] API gestopt");
+}
+
+
+// ======================================================
+// HTTP task (FreeRTOS)
+// ======================================================
+static void httpTask(void* arg)
+{
+	for (;;)
+	{
+		server.handleClient();
+		dns.processNextRequest();
+		#if defined(ESPmDNS_H)
+		MDNS.update();
+		#endif
+		vTaskDelay(pdMS_TO_TICKS(2));
+	}
 }
 
 
