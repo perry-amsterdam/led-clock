@@ -1,8 +1,8 @@
 #pragma once
 #include <Arduino.h>
 
-String nvsReadTimezone();
-void nvsWriteTimezone(const String& tz);
+//String nvsReadTimezone();
+//void nvsWriteTimezone(const String& tz);
 
 // Geeft aan of de gebruiker via de API een timezone heeft gezet.
 // Default = false (0) als nooit gezet.
@@ -17,4 +17,3 @@ void tz_user_set(const String& tz);
 
 // Leegt de handmatige TZ en reset het bit naar 0.
 void tz_user_clear();
-

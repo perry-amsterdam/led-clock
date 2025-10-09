@@ -53,7 +53,7 @@ static void sendJson(int code, const String& json)
 
 static void sendJson(WebServer& server, int code, const String& json)
 {
-    server.send(code, "application/json", json);
+	server.send(code, "application/json", json);
 }
 
 
@@ -157,9 +157,16 @@ static void apiHandleReboot()
 // ======================================================
 static void apiHandleTimezoneGet()
 {
-	// TODO : Aanpassen.
 	// Prefer runtime globals filled at startup; fallback to NVS
-	String tz = g_timezoneIANA.length() ? g_timezoneIANA : nvsReadTimezone();
+	String tz;
+	if (g_timezoneIANA.length())
+	{
+		tz = g_timezoneIANA;
+	}
+	else
+	{
+		tz_user_get(tz);
+	}
 
 	// Compute current total UTC offset from localtime vs gmtime if time is valid
 	time_t now = time(nullptr);
@@ -227,14 +234,14 @@ static void apiHandleTimezonePost()
 		return;
 	}
 
-	// TODO : Aanpassen.
-	g_timezoneIANA = tz;
-	nvsWriteTimezone(tz);
+	// Save timezone.
+	tz_user_set(tz.c_str());
 	setenv("TZ", tz.c_str(), 1);
 	tzset();
 
 	sendJson(200, "{\"success\":true,\"message\":\"Timezone updated successfully\"}");
 }
+
 
 // ======================================================
 // /api/timezone (DELETE)
@@ -252,11 +259,19 @@ static void apiHandleTimezoneDelete()
 	g_timezoneIANA = "";
 
 	// Bouw response zoals GET
-	String tz = g_timezoneIANA.length() ? g_timezoneIANA : nvsReadTimezone();
+	String tz;
+	if (g_timezoneIANA.length())
+	{
+		tz = g_timezoneIANA;
+	}
+	else
+	{
+		tz_user_get(tz);
+	}
 
 	time_t now = time(nullptr);
 	long off = 0;
-	if (now > 8 * 3600) // sanity check
+	if (now > 8 * 3600)			 // sanity check
 	{
 		struct tm lt = *localtime(&now);
 		struct tm gmt = *gmtime(&now);

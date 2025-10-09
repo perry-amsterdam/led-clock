@@ -3,10 +3,9 @@
 #include "net_time.h"
 #include "globals.h"
 #include "hal_time_freertos.h"
-#include <Preferences.h>		 //  nieuw
+#include <Preferences.h>
 
-extern String g_timezoneIANA;	 //  als deze al in globals staat, is dit genoeg
-
+//extern String g_timezoneIANA;	 //  als deze al in globals staat, is dit genoeg
 void task_time(void*)
 {
 	// Wait for WiFi
@@ -25,9 +24,10 @@ void task_time(void*)
 			p.end();
 			if (tz.length() > 0)
 			{
-								 // bewaar in global (wordt al door API gebruikt)
+				// bewaar in global (wordt al door API gebruikt)
 				g_timezoneIANA = tz;
-								 // runtime TZ instellen
+
+				// runtime TZ instellen
 				setenv("TZ", tz.c_str(), 1);
 				tzset();
 				haveSavedTz = true;
@@ -41,12 +41,12 @@ void task_time(void*)
 	bool ok = false;
 	if (haveSavedTz)
 	{
-								 // aanname: false = geen online TZ nodig
+		// aanname: false = geen online TZ nodig
 		ok = setupTimeFromInternet(false);
 	}
 	else
 	{
-								 // true = mag TZ online bepalen
+		// true = mag TZ online bepalen
 		ok = setupTimeFromInternet(true);
 	}
 
