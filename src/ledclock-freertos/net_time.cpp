@@ -3,7 +3,8 @@
 #include <WiFiClientSecure.h>
 #include <WiFi.h>
 #include <time.h>
-#include "lwip/apps/sntp.h"
+#include "esp_netif_sntp.h"
+#include "esp_sntp.h"
 
 #include "net_time.h"
 #include "hal_time_freertos.h"
