@@ -6,7 +6,6 @@ static const char* NS_SYS         = "sys";
 static const char* KEY_TZ_USER    = "tz_user";
 static const char* KEY_TZ_USERSET = "tz_user_set";
 
-
 bool tz_user_is_set()
 {
 	Preferences p;

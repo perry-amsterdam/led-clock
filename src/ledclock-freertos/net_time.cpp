@@ -216,6 +216,7 @@ bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bo
 				Serial.printf("[TZ] Using manual TZ with fetched offsets: %s\n", tzIana.c_str());
 				#endif
 			}
+			Serial.printf("#^#^#^#^#^#^#^#^#^#^# [TZ] From IP: tz=%s raw=%d dst_off=%d\n", tzIana.c_str(), gmtOffsetSec, daylightOffsetSec);
 			return true;
 		}
 	}

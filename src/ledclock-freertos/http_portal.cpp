@@ -253,6 +253,7 @@ void startPortal()
 
 	// --- mDNS (AP/portal) ---
 	// Laat clients http://ledclock.local gebruiken tijdens portal
+	MDNS.end();
 	if (!MDNS.begin("ledclock"))
 	{
 		Serial.println("[mDNS] AP mDNS start failed");
@@ -306,6 +307,7 @@ void stopPortal()
 
 	server.stop();
 	dns.stop();
+	MDNS.end();
 	WiFi.softAPdisconnect(true);
 	if(DEBUG_NET)
 	{
@@ -321,9 +323,7 @@ static void portalTask(void*)
 	{
 		dns.processNextRequest();
 		server.handleClient();
-		#if defined(ESPmDNS_H)
 		MDNS.update();
-		#endif
 		vTaskDelay(pdMS_TO_TICKS(10));
 	}
 

@@ -271,7 +271,7 @@ static void apiHandleTimezoneDelete()
 
 	time_t now = time(nullptr);
 	long off = 0;
-	if (now > 8 * 3600)		// sanity check
+	if (now > 8 * 3600)			 // sanity check
 	{
 		struct tm lt = *localtime(&now);
 		struct tm gmt = *gmtime(&now);
@@ -312,6 +312,7 @@ void startApi()
 	s_api_running = true;
 
 	// Start mDNS
+	MDNS.end();
 	if (!MDNS.begin("ledclock"))
 	{
 		Serial.println("[mDNS] Fout bij starten van mDNS");
@@ -346,9 +347,7 @@ static void httpTask(void* arg)
 	{
 		server.handleClient();
 		dns.processNextRequest();
-		#if defined(ESPmDNS_H)
 		MDNS.update();
-		#endif
 		vTaskDelay(pdMS_TO_TICKS(2));
 	}
 }
