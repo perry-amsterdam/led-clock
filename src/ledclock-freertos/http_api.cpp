@@ -271,7 +271,7 @@ static void apiHandleTimezoneDelete()
 
 	time_t now = time(nullptr);
 	long off = 0;
-	if (now > 8 * 3600)			 // sanity check
+	if (now > 8 * 3600)		// sanity check
 	{
 		struct tm lt = *localtime(&now);
 		struct tm gmt = *gmtime(&now);

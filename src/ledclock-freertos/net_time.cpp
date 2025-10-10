@@ -89,7 +89,7 @@ static bool httpGetToString(const String& url, String& out, bool acceptAllHttps)
 
 	// retry a few times  sommige hosts weigeren soms verbinding
 	int code = -1;
-	for (int attempt = 0; attempt < 3; ++attempt)
+	for (int attempt = 0; attempt < 10; ++attempt)
 	{
 		code = http.GET();
 		if (code == HTTP_CODE_OK) break;
@@ -112,10 +112,7 @@ static bool httpGetToString(const String& url, String& out, bool acceptAllHttps)
 
 
 // Fetch offsets for a given IANA TZ using WorldTimeAPI
-static bool fetchOffsetsForIanaFromWorldTimeAPI(const String& ianaTz,
-int& gmtOffsetSec,
-int& daylightOffsetSec,
-bool acceptAllHttps)
+static bool fetchOffsetsForIanaFromWorldTimeAPI(const String& ianaTz, int& gmtOffsetSec, int& daylightOffsetSec, bool acceptAllHttps)
 {
 	String url = String(URL_TZ_IANA_BASE) + ianaTz;
 	String body;
@@ -274,8 +271,7 @@ bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bo
 	daylightOffsetSec = okDst ? (int)dst : 0;
 
 	#ifdef DEBUG_TZ
-	Serial.printf("[TZ] From IP: tz=%s raw=%d dst_off=%d\n",
-		tzIana.c_str(), gmtOffsetSec, daylightOffsetSec);
+	Serial.printf("@@@@@@@@@@@@@@@@@@@@@ [TZ] From IP: tz=%s raw=%d dst_off=%d\n", tzIana.c_str(), gmtOffsetSec, daylightOffsetSec);
 	#endif
 
 	return true;
@@ -297,6 +293,8 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 		return false;
 	}
 
+	Serial.printf("########## [TIME] TZ set to IANA: %s, gmtOffset: %d, dstOffset %d\n", tzIana.c_str(), gmtOffset, dstOffset);
+
 	// Stel TZ in via IANA string  ESP32 libc ondersteunt POSIX TZ, maar
 	// recentere IDF builds accepteren ook IANA via setenv("TZ", "...").
 	// We vertrouwen op IANA; offsets worden door TZ-regels afgehandeld.
@@ -311,13 +309,14 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 
 	// SNTP configuratie
 	sntp_setoperatingmode(SNTP_OPMODE_POLL);
-	sntp_setservername(0, (char*)"pool.ntp.org");
+	sntp_setservername(0, (char*)"europe.pool.ntp.org");
 	sntp_setservername(1, (char*)"time.google.com");
+	sntp_setservername(2, (char*)"time.google.com");
 	sntp_init();
 
 	// Wacht even op tijd-sync (niet te lang)
 	const uint32_t start = hal_millis();
-	while ((time(nullptr) < 8 * 3600) && (hal_millis() - start < 5000))
+	while ((time(nullptr) < 8 * 3600) && (hal_millis() - start < 10000))
 	{
 		hal_delay_ms(150);
 	}
@@ -327,7 +326,7 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 	struct tm tm_now;
 	localtime_r(&now, &tm_now);
 	char buf[64];
-	strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", &tm_now);
+	strftime(buf, sizeof(buf), "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! %Y-%m-%d %H:%M:%S %Z", &tm_now);
 	Serial.printf("[TIME] now=%ld (%s)\n", (long)now, buf);
 	#endif
 
