@@ -52,25 +52,30 @@ func main() {
 	}
 
 	// 1) Ping
-	if !opSelected {
-
-		ping, err := c.GetApiPingWithResponse(ctx)
-		if err != nil {
-			log.Fatalf("GET /api/ping: %v", err)
-		}
-		if *showRaw && ping.Body != nil {
-			fmt.Println(string(ping.Body))
-		} else if ping.JSON200 != nil {
-			fmt.Printf("Ping Result:\n-----------\n")
-			fmt.Printf("pong=%v\nnow(ms)=%d\nuptime(ms)=%d\nheap_free=%d\nwifi_mode=%s\n",
-				ping.JSON200.Pong,
-				ping.JSON200.Now,
-				ping.JSON200.UptimeMs,
-				derefInt(ping.JSON200.HeapFree),
-				derefString(ping.JSON200.WifiMode),
-			)
-		}
+if !opSelected {
+	ping, err := c.GetApiPingWithResponse(ctx)
+	if err != nil {
+		log.Fatalf("GET /api/ping: %v", err)
 	}
+	if *showRaw && ping.Body != nil {
+		fmt.Println(string(ping.Body))
+	} else if ping.JSON200 != nil {
+		// now als echte datum/tijd in lokale tijdzone
+		nowTime := time.UnixMilli(int64(ping.JSON200.Now)).In(time.Local)
+
+		// uptime als duur
+		uptime := time.Duration(ping.JSON200.UptimeMs) * time.Millisecond
+
+		fmt.Printf("Ping Result:\n-----------\n")
+		fmt.Printf("pong=%v\n", ping.JSON200.Pong)
+		fmt.Printf("now(ms)=%d (%s)\n", ping.JSON200.Now, nowTime.Format("2006-01-02 15:04:05 MST"))
+		fmt.Printf("uptime(ms)=%d (%s)\n", ping.JSON200.UptimeMs, formatDuration(uptime))
+		fmt.Printf("heap_free=%d\nwifi_mode=%s\n",
+			derefInt(ping.JSON200.HeapFree),
+			derefString(ping.JSON200.WifiMode),
+		)
+	}
+}
 
 	// 2) Optioneel: TZ zetten
 	if *setTZ != "" {
@@ -87,7 +92,6 @@ func main() {
 		}
 		fmt.Println("timezone updated:", derefString(res.JSON200.Message))
 	}
-
 
 	// 2b) Optioneel: TZ verwijderen (DELETE /api/timezone)
 	if *clearTZ {
@@ -110,7 +114,6 @@ func main() {
 			fmt.Println("timezone clear request sent (check device)")
 		}
 	}
-
 
 	// 3) Optioneel: lijst tijdzones
 	if *listTZ {
@@ -165,3 +168,22 @@ func derefBool(p *bool) bool {
 	}
 	return *p
 }
+
+
+func formatDuration(d time.Duration) string {
+	seconds := int64(d.Seconds())
+
+	years := seconds / (365 * 24 * 3600)
+	days := (seconds % (365 * 24 * 3600)) / (24 * 3600)
+	hours := (seconds % (24 * 3600)) / 3600
+	minutes := (seconds % 3600) / 60
+	secs := seconds % 60
+
+	if years > 0 {
+		return fmt.Sprintf("%dy %dd %02dh %02dm %02ds", years, days, hours, minutes, secs)
+	} else if days > 0 {
+		return fmt.Sprintf("%dd %02dh %02dm %02ds", days, hours, minutes, secs)
+	}
+	return fmt.Sprintf("%02dh %02dm %02ds", hours, minutes, secs)
+}
+
