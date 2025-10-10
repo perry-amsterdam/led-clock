@@ -6,17 +6,16 @@
 /**
  * Dedicated mDNS task for ESP32 (ESPmDNS).
  *
- * Why?
- *  - Centralizes all MDNS.begin()/addService()/end() calls in one place.
- *  - Prevents use of the (non-existent on ESP32) MDNS.update().
- *  - Lets other modules (wifi/http/portal) send commands without worrying about timing.
- *
- * Usage (typical):
+ * Public API:
  *   mdnsTaskInit();                           // once at boot
- *   mdnsStart("ledclock");                    // after WiFi STA connected or AP started
- *   mdnsAddHttpService(80);                   // when HTTP server is up
- *   mdnsAnnounce();                           // optional: force announce after IP change
- *   mdnsStop();                               // before shutting down WiFi or switching modes
+ *   mdnsStart("ledclock");                    // start (after WiFi STA connected or AP up)
+ *   mdnsAddHttpService(80);                   // advertise HTTP
+ *   mdnsStop();                               // stop
+ *   mdnsRestart(nullptr or "ledclock");       // stop + start (uses last hostname if nullptr)
+ *
+ * Notes:
+ *   - No MDNS.update() (ESP8266-only) and no MDNS.announce() (not in ESP32 3.3.x).
+ *   - A fresh MDNS.begin(...) implicitly sends the necessary announcements.
  */
 
 #ifdef __cplusplus
@@ -37,8 +36,9 @@ extern "C"
 	// Add HTTP service on given port (e.g., 80). Returns true if the command was enqueued.
 	bool mdnsAddHttpService(uint16_t port);
 
-	// Trigger a manual announce (optional). Returns true if the command was enqueued.
-	bool mdnsAnnounce();
+	// Restart mDNS (stop + start). If hostname is nullptr, the last used hostname is reused.
+	// Returns true if the command was enqueued.
+	bool mdnsRestart(const char* hostname);
 
 	#ifdef __cplusplus
 }								 // extern "C"

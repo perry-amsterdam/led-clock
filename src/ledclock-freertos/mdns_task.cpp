@@ -13,18 +13,19 @@ enum class MdnsCmd : uint8_t
 	Start,
 	Stop,
 	AddHttp,
-	Announce
+	Restart
 };
 
 struct MdnsMsg
 {
 	MdnsCmd cmd;
 	uint16_t port;				 // for AddHttp
-	char hostname[33];			 // for Start (ESP mDNS limit is typically 32 chars)
+	char hostname[33];			 // for Start/Restart (ESP mDNS limit is typically 32 chars)
 };
 
 static TaskHandle_t sTask = nullptr;
 static QueueHandle_t sQueue = nullptr;
+static char sLastHostname[33] = {0};
 
 static void mdnsTask(void* arg)
 {
@@ -43,11 +44,9 @@ static void mdnsTask(void* arg)
 					MDNS.end();
 
 					// Only attempt start if we have an interface up; for STA ensure WiFi is connected
-					// (AP mode also works; library handles interface selection)
-					bool hasIf = (WiFi.isConnected() || WiFi.getMode() & WIFI_AP);
+					bool hasIf = (WiFi.isConnected() || (WiFi.getMode() & WIFI_AP));
 					if (!hasIf)
 					{
-						// No interface yet; small delay to avoid tight loop
 						vTaskDelay(pdMS_TO_TICKS(100));
 					}
 					if (!MDNS.begin(msg.hostname))
@@ -56,6 +55,8 @@ static void mdnsTask(void* arg)
 					}
 					else
 					{
+						strncpy(sLastHostname, msg.hostname, sizeof(sLastHostname) - 1);
+						sLastHostname[sizeof(sLastHostname) - 1] = '\0';
 						Serial.printf("[mDNS] Started as %s.local\n", msg.hostname);
 					}
 				} break;
@@ -69,7 +70,6 @@ static void mdnsTask(void* arg)
 				case MdnsCmd::AddHttp:
 				{
 					// Advertise HTTP service
-					// NOTE: addService is safe to call multiple times; subsequent calls update the service
 					if (!MDNS.addService("http", "tcp", msg.port))
 					{
 						Serial.printf("[mDNS] Failed to add HTTP service on port %u\n", msg.port);
@@ -80,11 +80,34 @@ static void mdnsTask(void* arg)
 					}
 				} break;
 
-				case MdnsCmd::Announce:
+				case MdnsCmd::Restart:
 				{
-					// Force an extra announcement (ESP32 API)
-					MDNS.announce();
-					Serial.println("[mDNS] Announce sent");
+					// Stop first
+					MDNS.end();
+					Serial.println("[mDNS] Restart: stopped");
+
+					const char* hn = msg.hostname[0] ? msg.hostname : sLastHostname;
+					if (!hn || !hn[0])
+					{
+						Serial.println("[mDNS] Restart aborted: no hostname available");
+						break;
+					}
+
+					bool hasIf = (WiFi.isConnected() || (WiFi.getMode() & WIFI_AP));
+					if (!hasIf)
+					{
+						vTaskDelay(pdMS_TO_TICKS(100));
+					}
+					if (!MDNS.begin(hn))
+					{
+						Serial.println("[mDNS] Restart failed to start");
+					}
+					else
+					{
+						strncpy(sLastHostname, hn, sizeof(sLastHostname) - 1);
+						sLastHostname[sizeof(sLastHostname) - 1] = '\0';
+						Serial.printf("[mDNS] Restarted as %s.local\n", hn);
+					}
 				} break;
 			}
 		}
@@ -141,9 +164,18 @@ extern "C" bool mdnsAddHttpService(uint16_t port)
 }
 
 
-extern "C" bool mdnsAnnounce()
+extern "C" bool mdnsRestart(const char* hostname)
 {
 	MdnsMsg m{};
-	m.cmd = MdnsCmd::Announce;
+	m.cmd = MdnsCmd::Restart;
+	if (hostname)
+	{
+		strncpy(m.hostname, hostname, sizeof(m.hostname) - 1);
+		m.hostname[sizeof(m.hostname) - 1] = '\0';
+	}
+	else
+	{
+		m.hostname[0] = '\0';	 // use last hostname in the task
+	}
 	return enqueue(m);
 }

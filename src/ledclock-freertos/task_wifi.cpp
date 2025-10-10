@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WebServer.h>
-#include <ESPmDNS.h>
 #include <Preferences.h>
 
 #include "rtos.h"
@@ -11,6 +10,7 @@
 #include "http_api.h"			 // startApi/stopApi
 #include "http_portal.h"		 // startPortal/stopPortal
 #include "hal_time_freertos.h"
+#include "mdns_task.h"
 
 // This task attempts to connect using saved credentials once,
 // then supervises link state and keeps the portal/API mutually exclusive.

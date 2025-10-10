@@ -1,8 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
-#include <ESPmDNS.h>
 #include <WebServer.h>
-#include <ESPmDNS.h>
 #include <DNSServer.h>
 #include <Preferences.h>
 #include <time.h>
@@ -17,6 +15,7 @@ extern "C"
 #include "http_api.h"
 #include "hal_time_freertos.h"
 #include "timezone_storage.h"
+#include "mdns_task.h"
 
 // ======================================================
 // Globals
@@ -312,14 +311,14 @@ void startApi()
 	s_api_running = true;
 
 	// Start mDNS
-	MDNS.end();
-	if (!MDNS.begin("ledclock"))
+	mdnsStop();
+	if (!mdnsStart("ledclock"))
 	{
 		Serial.println("[mDNS] Fout bij starten van mDNS");
 	}
 	else
 	{
-		MDNS.addService("http", "tcp", 80);
+		mdnsAddHttpService(80);
 		Serial.println("[mDNS] Service gestart: http://ledclock.local");
 	}
 
@@ -332,7 +331,7 @@ void stopApi()
 	if (!s_api_running) return;
 	Serial.println("[HTTP] Stopt API...");
 	server.close();
-	MDNS.end();
+	mdnsStop();
 	s_api_running = false;
 	Serial.println("[HTTP] API gestopt");
 }
@@ -347,7 +346,6 @@ static void httpTask(void* arg)
 	{
 		server.handleClient();
 		dns.processNextRequest();
-		MDNS.update();
 		vTaskDelay(pdMS_TO_TICKS(2));
 	}
 }

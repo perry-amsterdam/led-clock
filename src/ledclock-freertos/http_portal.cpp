@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <ESPmDNS.h>
 #include <WiFi.h>
 #include <time.h>
 #include <WebServer.h>
@@ -14,6 +13,7 @@ extern "C"
 {
 	#include "freertos/FreeRTOS.h"
 	#include "freertos/task.h"
+	#include "mdns_task.h"
 }
 
 
@@ -253,15 +253,15 @@ void startPortal()
 
 	// --- mDNS (AP/portal) ---
 	// Laat clients http://ledclock.local gebruiken tijdens portal
-	MDNS.end();
-	if (!MDNS.begin("ledclock"))
+	mdnsStop();
+	if (!mdnsStart("ledclock"))
 	{
 		Serial.println("[mDNS] AP mDNS start failed");
 	}
 	else
 	{
 		Serial.println("[mDNS] AP mDNS ledclock.local");
-		MDNS.addService("http", "tcp", 80);
+		mdnsAddHttpService(80);
 	}
 
 	if(DEBUG_NET) Serial.println("[Portal] Start");
@@ -307,7 +307,7 @@ void stopPortal()
 
 	server.stop();
 	dns.stop();
-	MDNS.end();
+	mdnsStop();
 	WiFi.softAPdisconnect(true);
 	if(DEBUG_NET)
 	{
@@ -323,7 +323,6 @@ static void portalTask(void*)
 	{
 		dns.processNextRequest();
 		server.handleClient();
-		MDNS.update();
 		vTaskDelay(pdMS_TO_TICKS(10));
 	}
 

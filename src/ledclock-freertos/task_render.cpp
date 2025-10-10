@@ -47,11 +47,13 @@ void task_render(void*)
 		{
 			#if DEBUG_TIMING
 			unsigned long start = micros();
+			#endif
+
 			ws2812bUpdate(now, epoch);
+
+			#if DEBUG_TIMING
 			unsigned long duration = micros() - start;
 			Serial.printf("ws2812bUpdate took %.3f ms\n", duration / 1000.0);
-			#else
-			ws2812bUpdate(now, epoch);
 			#endif
 		}
 
