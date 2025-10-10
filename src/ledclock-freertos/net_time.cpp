@@ -303,9 +303,7 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 
 	Serial.printf("########## [TIME] TZ set to IANA: %s, gmtOffset: %d, dstOffset %d\n", tzIana.c_str(), gmtOffset, dstOffset);
 
-	// Stel TZ in via IANA string  ESP32 libc ondersteunt POSIX TZ, maar
-	// recentere IDF builds accepteren ook IANA via setenv("TZ", "...").
-	// We vertrouwen op IANA; offsets worden door TZ-regels afgehandeld.
+	// 1) Probeer IANA TZ te zetten (voor wie dit ondersteunt)
 	if (tzIana.length() > 0)
 	{
 		setenv("TZ", tzIana.c_str(), 1);
@@ -315,12 +313,12 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 		#endif
 	}
 
-	// SNTP configuratie
-	sntp_setoperatingmode(SNTP_OPMODE_POLL);
-	sntp_setservername(0, (char*)"europe.pool.ntp.org");
-	sntp_setservername(1, (char*)"time.google.com");
-	sntp_setservername(2, (char*)"pool.ntp.org");
-	sntp_init();
+	// 2) **Belangrijk**: configureer SNTP inclusief offsets zodat tijd lokaal klopt
+	//    (werkt ook wanneer IANA TZ niet wordt ondersteund).
+	configTime(gmtOffset, dstOffset,
+		"europe.pool.ntp.org",
+		"time.google.com",
+		"pool.ntp.org");
 
 	// Wacht even op tijd-sync (niet te lang)
 	const uint32_t start = hal_millis();
