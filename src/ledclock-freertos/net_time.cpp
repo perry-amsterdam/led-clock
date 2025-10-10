@@ -9,6 +9,7 @@
 #include "net_time.h"
 #include "hal_time_freertos.h"
 #include "timezone_storage.h"
+#include <ArduinoJson.h>
 
 // --------- Configurable endpoints (overridable via -D defines) ----------
 #ifndef URL_TIMEINFO
@@ -49,24 +50,23 @@ void dumpPreview(const String& payload)
 }
 
 
-// Very light-weight JSON string extractor: looks for "key":"value"
-String extractJsonString(const String& json, const String& key)
-{
-	String pat = "\"" + key + "\"";
-	int i = json.indexOf(pat);
-	if (i < 0) return "";
-	i = json.indexOf(':', i);
-	if (i < 0) return "";
-	// skip whitespace
-	while (i + 1 < (int)json.length() && (json[i + 1] == ' ' || json[i + 1] == '\t')) i++;
-	// expect '"'
-	int q1 = json.indexOf('\"', i + 1);
-	if (q1 < 0) return "";
-	int q2 = json.indexOf('\"', q1 + 1);
-	if (q2 < 0) return "";
-	return json.substring(q1 + 1, q2);
-}
-
+//// Very light-weight JSON string extractor: looks for "key":"value"
+//String extractJsonString(const String& json, const String& key)
+//{
+//	String pat = "\"" + key + "\"";
+//	int i = json.indexOf(pat);
+//	if (i < 0) return "";
+//	i = json.indexOf(':', i);
+//	if (i < 0) return "";
+//	// skip whitespace
+//	while (i + 1 < (int)json.length() && (json[i + 1] == ' ' || json[i + 1] == '\t')) i++;
+//	// expect '"'
+//	int q1 = json.indexOf('\"', i + 1);
+//	if (q1 < 0) return "";
+//	int q2 = json.indexOf('\"', q1 + 1);
+//	if (q2 < 0) return "";
+//	return json.substring(q1 + 1, q2);
+//}
 
 // Simple HTTP GET into String (TLS optional)
 static bool httpGetToString(const String& url, String& out, bool acceptAllHttps)
@@ -120,42 +120,21 @@ static bool fetchOffsetsForIanaFromWorldTimeAPI(const String& ianaTz, int& gmtOf
 	{
 		return false;
 	}
+	//Serial.println(String(URL_TZ_IANA_BASE) + ianaTz);
 	dumpPreview(body);
 
-	// WorldTimeAPI velden: raw_offset (sec), dst_offset (sec)
-	// Gebruik string extractor (lichtgewicht) of parse ints snel:
-	// we pakken string values en converteren (robust genoeg voor WTA format)
-	String raw_s = extractJsonString(body, "raw_offset");
-	String dst_s = extractJsonString(body, "dst_offset");
-
-	// Sommige implementaties geven raw_offset/dst_offset als numeriek zonder quotes.
-	// Fallback: simpele zoek-naar sleutel gevolgd door nummer.
-	auto extractNumber = [&](const String& src, const String& k, long& outNum) -> bool
+	// Parse JSON body
+	StaticJsonDocument<1024> doc;
+	DeserializationError err = deserializeJson(doc, body);
+	if (err)
 	{
-		int p = src.indexOf("\"" + k + "\"");
-		if (p < 0) return false;
-		p = src.indexOf(':', p);
-		if (p < 0) return false;
-		// skip spaces
-		while (p + 1 < (int)src.length() && (src[p + 1] == ' ' || src[p + 1] == '\t')) p++;
-		int s = p + 1;
-		int e = s;
-		while (e < (int)src.length() && (isDigit(src[e]) || src[e] == '-' )) e++;
-		if (e <= s) return false;
-		outNum = src.substring(s, e).toInt();
-		return true;
-	};
+		Serial.print("JSON parse error: ");
+		Serial.println(err.f_str());
+		return false;
+	}
 
-	long raw = 0, dst = 0;
-	bool okRaw = false, okDst = false;
-
-	if (raw_s.length() > 0) { raw = raw_s.toInt(); okRaw = true; }
-	if (dst_s.length() > 0) { dst = dst_s.toInt(); okDst = true; }
-
-	if (!okRaw) okRaw = extractNumber(body, "raw_offset", raw);
-	if (!okDst) okDst = extractNumber(body, "dst_offset", dst);
-
-	if (!okRaw || !okDst)
+	// Controleer of beide keys bestaan
+	if (!doc.containsKey("raw_offset") || !doc.containsKey("dst_offset"))
 	{
 		#ifdef DEBUG_TZ
 		Serial.println("[TZ] Missing raw_offset/dst_offset in WorldTimeAPI response");
@@ -163,8 +142,16 @@ static bool fetchOffsetsForIanaFromWorldTimeAPI(const String& ianaTz, int& gmtOf
 		return false;
 	}
 
+	// Lees offsets direct als integers
+	int raw = doc["raw_offset"] | 0;
+	int dst = doc["dst_offset"] | 0;
+
+	// Debug (optioneel)
+	Serial.printf("raw_offset=%d, dst_offset=%d\n", raw, dst);
+
 	gmtOffsetSec      = (int)raw;
 	daylightOffsetSec = (int)dst;
+
 	#ifdef DEBUG_TZ
 	Serial.printf("[TZ] IANA '%s' raw=%d dst_off=%d\n", ianaTz.c_str(), gmtOffsetSec, daylightOffsetSec);
 	#endif
@@ -216,7 +203,7 @@ bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bo
 				Serial.printf("[TZ] Using manual TZ with fetched offsets: %s\n", tzIana.c_str());
 				#endif
 			}
-			Serial.printf("#^#^#^#^#^#^#^#^#^#^# [TZ] From IP: tz=%s raw=%d dst_off=%d\n", tzIana.c_str(), gmtOffsetSec, daylightOffsetSec);
+			Serial.printf("[TZ] From IP: tz=%s raw=%d dst_off=%d\n", tzIana.c_str(), gmtOffsetSec, daylightOffsetSec);
 			return true;
 		}
 	}
@@ -234,7 +221,27 @@ bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bo
 	dumpPreview(body);
 
 	// WorldTimeAPI /api/ip velden: "timezone":"Europe/Amsterdam", "raw_offset":7200, "dst_offset":3600, "dst":true
-	String tz = extractJsonString(body, "timezone");
+
+	// Parse JSON body
+	DynamicJsonDocument doc(4096);
+	DeserializationError err = deserializeJson(doc, body);
+	if (err)
+	{
+		Serial.print("JSON parse error: ");
+		Serial.println(err.f_str());
+		return false;
+	}
+
+	if (!doc.containsKey("timezone"))
+	{
+		Serial.printf("[JSON] Key not found: %s\n", "timezone");
+		return false;
+	}
+
+	// veilig uitlezen als C-string, dan naar Arduino String
+	const char* tz_c = doc["timezone"] | "";
+	String tz = String(tz_c);
+
 	if (tz.length() == 0)
 	{
 		#ifdef DEBUG_TZ
@@ -272,7 +279,7 @@ bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bo
 	daylightOffsetSec = okDst ? (int)dst : 0;
 
 	#ifdef DEBUG_TZ
-	Serial.printf("@@@@@@@@@@@@@@@@@@@@@ [TZ] From IP: tz=%s raw=%d dst_off=%d\n", tzIana.c_str(), gmtOffsetSec, daylightOffsetSec);
+	Serial.printf("[TZ] From IP: tz=%s raw=%d dst_off=%d\n", tzIana.c_str(), gmtOffsetSec, daylightOffsetSec);
 	#endif
 
 	return true;
@@ -312,7 +319,7 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 	sntp_setoperatingmode(SNTP_OPMODE_POLL);
 	sntp_setservername(0, (char*)"europe.pool.ntp.org");
 	sntp_setservername(1, (char*)"time.google.com");
-	sntp_setservername(2, (char*)"time.google.com");
+	sntp_setservername(2, (char*)"pool.ntp.org");
 	sntp_init();
 
 	// Wacht even op tijd-sync (niet te lang)
