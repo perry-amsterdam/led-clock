@@ -91,6 +91,20 @@ static const char* kTimezones[] PROGMEM =
 };
 static constexpr size_t kTimezoneCount = sizeof(kTimezones) / sizeof(kTimezones[0]);
 
+
+// Put near kTimezones[] and kTimezoneCount
+static bool isValidIanaTimezone(const String& tz)
+{
+	for (size_t i = 0; i < kTimezoneCount; ++i)
+	{
+		// Read from PROGMEM safely
+		const char* item = (const char*)pgm_read_ptr(&kTimezones[i]);
+		if (tz.equals(item)) return true;  // exact match, case-sensitive (IANA)
+	}
+	return false;
+}
+
+
 static void apiHandleTimezonesGet()
 {
 	server.sendHeader("Access-Control-Allow-Origin", "*");
@@ -227,13 +241,21 @@ static void apiHandleTimezonePost()
 	String tz = body.substring(q1 + 1, q2);
 	tz.trim();
 
-	if (tz.length() < 3 || tz.length() > 64)
+	// Basic shape check (optional, keeps error messages clearer)
+	if (tz.length() < 3 || tz.length() > 64 || tz.indexOf(' ') >= 0 || tz.indexOf('\\') >= 0)
 	{
 		sendJson(400, "{\"success\":false,\"message\":\"Invalid timezone format\"}");
 		return;
 	}
 
-	// Save timezone.
+	// ✅ IANA validation against our compiled list
+	if (!isValidIanaTimezone(tz))
+	{
+		sendJson(400, "{\"success\":false,\"message\":\"Unknown timezone. Use /api/timezones to list supported IANA names.\"}");
+		return;
+	}
+
+	// Save & apply
 	tz_user_set(tz.c_str());
 	setenv("TZ", tz.c_str(), 1);
 	tzset();
