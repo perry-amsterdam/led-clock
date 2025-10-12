@@ -137,6 +137,7 @@ extern const Theme THEME_CLASSIC =
 	.name   = "Classic",
 	.begin  = beginClassic,
 	.update = updateClassic,
+	.showStartupPattern = showStartupPattern,
 };
 
 // Auto-registratie + markeer als default (of gebruik REGISTER_THEME)
