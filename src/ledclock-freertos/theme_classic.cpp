@@ -85,19 +85,19 @@ static void updateClassic(const tm& now, time_t epoch)
 	}
 	if (kClassic.showHourTicks)
 	{
-		for (int h=0; h<24; h+=3)
+		for (int h=0; h<12; h+=3)
 		{
-			ledhwAdd24(ring24Index(h), TICK_HOUR_R, TICK_HOUR_G, TICK_HOUR_B);
+			ledhwAdd24(ring24Index(h*2), TICK_HOUR_R, TICK_HOUR_G, TICK_HOUR_B);
 		}
 	}
 
 	const int s = now.tm_sec % 60;
 	const int m = now.tm_min % 60;
-	const int h = now.tm_hour % 24;
+	const int h = now.tm_hour % 12;
 
 	ledhwAdd60(ring60Index(s), COLOR_SEC_R, COLOR_SEC_G, COLOR_SEC_B);
 	ledhwAdd60(ring60Index(m), COLOR_MIN_R, COLOR_MIN_G, COLOR_MIN_B);
-	ledhwAdd24(ring24Index(h), COLOR_HOUR_R, COLOR_HOUR_G, COLOR_HOUR_B);
+	ledhwAdd24(ring24Index(h*2), COLOR_HOUR_R, COLOR_HOUR_G, COLOR_HOUR_B);
 
 	ledhwShow();
 }
