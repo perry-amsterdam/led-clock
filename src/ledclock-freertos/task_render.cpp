@@ -18,21 +18,21 @@ void task_render(void*)
 	EventBits_t bits = xEventGroupGetBits(g_sysEvents);
 	while (!(bits & EVT_TIME_READY))
 	{
-				if (bits & EVT_PORTAL_ON)
-				{
-					// Captive portal actief  rood pulse
-					showStartupPattern(25, 0, 0)
-				}
-				else if (!(bits & EVT_WIFI_UP))
-				{
-					// WiFi is niet verbonden  blauw pulse
-					showStartupPattern(0, 0, 25)
-				}
-				else if (!(bits & EVT_TIME_READY))
-				{
-					// WiFi verbonden, maar tijd nog niet gesynchroniseerd  groen pulse
-					showStartupPattern(0, 25, 0)
-				}
+		if (bits & EVT_PORTAL_ON)
+		{
+			// Captive portal actief  rood pulse
+			themeshowStartupPattern(25,0,0);
+		}
+		else if (!(bits & EVT_WIFI_UP))
+		{
+			// WiFi is niet verbonden  blauw pulse
+			themeshowStartupPattern(0,0,25);
+		}
+		else if (!(bits & EVT_TIME_READY))
+		{
+			// WiFi verbonden, maar tijd nog niet gesynchroniseerd  groen pulse
+			themeshowStartupPattern(0,25,0);
+		}
 
 		hal_delay_ms(500);
 		bits = xEventGroupGetBits(g_sysEvents);

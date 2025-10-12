@@ -2,7 +2,8 @@
 #include "theme.h"
 #include "theme_registry.h"
 #include "ledhw.h"
-#include "theme_classic_config.h"
+#include "hal_time_freertos.h"
+#include "theme_classic.h"
 
 // ---------------------------------------------------
 // Wijzerkleuren (RGB 0..255)  pas aan naar smaak
@@ -74,28 +75,26 @@ static void beginClassic()
 // Functie to display status during startup on the leds (24 en 60).
 void showStartupPattern(uint8_t r, uint8_t g, uint8_t b)
 {
-        clearAll();
+	ledhwClearAll();
 
-        for (int index = 0; index < 60; index += 5)
-        {
-                // Positie = (statische offset + lus-index)
-                addPix60(idx60(index), r, g, b);
-        }
+	for (int index = 0; index < 60; index += 5)
+	{
+		// Positie = (statische offset + lus-index)
+		ledhwAdd60(ring60Index(index), r, g, b);
+	}
 
-        for (int index = 0; index < 24; index += 3)
-        {
-                // Positie = (statische offset + lus-index)
-                addPix24(idx24(index), r, g, b);
-        }
+	for (int index = 0; index < 24; index += 3)
+	{
+		// Positie = (statische offset + lus-index)
+		ledhwAdd24(ring24Index(index), r, g, b);
+	}
 
-        strip24.show();
-        strip60.show();
+	ledhwShow();
 
-        hal_delay_ms(500);
+	hal_delay_ms(500);
 
-        clearAll();
-        strip60.show();
-        strip24.show();
+	ledhwClearAll();
+	ledhwShow();
 }
 
 
@@ -111,6 +110,7 @@ static void updateClassic(const tm& now, time_t epoch)
 			ledhwAdd60(ring60Index(m), TICK_MIN_R, TICK_MIN_G, TICK_MIN_B);
 		}
 	}
+
 	if (kClassic.showHourTicks)
 	{
 		for (int h=0; h<12; h+=3)

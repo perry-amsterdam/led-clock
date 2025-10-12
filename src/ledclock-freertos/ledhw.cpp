@@ -59,15 +59,6 @@ uint16_t ring60Index(int raw)
 }
 
 
-//uint16_t ring12Index(int raw)
-//{
-//	int x = ((raw * 2) % 24 + 24) % 24;
-//	x = (RING24_DIR>0) ? x : (24 - x) % 24;
-//	x = (x + RING24_OFFSET) % 24;
-//	return (uint16_t)x;
-//}
-
-
 uint16_t ring24Index(int raw)
 {
 	int x = (raw % 24 + 24) % 24;

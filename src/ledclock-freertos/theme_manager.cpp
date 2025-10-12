@@ -49,3 +49,12 @@ void themeUpdate(const tm& now, time_t epoch)
 		currentTheme->update(now, epoch);
 	};
 }
+
+
+void themeshowStartupPattern(uint8_t r, uint8_t g, uint8_t b)
+{
+	if (currentTheme && currentTheme->showStartupPattern)
+	{
+		currentTheme->showStartupPattern(r,g,b);
+	};
+}
