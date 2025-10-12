@@ -91,7 +91,6 @@ static const char* kTimezones[] PROGMEM =
 };
 static constexpr size_t kTimezoneCount = sizeof(kTimezones) / sizeof(kTimezones[0]);
 
-
 // Put near kTimezones[] and kTimezoneCount
 static bool isValidIanaTimezone(const String& tz)
 {
@@ -99,7 +98,9 @@ static bool isValidIanaTimezone(const String& tz)
 	{
 		// Read from PROGMEM safely
 		const char* item = (const char*)pgm_read_ptr(&kTimezones[i]);
-		if (tz.equals(item)) return true;  // exact match, case-sensitive (IANA)
+
+		// exact match, case-sensitive (IANA)
+		if (tz.equals(item)) return true;
 	}
 	return false;
 }
@@ -248,7 +249,7 @@ static void apiHandleTimezonePost()
 		return;
 	}
 
-	// ✅ IANA validation against our compiled list
+	//  IANA validation against our compiled list
 	if (!isValidIanaTimezone(tz))
 	{
 		sendJson(400, "{\"success\":false,\"message\":\"Unknown timezone. Use /api/timezones to list supported IANA names.\"}");

@@ -1,0 +1,11 @@
+#pragma once
+#include <cstddef>
+#include "theme.h"
+
+void        themeInit();
+void        themeUpdate(const tm& now, time_t epoch);
+
+size_t      themeCount();
+const char* themeNameAt(size_t i);
+const char* themeCurrentName();
+bool        themeSelect(const char* name);

@@ -1,38 +1,38 @@
 #include <Arduino.h>
 #include "rtos.h"
-#include "ws2812b.h"
 #include <Adafruit_NeoPixel.h>
 #include "net_time.h"
 #include <time.h>
 #include "hal_time_freertos.h"
+#include "theme_manager.h"
 
 void task_render(void*)
 {
 	vTaskDelay(pdMS_TO_TICKS(50));
 	LOG_STACK_WATERMARK("render:init");
 
-	ws2812bBegin();
+	themeInit();
 
 	int direction = 0;
 
 	EventBits_t bits = xEventGroupGetBits(g_sysEvents);
 	while (!(bits & EVT_TIME_READY))
 	{
-		if (bits & EVT_PORTAL_ON)
-		{
-			// Captive portal actief  rood pulse
-			drawStatusTicks(25, 0, 0);
-		}
-		else if (!(bits & EVT_WIFI_UP))
-		{
-			// WiFi is niet verbonden  blauw pulse
-			drawStatusTicks(0, 0, 25);
-		}
-		else if (!(bits & EVT_TIME_READY))
-		{
-			// WiFi verbonden, maar tijd nog niet gesynchroniseerd  groen pulse
-			drawStatusTicks(0, 25, 0);
-		}
+		//		if (bits & EVT_PORTAL_ON)
+		//		{
+		//			// Captive portal actief  rood pulse
+		//			drawStatusTicks(25, 0, 0);
+		//		}
+		//		else if (!(bits & EVT_WIFI_UP))
+		//		{
+		//			// WiFi is niet verbonden  blauw pulse
+		//			drawStatusTicks(0, 0, 25);
+		//		}
+		//		else if (!(bits & EVT_TIME_READY))
+		//		{
+		//			// WiFi verbonden, maar tijd nog niet gesynchroniseerd  groen pulse
+		//			drawStatusTicks(0, 25, 0);
+		//		}
 
 		hal_delay_ms(500);
 		bits = xEventGroupGetBits(g_sysEvents);
@@ -49,7 +49,7 @@ void task_render(void*)
 			unsigned long start = micros();
 			#endif
 
-			ws2812bUpdate(now, epoch);
+			themeUpdate(now, epoch);
 
 			#if DEBUG_TIMING
 			unsigned long duration = micros() - start;
@@ -58,6 +58,6 @@ void task_render(void*)
 		}
 
 		// ~4 FPS animation.
-		hal_delay_ms(500);
+		hal_delay_ms(250);
 	}
 }

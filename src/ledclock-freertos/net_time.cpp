@@ -32,17 +32,32 @@
 void dumpPreview(const String& payload)
 {
 	#ifdef DEBUG_TZ
+	// Limit the debug output to maxium 160 characters.
 	int n = payload.length();
 	int k = n > 160 ? 160 : n;
+
 	Serial.print("[HTTP PREVIEW] ");
 	for (int i = 0; i < k; ++i)
 	{
 		char c = payload[i];
-		if (c == '\n') { Serial.print("\\n"); }
-		else if (c == '\r') { Serial.print("\\r"); }
-		else { Serial.print(c); }
+		if (c == '\n')
+		{
+			Serial.print("\\n");
+		}
+		else if (c == '\r')
+		{
+			Serial.print("\\r");
+		}
+		else
+		{
+			Serial.print(c);
+		}
 	}
-	if (n > k) Serial.print(" ...");
+
+	if (n > k)
+	{
+		Serial.print(" ...");
+	}
 	Serial.println();
 	#else
 	(void)payload;
@@ -252,31 +267,37 @@ bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bo
 
 	tzIana = tz;
 
-	long raw = 0, dst = 0;
-	bool okRaw = false, okDst = false;
+	//	long raw = 0, dst = 0;
+	//	bool okRaw = false, okDst = false;
 
-	// Probeert numeriek te pakken (zie helper hierboven)
-	auto extractNumber = [&](const String& src, const String& k, long& outNum) -> bool
+	//	// Probeert numeriek te pakken (zie helper hierboven)
+	//	auto extractNumber = [&](const String& src, const String& k, long& outNum) -> bool
+	//	{
+	//		int p = src.indexOf("\"" + k + "\"");
+	//		if (p < 0) return false;
+	//		p = src.indexOf(':', p);
+	//		if (p < 0) return false;
+	//		while (p + 1 < (int)src.length() && (src[p + 1] == ' ' || src[p + 1] == '\t')) p++;
+	//		int s = p + 1;
+	//		int e = s;
+	//		while (e < (int)src.length() && (isDigit(src[e]) || src[e] == '-' )) e++;
+	//		if (e <= s) return false;
+	//		outNum = src.substring(s, e).toInt();
+	//		return true;
+	//	};
+
+	// Controleer of beide keys bestaan
+	if (!doc.containsKey("raw_offset") || !doc.containsKey("dst_offset"))
 	{
-		int p = src.indexOf("\"" + k + "\"");
-		if (p < 0) return false;
-		p = src.indexOf(':', p);
-		if (p < 0) return false;
-		while (p + 1 < (int)src.length() && (src[p + 1] == ' ' || src[p + 1] == '\t')) p++;
-		int s = p + 1;
-		int e = s;
-		while (e < (int)src.length() && (isDigit(src[e]) || src[e] == '-' )) e++;
-		if (e <= s) return false;
-		outNum = src.substring(s, e).toInt();
-		return true;
-	};
+		#ifdef DEBUG_TZ
+		Serial.println("[TZ] Missing raw_offset/dst_offset in WorldTimeAPI response");
+		#endif
+		return false;
+	}
 
-	okRaw = extractNumber(body, "raw_offset", raw);
-	okDst = extractNumber(body, "dst_offset", dst);
-
-	// Als offsets ontbreken, val terug op 0/0 (TZ string dekt DST-regels)
-	gmtOffsetSec      = okRaw ? (int)raw : 0;
-	daylightOffsetSec = okDst ? (int)dst : 0;
+	// Lees offsets direct als integers
+	gmtOffsetSec = doc["raw_offset"] | 0;
+	daylightOffsetSec = doc["dst_offset"] | 0;
 
 	#ifdef DEBUG_TZ
 	Serial.printf("[TZ] From IP: tz=%s raw=%d dst_off=%d\n", tzIana.c_str(), gmtOffsetSec, daylightOffsetSec);
@@ -300,8 +321,6 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 		#endif
 		return false;
 	}
-
-	Serial.printf("########## [TIME] TZ set to IANA: %s, gmtOffset: %d, dstOffset %d\n", tzIana.c_str(), gmtOffset, dstOffset);
 
 	// 1) Probeer IANA TZ te zetten (voor wie dit ondersteunt)
 	if (tzIana.length() > 0)
@@ -328,11 +347,12 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 	}
 
 	time_t now = time(nullptr);
+
 	#ifdef DEBUG_TZ
 	struct tm tm_now;
 	localtime_r(&now, &tm_now);
 	char buf[64];
-	strftime(buf, sizeof(buf), "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! %Y-%m-%d %H:%M:%S %Z", &tm_now);
+	strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", &tm_now);
 	Serial.printf("[TIME] now=%ld (%s)\n", (long)now, buf);
 	#endif
 
