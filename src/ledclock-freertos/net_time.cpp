@@ -64,25 +64,6 @@ void dumpPreview(const String& payload)
 	#endif
 }
 
-
-//// Very light-weight JSON string extractor: looks for "key":"value"
-//String extractJsonString(const String& json, const String& key)
-//{
-//	String pat = "\"" + key + "\"";
-//	int i = json.indexOf(pat);
-//	if (i < 0) return "";
-//	i = json.indexOf(':', i);
-//	if (i < 0) return "";
-//	// skip whitespace
-//	while (i + 1 < (int)json.length() && (json[i + 1] == ' ' || json[i + 1] == '\t')) i++;
-//	// expect '"'
-//	int q1 = json.indexOf('\"', i + 1);
-//	if (q1 < 0) return "";
-//	int q2 = json.indexOf('\"', q1 + 1);
-//	if (q2 < 0) return "";
-//	return json.substring(q1 + 1, q2);
-//}
-
 // Simple HTTP GET into String (TLS optional)
 static bool httpGetToString(const String& url, String& out, bool acceptAllHttps)
 {
@@ -266,25 +247,6 @@ bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bo
 	}
 
 	tzIana = tz;
-
-	//	long raw = 0, dst = 0;
-	//	bool okRaw = false, okDst = false;
-
-	//	// Probeert numeriek te pakken (zie helper hierboven)
-	//	auto extractNumber = [&](const String& src, const String& k, long& outNum) -> bool
-	//	{
-	//		int p = src.indexOf("\"" + k + "\"");
-	//		if (p < 0) return false;
-	//		p = src.indexOf(':', p);
-	//		if (p < 0) return false;
-	//		while (p + 1 < (int)src.length() && (src[p + 1] == ' ' || src[p + 1] == '\t')) p++;
-	//		int s = p + 1;
-	//		int e = s;
-	//		while (e < (int)src.length() && (isDigit(src[e]) || src[e] == '-' )) e++;
-	//		if (e <= s) return false;
-	//		outNum = src.substring(s, e).toInt();
-	//		return true;
-	//	};
 
 	// Controleer of beide keys bestaan
 	if (!doc.containsKey("raw_offset") || !doc.containsKey("dst_offset"))
