@@ -71,6 +71,34 @@ static void beginClassic()
 }
 
 
+// Functie to display status during startup on the leds (24 en 60).
+void showStartupPattern(uint8_t r, uint8_t g, uint8_t b)
+{
+        clearAll();
+
+        for (int index = 0; index < 60; index += 5)
+        {
+                // Positie = (statische offset + lus-index)
+                addPix60(idx60(index), r, g, b);
+        }
+
+        for (int index = 0; index < 24; index += 3)
+        {
+                // Positie = (statische offset + lus-index)
+                addPix24(idx24(index), r, g, b);
+        }
+
+        strip24.show();
+        strip60.show();
+
+        hal_delay_ms(500);
+
+        clearAll();
+        strip60.show();
+        strip24.show();
+}
+
+
 static void updateClassic(const tm& now, time_t epoch)
 {
 	(void)epoch;
