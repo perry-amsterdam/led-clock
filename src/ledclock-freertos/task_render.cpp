@@ -4,7 +4,7 @@
 #include "net_time.h"
 #include <time.h>
 #include "hal_time_freertos.h"
-#include "themes/theme_manager.h"
+#include <theme_manager.h>
 
 void task_render(void*)
 {

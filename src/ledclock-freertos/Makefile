@@ -1,16 +1,13 @@
 # ====== User-configurable ======
-# Sketch folder (directory containing your .ino)
 SKETCH        ?= .
-# Serial port for the board
 PORT          ?= /dev/ttyACM0
-# Upload speed
 UPLOAD_SPEED  ?= 921600
-# Serial monitor baudrate
 MONITOR_BAUD  ?= 115200
-# Build directory
 BUILD_DIR     ?= build
-# Optional libraries manifest (one library name per line)
 LIBS_FILE     ?= libs.txt
+ARDUINO_CLI = arduino-cli
+SKETCH_DIR ?= $(CURDIR)
+LIBRARIES_DIR ?= $(CURDIR)/libraries
 
 # Arduino core ID and base board
 CORE_ID       ?= esp32:esp32
@@ -50,11 +47,11 @@ board-details: ## Show board menu options for $(FQBN_BASE)
 build: ## Compile the sketch into $(BUILD_DIR)
 	@mkdir -p "$(BUILD_DIR)"
 	@echo "Building for FQBN: $(FQBN)"
-	arduino-cli compile --fqbn "$(FQBN)" --build-path "$(BUILD_DIR)" "$(SKETCH)"
+	$(ARDUINO_CLI) compile --libraries "$(LIBRARIES_DIR)" --fqbn "$(FQBN)" --build-path "$(BUILD_DIR)" "$(SKETCH)"
 
 # ----- Upload/Flash (reuses artifacts from BUILD_DIR) -----
 flash: build ## Upload (flash) prebuilt artifacts from $(BUILD_DIR)
-	arduino-cli upload -p "$(PORT)" --fqbn "$(FQBN)" --input-dir "$(BUILD_DIR)"
+	$(ARDUINO_CLI) upload -p $(PORT) -p "$(PORT)" --fqbn "$(FQBN)" --input-dir "$(BUILD_DIR)"
 
 upload: flash ## Alias for flash
 	@true
@@ -113,3 +110,8 @@ help: ## Show this help
 
 .PHONY: lint cppcheck check
 check: lint cppcheck
+
+
+.PHONY: verbose
+verbose:
+	$(ARDUINO_CLI) compile -v --libraries "$(LIBRARIES_DIR)" --build-path "$(BUILD_DIR)" "$(SKETCH_DIR)"

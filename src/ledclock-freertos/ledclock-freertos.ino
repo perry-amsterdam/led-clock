@@ -8,7 +8,7 @@
 #include "task_time.h"
 #include "task_render.h"
 #include "task_mdns.h"
-#include "themes/theme_manager.h"
+#include <theme_manager.h>
 
 #if !defined(ESP_ARDUINO_VERSION_MAJOR) || (ESP_ARDUINO_VERSION_MAJOR < 3)
 #error "This project requires Arduino-ESP32 core v3.0.0 or higher"
