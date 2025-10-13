@@ -16,6 +16,7 @@ extern "C"
 #include "hal_time_freertos.h"
 #include "timezone_storage.h"
 #include "task_mdns.h"
+#include "theme_registry.h"
 
 // ======================================================
 // Globals
@@ -53,6 +54,44 @@ static void sendJson(int code, const String& json)
 static void sendJson(WebServer& server, int code, const String& json)
 {
 	server.send(code, "application/json", json);
+}
+
+
+//
+// Function to save and load theme stettings.
+//
+
+static const char* PREF_NS        = "settings";
+static const char* PREF_THEME_KEY = "theme_id";
+
+static bool saveThemeId(const String& id)
+{
+	Preferences p;
+	if (!p.begin(PREF_NS, false)) return false;
+	bool ok = p.putString(PREF_THEME_KEY, id) > 0;
+	p.end();
+	return ok;
+}
+
+
+static String loadThemeId()
+{
+	Preferences p;
+	if (!p.begin(PREF_NS, true)) return String();
+	String id = p.getString(PREF_THEME_KEY, "");
+	p.end();
+	return id;
+}
+
+
+static void clearSavedTheme()
+{
+	Preferences p;
+	if (p.begin(PREF_NS, false))
+	{
+		p.remove(PREF_THEME_KEY);
+		p.end();
+	}
 }
 
 
@@ -314,6 +353,121 @@ static void apiHandleTimezoneDelete()
 }
 
 
+//
+// ========== Themes: LIST ==========
+//
+static void apiHandleThemesList()
+{
+	auto& reg = ThemeRegistry::get();
+
+	const Theme* def = reg.getDefault();
+	const Theme* cur = reg.getActive();
+
+	String json = "[";
+	bool first = true;
+	reg.forEach([&](const Theme* t)
+	{
+		if (!first) json += ",";
+			first = false;
+			json += "{";
+		// Ik ga er vanuit dat ieder theme een 'id' (technische naam) en 'name' (display) heeft.
+			json += "\"id\":\"" + String(t->id) + "\"";
+			json += ",\"name\":\"" + String(t->name) + "\"";
+			json += ",\"is_default\":" + String(t == def ? "true" : "false");
+			json += ",\"is_active\":"  + String(t == cur ? "true" : "false");
+			json += "}";
+	});
+	json += "]";
+
+	server.send(200, "application/json", json);
+}
+
+
+//
+// ========== Theme: GET current ==========
+//
+static void apiHandleThemeGet()
+{
+	auto& reg = ThemeRegistry::get();
+	const Theme* def = reg.getDefault();
+	const Theme* cur = reg.getActive();
+
+	// Probeer ook te laten zien of er een user override is opgeslagen
+	String saved = loadThemeId();
+	bool has_override = saved.length() > 0;
+
+	String json = "{";
+	json += "\"active_id\":\"" + String(cur ? cur->id : "") + "\"";
+	json += ",\"active_name\":\"" + String(cur ? cur->name : "") + "\"";
+	json += ",\"is_default\":" + String(cur == def ? "true" : "false");
+	json += ",\"has_saved_override\":" + String(has_override ? "true" : "false");
+	if (has_override)
+	{
+		json += ",\"saved_override_id\":\"" + saved + "\"";
+	}
+	json += "}";
+
+	server.send(200, "application/json", json);
+}
+
+
+//
+// ========== Theme: SET (POST) ==========
+// Ondersteunt: /api/theme?id=<theme_id>  (query) of als form-field "id"
+//
+static void apiHandleThemeSet()
+{
+	String id = server.arg("id");// query of form-field
+								 // fallback alias
+	if (id.isEmpty()) id = server.arg("name");
+
+	if (id.isEmpty())
+	{
+		server.send(400, "application/json", "{\"error\":\"missing id parameter\"}");
+		return;
+	}
+
+	auto& reg = ThemeRegistry::get();
+	const Theme* t = reg.findById(id.c_str());
+	if (!t)
+	{
+		server.send(404, "application/json", "{\"error\":\"unknown theme id\"}");
+		return;
+	}
+
+	reg.setActive(t);			 // maak dit theme actief
+	saveThemeId(id);			 // bewaar als user override
+
+	String json = "{";
+	json += "\"ok\":true";
+	json += ",\"active_id\":\"" + String(t->id) + "\"";
+	json += ",\"active_name\":\"" + String(t->name) + "\"";
+	json += "}";
+	server.send(200, "application/json", json);
+}
+
+
+//
+// ========== Theme: CLEAR (DELETE) ==========
+// Verwijdert de user override; default wordt weer gebruikt.
+//
+static void apiHandleThemeClear()
+{
+	clearSavedTheme();
+	auto& reg = ThemeRegistry::get();
+	const Theme* def = reg.getDefault();
+	if (def) reg.setActive(def); // forceer default als actief (optioneel)
+
+	String json = "{";
+	json += "\"ok\":true";
+	json += ",\"active_id\":\"" + String(def ? def->id : "") + "\"";
+	json += ",\"active_name\":\"" + String(def ? def->name : "") + "\"";
+	json += ",\"is_default\":true";
+	json += "}";
+	server.send(200, "application/json", json);
+}
+
+
 // ======================================================
 // startApi / stopApi / startHttpTask / stopHttpTask
 // ======================================================
@@ -322,12 +476,22 @@ void startApi()
 	if (s_api_running) return;
 
 	Serial.println("[HTTP] Starting API...");
+
+	// Api system calls.
 	server.on("/api/ping", HTTP_GET, apiHandlePing);
 	server.on("/api/system/reboot", HTTP_POST, apiHandleReboot);
+
+	// Api timezone calls.
 	server.on("/api/timezone", HTTP_GET, apiHandleTimezoneGet);
 	server.on("/api/timezone", HTTP_POST, apiHandleTimezonePost);
 	server.on("/api/timezone", HTTP_DELETE, apiHandleTimezoneDelete);
 	server.on("/api/timezones", HTTP_GET, apiHandleTimezonesGet);
+
+	// Api themes calls.
+	server.on("/api/themes", HTTP_GET,  apiHandleThemesList);
+	server.on("/api/theme",  HTTP_GET,  apiHandleThemeGet);
+	server.on("/api/theme",  HTTP_POST, apiHandleThemeSet);
+	server.on("/api/theme",  HTTP_DELETE, apiHandleThemeClear);
 
 	server.begin();
 	startHttpTask();

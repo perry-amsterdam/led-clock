@@ -222,7 +222,7 @@ void handleNotFound()
 	if(!isIpLike(server.hostHeader()) && server.hostHeader()!=AP_IP.toString())
 	{
 		String loc = "http://" + AP_IP.toString();
-		server.sendHeader("Location", loc, true); 
+		server.sendHeader("Location", loc, true);
 		server.send(302,"text/plain",""); return;
 	}
 	handleRoot();
@@ -344,6 +344,7 @@ void handleScan()
 	if (DEBUG_NET) Serial.printf("[HTTP] /scan returned %d AP(s)\n", n);
 }
 
+
 // ======================================================
 // HTTP task (FreeRTOS)
 // ======================================================
@@ -362,7 +363,7 @@ static void portalTask(void*)
 
 
 void startPortalTask()
-{	
+{
 	if (s_portalTask == nullptr)
 	{
 		BaseType_t ok = xTaskCreate( portalTask, "task_portal", 4096, nullptr, tskIDLE_PRIORITY + 2, &s_portalTask);
@@ -386,6 +387,7 @@ void stopPortalTask()
 	}
 }
 
+
 //	TickType_t deadline = xTaskGetTickCount() + pdMS_TO_TICKS(250);
 //	while (s_portalTask != nullptr && xTaskGetTickCount() < deadline)
 //	{
@@ -396,4 +398,3 @@ void stopPortalTask()
 //		vTaskDelete(s_portalTask);
 //		s_portalTask = nullptr;
 //	}
-
