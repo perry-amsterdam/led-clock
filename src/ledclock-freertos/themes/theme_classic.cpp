@@ -1,9 +1,9 @@
 #include <Arduino.h>
-#include "themes/theme.h"
-#include "themes/theme_registry.h"
+#include "theme.h"
+#include "theme_registry.h"
 #include "ledhw.h"
 #include "hal_time_freertos.h"
-#include "themes/theme_classic.h"
+#include "theme_classic.h"
 
 // ---------------------------------------------------
 // Wijzerkleuren (RGB 0..255)  pas aan naar smaak
@@ -48,20 +48,20 @@
 #define TICK_MIN_R  20
 #endif
 #ifndef TICK_MIN_G
-#define TICK_MIN_G  20
+#define TICK_MIN_G  16
 #endif
 #ifndef TICK_MIN_B
-#define TICK_MIN_B  20
+#define TICK_MIN_B  10
 #endif
 
 #ifndef TICK_HOUR_R
 #define TICK_HOUR_R  20
 #endif
 #ifndef TICK_HOUR_G
-#define TICK_HOUR_G  20
+#define TICK_HOUR_G  16
 #endif
 #ifndef TICK_HOUR_B
-#define TICK_HOUR_B  20
+#define TICK_HOUR_B  10
 #endif
 
 static void beginClassic()

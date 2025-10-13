@@ -10,7 +10,7 @@ struct RainbowConfig
 
 static constexpr RainbowConfig kRainbow =
 {
-	16,
+	64,
 	true,
 	true,
 };

@@ -1,5 +1,5 @@
 
-#include "mdns_task.h"
+#include "task_mdns.h"
 
 #include <WiFi.h>
 #include <ESPmDNS.h>
@@ -124,7 +124,7 @@ extern "C" void mdnsTaskInit(uint32_t stackSize, UBaseType_t priority)
 	}
 	if (!sTask && sQueue)
 	{
-		xTaskCreatePinnedToCore(mdnsTask, "mdns_task", stackSize, nullptr, priority, &sTask, APP_CPU_NUM);
+		xTaskCreatePinnedToCore(mdnsTask, "task_mdns", stackSize, nullptr, priority, &sTask, APP_CPU_NUM);
 	}
 }
 

@@ -1,6 +1,6 @@
 #pragma once
 #include <cstddef>
-#include "themes/theme.h"
+#include "theme.h"
 
 void        themeInit();
 void        themeUpdate(const tm& now, time_t epoch);

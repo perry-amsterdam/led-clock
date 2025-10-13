@@ -1,9 +1,9 @@
 #include <Arduino.h>
-#include "themes/theme.h"
-#include "themes/theme_registry.h"
+#include "theme.h"
+#include "theme_registry.h"
 #include "hal_time_freertos.h"
 #include "ledhw.h"
-#include "themes/theme_rainbow.h"
+#include "theme_rainbow.h"
 
 // ---------------------------------------------------
 // Wijzerkleuren (RGB 0..255)  pas aan naar smaak

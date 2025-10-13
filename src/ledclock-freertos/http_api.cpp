@@ -15,7 +15,7 @@ extern "C"
 #include "http_api.h"
 #include "hal_time_freertos.h"
 #include "timezone_storage.h"
-#include "mdns_task.h"
+#include "task_mdns.h"
 
 // ======================================================
 // Globals
@@ -353,6 +353,7 @@ void stopApi()
 {
 	if (!s_api_running) return;
 	Serial.println("[HTTP] Stopt API...");
+	stopHttpTask();
 	server.close();
 	mdnsStop();
 	s_api_running = false;

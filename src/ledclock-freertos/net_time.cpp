@@ -64,7 +64,6 @@ void dumpPreview(const String& payload)
 	#endif
 }
 
-
 // Simple HTTP GET into String (TLS optional)
 static bool httpGetToString(const String& url, String& out, bool acceptAllHttps)
 {

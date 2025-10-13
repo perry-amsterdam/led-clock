@@ -10,7 +10,7 @@
 #include "http_api.h"			 // startApi/stopApi
 #include "http_portal.h"		 // startPortal/stopPortal
 #include "hal_time_freertos.h"
-#include "mdns_task.h"
+#include "task_mdns.h"
 
 // This task attempts to connect using saved credentials once,
 // then supervises link state and keeps the portal/API mutually exclusive.

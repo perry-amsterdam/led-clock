@@ -13,7 +13,7 @@ extern "C"
 {
 	#include "freertos/FreeRTOS.h"
 	#include "freertos/task.h"
-	#include "mdns_task.h"
+	#include "task_mdns.h"
 }
 
 
@@ -221,7 +221,9 @@ void handleNotFound()
 	if(DEBUG_NET) Serial.printf("[HTTP] 404 %s -> redirect /\n", server.uri().c_str());
 	if(!isIpLike(server.hostHeader()) && server.hostHeader()!=AP_IP.toString())
 	{
-		String loc = "http://" + AP_IP.toString(); server.sendHeader("Location", loc, true); server.send(302,"text/plain",""); return;
+		String loc = "http://" + AP_IP.toString();
+		server.sendHeader("Location", loc, true); 
+		server.send(302,"text/plain",""); return;
 	}
 	handleRoot();
 }
@@ -230,22 +232,7 @@ void handleNotFound()
 void startPortal()
 {
 	// --- Ensure portal task is running ---
-	s_portalOn = true;
-	if (s_portalTask == nullptr)
-	{
-		BaseType_t ok = xTaskCreate(
-			portalTask,
-			"task_portal",
-			4096,
-			nullptr,
-			tskIDLE_PRIORITY + 2,
-			&s_portalTask
-			);
-		if (ok != pdPASS)
-		{
-			s_portalTask = nullptr;
-		}
-	}
+	startPortalTask()
 
 	/*__STARTPORTAL_MUTEX__*/
 	stopApi();
@@ -291,16 +278,7 @@ void stopPortal()
 {
 	// --- Request portal task to stop and wait briefly ---
 	s_portalOn = false;
-	TickType_t deadline = xTaskGetTickCount() + pdMS_TO_TICKS(250);
-	while (s_portalTask != nullptr && xTaskGetTickCount() < deadline)
-	{
-		vTaskDelay(pdMS_TO_TICKS(10));
-	}
-	if (s_portalTask != nullptr)
-	{
-		vTaskDelete(s_portalTask);
-		s_portalTask = nullptr;
-	}
+	stopPortalTask()
 
 	/*__STOPPORTAL_BITS__*/
 	xEventGroupClearBits(g_sysEvents, EVT_PORTAL_ON);
@@ -313,21 +291,6 @@ void stopPortal()
 	{
 		Serial.println("[Portal] Gestopt");
 	}
-}
-
-
-// ===== Portal FreeRTOS task implementation =====
-static void portalTask(void*)
-{
-	while (s_portalOn)
-	{
-		dns.processNextRequest();
-		server.handleClient();
-		vTaskDelay(pdMS_TO_TICKS(10));
-	}
-
-	s_portalTask = nullptr;
-	vTaskDelete(nullptr);
 }
 
 
@@ -380,3 +343,57 @@ void handleScan()
 
 	if (DEBUG_NET) Serial.printf("[HTTP] /scan returned %d AP(s)\n", n);
 }
+
+// ======================================================
+// HTTP task (FreeRTOS)
+// ======================================================
+static void portalTask(void*)
+{
+	while (s_portalOn)
+	{
+		dns.processNextRequest();
+		server.handleClient();
+		vTaskDelay(pdMS_TO_TICKS(10));
+	}
+
+	s_portalTask = nullptr;
+	vTaskDelete(nullptr);
+}
+
+
+void startPortalTask()
+{	
+	if (s_portalTask == nullptr)
+	{
+		BaseType_t ok = xTaskCreate( portalTask, "task_portal", 4096, nullptr, tskIDLE_PRIORITY + 2, &s_portalTask);
+		if (ok != pdPASS)
+		{
+			s_portalTask = nullptr;
+		}
+		Serial.println("[Portal] Task gestart");
+	}
+}
+
+
+void stopPortalTask()
+{
+	if (s_portalTask != nullptr)
+	{
+		TaskHandle_t t = s_portalTask;
+		httpTaskHandle = nullptr;
+		vTaskDelete(t);
+		Serial.println("[Portal] Task gestopt");
+	}
+}
+
+//	TickType_t deadline = xTaskGetTickCount() + pdMS_TO_TICKS(250);
+//	while (s_portalTask != nullptr && xTaskGetTickCount() < deadline)
+//	{
+//		vTaskDelay(pdMS_TO_TICKS(10));
+//	}
+//	if (s_portalTask != nullptr)
+//	{
+//		vTaskDelete(s_portalTask);
+//		s_portalTask = nullptr;
+//	}
+
