@@ -1,9 +1,9 @@
 #include <Arduino.h>
-#include "theme.h"
-#include "theme_registry.h"
-#include "hal_time_freertos.h"
+#include "themes/theme.h"
+#include "themes/theme_registry.h"
 #include "ledhw.h"
-#include "theme_rainbow.h"
+#include "hal_time_freertos.h"
+#include "themes/theme_classic.h"
 
 // ---------------------------------------------------
 // Wijzerkleuren (RGB 0..255)  pas aan naar smaak
@@ -48,25 +48,25 @@
 #define TICK_MIN_R  20
 #endif
 #ifndef TICK_MIN_G
-#define TICK_MIN_G  16
+#define TICK_MIN_G  20
 #endif
 #ifndef TICK_MIN_B
-#define TICK_MIN_B  10
+#define TICK_MIN_B  20
 #endif
 
 #ifndef TICK_HOUR_R
 #define TICK_HOUR_R  20
 #endif
 #ifndef TICK_HOUR_G
-#define TICK_HOUR_G  16
+#define TICK_HOUR_G  20
 #endif
 #ifndef TICK_HOUR_B
-#define TICK_HOUR_B  10
+#define TICK_HOUR_B  20
 #endif
 
-static void beginRainbow()
+static void beginClassic()
 {
-	ledhwSetGlobalBrightness(kRainbow.brightness);
+	ledhwSetGlobalBrightness(kClassic.brightness);
 	ledhwClearAll();
 	ledhwShow();
 }
@@ -98,12 +98,12 @@ static void showStartupPattern(uint8_t r, uint8_t g, uint8_t b)
 }
 
 
-static void updateRainbow(const tm& now, time_t epoch)
+static void updateClassic(const tm& now, time_t epoch)
 {
 	(void)epoch;
 	ledhwClearAll();
 
-	if (kRainbow.showMinuteTicks)
+	if (kClassic.showMinuteTicks)
 	{
 		for (int m=0; m<60; m+=5)
 		{
@@ -111,7 +111,7 @@ static void updateRainbow(const tm& now, time_t epoch)
 		}
 	}
 
-	if (kRainbow.showHourTicks)
+	if (kClassic.showHourTicks)
 	{
 		for (int h=0; h<12; h+=3)
 		{
@@ -132,13 +132,13 @@ static void updateRainbow(const tm& now, time_t epoch)
 
 
 // definitie (heeft externe linkage nodig)
-extern const Theme THEME_RAINBOW =
+extern const Theme THEME_CLASSIC =
 {
-	.name   = "Rainbow",
-	.begin  = beginRainbow,
-	.update = updateRainbow,
+	.name   = "Classic",
+	.begin  = beginClassic,
+	.update = updateClassic,
 	.showStartupPattern = showStartupPattern,
 };
 
 // Auto-registratie + markeer als default (of gebruik REGISTER_THEME)
-//REGISTER_DEFAULT_THEME(THEME_RAINBOW)
+REGISTER_DEFAULT_THEME(THEME_CLASSIC)

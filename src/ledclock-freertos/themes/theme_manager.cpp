@@ -1,5 +1,5 @@
-#include "theme.h"
-#include "theme_registry.h"
+#include "themes/theme.h"
+#include "themes/theme_registry.h"
 
 // Huidige thema pointer
 static const Theme* currentTheme = nullptr;

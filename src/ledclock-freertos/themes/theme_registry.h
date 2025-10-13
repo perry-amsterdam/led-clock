@@ -1,6 +1,6 @@
 #pragma once
 #include <stddef.h>
-#include "theme.h"
+#include "themes/theme.h"
 
 // Lichtgewicht registry zonder heap
 struct ThemeRegistry
