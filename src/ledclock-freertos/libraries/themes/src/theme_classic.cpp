@@ -134,6 +134,7 @@ static void updateClassic(const tm& now, time_t epoch)
 // definitie (heeft externe linkage nodig)
 extern const Theme THEME_CLASSIC =
 {
+	.id     = "theme_classic",
 	.name   = "Classic",
 	.begin  = beginClassic,
 	.update = updateClassic,

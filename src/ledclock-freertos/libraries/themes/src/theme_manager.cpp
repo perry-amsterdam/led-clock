@@ -6,55 +6,77 @@ static const Theme* currentTheme = nullptr;
 
 void themeInit()
 {
-	// eerste of expliciete default
-	currentTheme = ThemeRegistry::getDefault();
-	if (currentTheme && currentTheme->begin) currentTheme->begin();
+    // eerste of expliciete default
+    currentTheme = ThemeRegistry::getDefault();
+    if (currentTheme && currentTheme->begin) currentTheme->begin();
 }
-
 
 size_t themeCount()
 {
-	return ThemeRegistry::size();
+    return ThemeRegistry::size();
 }
 
-
-const Theme* themeByIndex(size_t idx)
+const char* themeIdAt(size_t i)
 {
-	if (idx >= ThemeRegistry::size()) return nullptr;
-	return ThemeRegistry::items()[idx];
+    auto items = ThemeRegistry::items();
+    return (i < ThemeRegistry::size() && items[i]) ? items[i]->id : nullptr;
 }
 
-
-bool themeSelectByIndex(size_t idx)
+const char* themeNameAt(size_t i)
 {
-	const Theme* t = themeByIndex(idx);
-	if (!t) return false;
-	currentTheme = t;
-	if (currentTheme->begin) currentTheme->begin();
-	return true;
+    auto items = ThemeRegistry::items();
+    return (i < ThemeRegistry::size() && items[i]) ? items[i]->name : nullptr;
 }
 
-
-const char* themeName(size_t idx)
+const char* themeCurrentId()
 {
-	const Theme* t = themeByIndex(idx);
-	return t ? t->name : "";
+    return currentTheme ? currentTheme->id : nullptr;
 }
 
+const char* themeCurrentName()
+{
+    return currentTheme ? currentTheme->name : nullptr;
+}
+
+bool themeSelectById(const char* id)
+{
+    auto t = ThemeRegistry::findById(id);
+    if (!t) return false;
+    currentTheme = t;
+    if (currentTheme->begin) currentTheme->begin();
+    return true;
+}
+
+// Backwards compat – selecteren op display-naam
+bool themeSelect(const char* name)
+{
+    auto t = ThemeRegistry::findByName(name);
+    if (!t) return false;
+    currentTheme = t;
+    if (currentTheme->begin) currentTheme->begin();
+    return true;
+}
+
+bool themeSelectDefault()
+{
+    auto t = ThemeRegistry::getDefault();
+    if (!t) return false;
+    currentTheme = t;
+    if (currentTheme->begin) currentTheme->begin();
+    return true;
+}
 
 void themeUpdate(const tm& now, time_t epoch)
 {
-	if (currentTheme && currentTheme->update)
-	{
-		currentTheme->update(now, epoch);
-	};
+    if (currentTheme && currentTheme->update) {
+        currentTheme->update(now, epoch);
+    }
 }
-
 
 void themeshowStartupPattern(uint8_t r, uint8_t g, uint8_t b)
 {
-	if (currentTheme && currentTheme->showStartupPattern)
-	{
-		currentTheme->showStartupPattern(r,g,b);
-	};
+    if (currentTheme && currentTheme->showStartupPattern) {
+        currentTheme->showStartupPattern(r,g,b);
+    }
 }
+

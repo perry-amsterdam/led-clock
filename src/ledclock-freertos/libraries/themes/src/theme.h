@@ -3,6 +3,7 @@
 
 struct Theme
 {
+	const char* id;
 	const char* name;
 	void (*begin)();
 	void (*update)(const tm& now, time_t epoch);
