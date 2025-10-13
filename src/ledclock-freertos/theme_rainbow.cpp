@@ -1,9 +1,9 @@
 #include <Arduino.h>
 #include "theme.h"
 #include "theme_registry.h"
-#include "ledhw.h"
 #include "hal_time_freertos.h"
-#include "theme_classic.h"
+#include "ledhw.h"
+#include "theme_rainbow.h"
 
 // ---------------------------------------------------
 // Wijzerkleuren (RGB 0..255)  pas aan naar smaak
@@ -48,25 +48,25 @@
 #define TICK_MIN_R  20
 #endif
 #ifndef TICK_MIN_G
-#define TICK_MIN_G  20
+#define TICK_MIN_G  16
 #endif
 #ifndef TICK_MIN_B
-#define TICK_MIN_B  20
+#define TICK_MIN_B  10
 #endif
 
 #ifndef TICK_HOUR_R
 #define TICK_HOUR_R  20
 #endif
 #ifndef TICK_HOUR_G
-#define TICK_HOUR_G  20
+#define TICK_HOUR_G  16
 #endif
 #ifndef TICK_HOUR_B
-#define TICK_HOUR_B  20
+#define TICK_HOUR_B  10
 #endif
 
-static void beginClassic()
+static void beginRainbow()
 {
-	ledhwSetGlobalBrightness(kClassic.brightness);
+	ledhwSetGlobalBrightness(kRainbow.brightness);
 	ledhwClearAll();
 	ledhwShow();
 }
@@ -98,12 +98,12 @@ static void showStartupPattern(uint8_t r, uint8_t g, uint8_t b)
 }
 
 
-static void updateClassic(const tm& now, time_t epoch)
+static void updateRainbow(const tm& now, time_t epoch)
 {
 	(void)epoch;
 	ledhwClearAll();
 
-	if (kClassic.showMinuteTicks)
+	if (kRainbow.showMinuteTicks)
 	{
 		for (int m=0; m<60; m+=5)
 		{
@@ -111,7 +111,7 @@ static void updateClassic(const tm& now, time_t epoch)
 		}
 	}
 
-	if (kClassic.showHourTicks)
+	if (kRainbow.showHourTicks)
 	{
 		for (int h=0; h<12; h+=3)
 		{
@@ -132,13 +132,13 @@ static void updateClassic(const tm& now, time_t epoch)
 
 
 // definitie (heeft externe linkage nodig)
-extern const Theme THEME_CLASSIC =
+extern const Theme THEME_RAINBOW =
 {
-	.name   = "Classic",
-	.begin  = beginClassic,
-	.update = updateClassic,
+	.name   = "Rainbow",
+	.begin  = beginRainbow,
+	.update = updateRainbow,
 	.showStartupPattern = showStartupPattern,
 };
 
 // Auto-registratie + markeer als default (of gebruik REGISTER_THEME)
-REGISTER_DEFAULT_THEME(THEME_CLASSIC)
+//REGISTER_DEFAULT_THEME(THEME_RAINBOW)
