@@ -232,7 +232,7 @@ void handleNotFound()
 void startPortal()
 {
 	// --- Ensure portal task is running ---
-	startPortalTask()
+	startPortalTask();
 
 	/*__STARTPORTAL_MUTEX__*/
 	stopApi();
@@ -278,7 +278,7 @@ void stopPortal()
 {
 	// --- Request portal task to stop and wait briefly ---
 	s_portalOn = false;
-	stopPortalTask()
+	stopPortalTask();
 
 	/*__STOPPORTAL_BITS__*/
 	xEventGroupClearBits(g_sysEvents, EVT_PORTAL_ON);
@@ -380,7 +380,7 @@ void stopPortalTask()
 	if (s_portalTask != nullptr)
 	{
 		TaskHandle_t t = s_portalTask;
-		httpTaskHandle = nullptr;
+		s_portalTask = nullptr;
 		vTaskDelete(t);
 		Serial.println("[Portal] Task gestopt");
 	}

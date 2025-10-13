@@ -11,3 +11,5 @@ void handleNotFound();
 void startPortal();
 void stopPortal();
 void handlePing();
+void startPortalTask();
+void stopPortalTask();
