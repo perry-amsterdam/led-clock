@@ -1,6 +1,6 @@
 #include <Preferences.h>
 #include <Arduino.h>
-#include "timezone_storage.h"
+#include "config_storage.h"
 
 static const char* NS_SYS         = "sys";
 static const char* KEY_TZ_USER    = "tz_user";
@@ -49,3 +49,40 @@ void tz_user_clear()
 	p.putUChar(KEY_TZ_USERSET, 0);
 	p.end();
 }
+//
+////
+//// Function to save and load theme stettings.
+////
+//
+//static const char* PREF_NS        = "settings";
+//static const char* PREF_THEME_KEY = "theme_id";
+//
+//static bool saveThemeId(const String& id)
+//{
+//	Preferences p;
+//	if (!p.begin(PREF_NS, false)) return false;
+//	bool ok = p.putString(PREF_THEME_KEY, id) > 0;
+//	p.end();
+//	return ok;
+//}
+//
+//
+//static String loadThemeId()
+//{
+//	Preferences p;
+//	if (!p.begin(PREF_NS, true)) return String();
+//	String id = p.getString(PREF_THEME_KEY, "");
+//	p.end();
+//	return id;
+//}
+//
+//
+//static void clearSavedTheme()
+//{
+//	Preferences p;
+//	if (p.begin(PREF_NS, false))
+//	{
+//		p.remove(PREF_THEME_KEY);
+//		p.end();
+//	}
+//}

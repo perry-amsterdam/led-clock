@@ -14,3 +14,9 @@ void tz_user_set(const String& tz);
 
 // Leegt de handmatige TZ en reset het bit naar 0.
 void tz_user_clear();
+
+bool saveThemeId(const String& id);
+
+String loadThemeId();
+
+void clearSavedTheme();

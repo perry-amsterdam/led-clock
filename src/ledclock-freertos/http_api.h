@@ -2,7 +2,7 @@
 #pragma once
 
 #include <Arduino.h>
-#include "timezone_storage.h"
+#include "config_storage.h"
 #include <WebServer.h>
 
 // Publieke WebServer instantie (wordt gedefinieerd in http_api.cpp)

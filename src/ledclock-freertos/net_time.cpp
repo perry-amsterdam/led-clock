@@ -8,7 +8,7 @@
 
 #include "net_time.h"
 #include "hal_time_freertos.h"
-#include "timezone_storage.h"
+#include "config_storage.h"
 #include <ArduinoJson.h>
 
 // --------- Configurable endpoints (overridable via -D defines) ----------
@@ -113,10 +113,12 @@ static bool fetchOffsetsForIanaFromWorldTimeAPI(const String& ianaTz, int& gmtOf
 {
 	String url = String(URL_TZ_IANA_BASE) + ianaTz;
 	String body;
+
 	if (!httpGetToString(url, body, acceptAllHttps))
 	{
 		return false;
 	}
+
 	//Serial.println(String(URL_TZ_IANA_BASE) + ianaTz);
 	dumpPreview(body);
 
@@ -162,14 +164,14 @@ static bool fetchOffsetsForIanaFromWorldTimeAPI(const String& ianaTz, int& gmtOf
 String fetchCountryCode()
 {
 	String body;
-	if (!httpGetToString(URL_COUNTRYCODE, body, /*acceptAllHttps*/ true)) {
-	return "";
-}
+	if (!httpGetToString(URL_COUNTRYCODE, body, true))
+	{
+		return "";
+	}
 
-
-// ipapi.co/country/ geeft letterlijk bv. "NL\n"
-body.trim();
-return body;
+	// ipapi.co/country/ geeft letterlijk bv. "NL\n"
+	body.trim();
+	return body;
 }
 
 
