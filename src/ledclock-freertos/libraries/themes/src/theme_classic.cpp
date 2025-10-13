@@ -45,23 +45,23 @@
 // Tip: verhoog/verlaag alle drie samen als je ze feller/zachter wil.
 // ---------------------------------------------------
 #ifndef TICK_MIN_R
-#define TICK_MIN_R  10
+#define TICK_MIN_R  20
 #endif
 #ifndef TICK_MIN_G
-#define TICK_MIN_G  10
+#define TICK_MIN_G  20
 #endif
 #ifndef TICK_MIN_B
-#define TICK_MIN_B  10
+#define TICK_MIN_B  20
 #endif
 
 #ifndef TICK_HOUR_R
-#define TICK_HOUR_R  10
+#define TICK_HOUR_R  20
 #endif
 #ifndef TICK_HOUR_G
-#define TICK_HOUR_G  10
+#define TICK_HOUR_G  20
 #endif
 #ifndef TICK_HOUR_B
-#define TICK_HOUR_B  10
+#define TICK_HOUR_B  20
 #endif
 
 static void beginClassic()
