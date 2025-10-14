@@ -4,7 +4,7 @@
 
 void        themeInit();
 void        themeUpdate(const tm& now, time_t epoch);
-void        themeshowStartupPattern(uint8_t r, uint8_t g, uint8_t b);
+void        themeShowStartupPattern(uint8_t r, uint8_t g, uint8_t b);
 
 size_t      themeCount();
 const char* themeIdAt(size_t i);   

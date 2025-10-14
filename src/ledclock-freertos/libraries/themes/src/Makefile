@@ -59,3 +59,8 @@ clone:
 	@$(SED_INPLACE) "s/$(FROM)/$(NEW)/g" "$(NEW).cpp"
 	@$(SED_INPLACE) "s/$(FROM)/$(NEW)/g" "$(NEW).h"
 	@echo "Klaar: nieuw theme-bestand: $(NEW).cpp en $(NEW).h"
+	@echo "Pas REGISTER_* macro en Theme id/name waar mogelijk aan ..."
+	@$(SED_INPLACE) "s/REGISTER_THEME(.*)/REGISTER_THEME($(NEW));/g" "$(NEW).cpp"
+	@$(SED_INPLACE) "s/REGISTER_DEFAULT_THEME(.*)/REGISTER_DEFAULT_THEME($(NEW));/g" "$(NEW).cpp"
+	@$(SED_INPLACE) "s/id\s*=\s*\"[^\"]*\"/id=\"$(subst theme_,,$(NEW))\"/g" "$(NEW).cpp"
+	@$(SED_INPLACE) "s/name\s*=\s*\"[^\"]*\"/name=\"$(subst theme_,,$(NEW))\"/g" "$(NEW).cpp"
