@@ -332,7 +332,7 @@ static void apiHandleTimezoneDelete()
 //		if (!first) json += ",";
 //			first = false;
 //			json += "{";
-//		// Ik ga er vanuit dat ieder theme een 'id' (technische naam) en 'name' (display) heeft.
+//			// Ik ga er vanuit dat ieder theme een 'id' (technische naam) en 'name' (display) heeft.
 //			json += "\"id\":\"" + String(t->id) + "\"";
 //			json += ",\"name\":\"" + String(t->name) + "\"";
 //			json += ",\"is_default\":" + String(t == def ? "true" : "false");
@@ -429,7 +429,6 @@ static void apiHandleTimezoneDelete()
 //	server.send(200, "application/json", json);
 //}
 
-
 // ======================================================
 // startApi / stopApi / startHttpTask / stopHttpTask
 // ======================================================
@@ -449,11 +448,11 @@ void startApi()
 	server.on("/api/timezone", HTTP_DELETE, apiHandleTimezoneDelete);
 	server.on("/api/timezones", HTTP_GET, apiHandleTimezonesGet);
 
-//	// Api themes calls.
-//	server.on("/api/themes", HTTP_GET,  apiHandleThemesList);
-//	server.on("/api/theme",  HTTP_GET,  apiHandleThemeGet);
-//	server.on("/api/theme",  HTTP_POST, apiHandleThemeSet);
-//	server.on("/api/theme",  HTTP_DELETE, apiHandleThemeClear);
+	//	// Api themes calls.
+	//	server.on("/api/themes", HTTP_GET,  apiHandleThemesList);
+	//	server.on("/api/theme",  HTTP_GET,  apiHandleThemeGet);
+	//	server.on("/api/theme",  HTTP_POST, apiHandleThemeSet);
+	//	server.on("/api/theme",  HTTP_DELETE, apiHandleThemeClear);
 
 	server.begin();
 	startHttpTask();
