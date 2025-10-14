@@ -2,87 +2,131 @@
 #include <Arduino.h>
 #include "config_storage.h"
 
-static const char* NS_SYS         = "sys";
-static const char* KEY_TZ_USER    = "tz_user";
-static const char* KEY_TZ_USERSET = "tz_user_set";
+// Overweeg een globale mutex als je meerdere taken hebt:
+// static SemaphoreHandle_t g_cfgMutex = xSemaphoreCreateMutex();
+
+namespace
+{
+	constexpr const char* PREF_NS        = "sys";
+
+	// Timezone keys
+	constexpr const char* KEY_TZ_USER    = "tz_user";
+
+	// Theme key
+	constexpr const char* KEY_THEME_ID   = "theme_id";
+
+	// Hulpfuncties
+	bool openPrefsRO(Preferences& p) 
+	{ 
+		return p.begin(PREF_NS, true); 
+	}
+	bool openPrefsRW(Preferences& p)
+   	{ 
+		return p.begin(PREF_NS, false); 
+	}
+
+	// Schrijf alleen als anders om slijtage te beperken
+	bool writeIfChanged(Preferences& p, const char* key, const String& value)
+	{
+		String current = p.getString(key, "");
+		// niets te doen
+		if (current == value) return true;
+		return p.putString(key, value) > 0;
+	}
+
+	bool isNonEmpty(const String& s) { return s.length() > 0; }
+}
+
+
+// -------- Timezone --------
+bool theme_is_set()
+{
+	Preferences p;
+	if (!p.begin("sys", true)) return false;
+	String id = p.getString("theme_id", "");
+	p.end();
+	return id.length() > 0;
+}
+
 
 bool tz_user_is_set()
 {
 	Preferences p;
-	if (!p.begin(NS_SYS, /*readOnly*/ true)) return false;
-	// default = 0
-	uint8_t v = p.getUChar(KEY_TZ_USERSET, 0);
+	if (!openPrefsRO(p)) return false;
+	String tz = p.getString(KEY_TZ_USER, "");
 	p.end();
-	return v != 0;
+	return isNonEmpty(tz);
 }
 
 
 bool tz_user_get(String& out)
 {
 	Preferences p;
-	if (!p.begin(NS_SYS, /*readOnly*/ true)) { out = ""; return false; }
-	String tz = p.getString(KEY_TZ_USER, "");
+	if (!openPrefsRO(p)) return false;
+	out = p.getString(KEY_TZ_USER, "");
 	p.end();
-	out = tz;
-	return tz.length() > 0;
+	return isNonEmpty(out);
 }
 
 
-void tz_user_set(const String& tz)
+bool tz_user_set(const String& tz)
+{
+	// Optionele eenvoudige validatie: moet "Region/City" bevatten
+	if (tz.indexOf('/') <= 0)
+	{
+		// desgewenst toch opslaan; ik kies hier voor "false" bij duidelijke ongeldige vorm
+		return false;
+	}
+
+	Preferences p;
+	if (!openPrefsRW(p)) return false;
+	bool ok = writeIfChanged(p, KEY_TZ_USER, tz);
+	p.end();
+	return ok;
+}
+
+
+bool tz_user_clear()
 {
 	Preferences p;
-	if (!p.begin(NS_SYS, /*readOnly*/ false)) return;
-	p.putString(KEY_TZ_USER, tz);
-	// bit zetten
-	p.putUChar(KEY_TZ_USERSET, 1);
+	if (!openPrefsRW(p)) return false;
+	bool existed = p.isKey(KEY_TZ_USER);
+	if (existed) p.remove(KEY_TZ_USER);
 	p.end();
+	return true;				 // remove geeft geen status; we nemen aan dat end() gelukt is
 }
 
 
-void tz_user_clear()
+// -------- Theme --------
+bool saveThemeId(const String& id)
+{
+	// eenvoudige validatie: geen spaties, max 64 chars
+	if (id.length() == 0 || id.length() > 64 || id.indexOf(' ') >= 0) return false;
+
+	Preferences p;
+	if (!openPrefsRW(p)) return false;
+	bool ok = writeIfChanged(p, KEY_THEME_ID, id);
+	p.end();
+	return ok;
+}
+
+
+bool loadThemeId(String& out)
 {
 	Preferences p;
-	if (!p.begin(NS_SYS, /*readOnly*/ false)) return;
-	// Leeg de string en reset flag
-	p.putString(KEY_TZ_USER, "");
-	// default = 0
-	p.putUChar(KEY_TZ_USERSET, 0);
+	if (!openPrefsRO(p)) return false;
+	out = p.getString(KEY_THEME_ID, "");
 	p.end();
+	return isNonEmpty(out);
 }
-//
-////
-//// Function to save and load theme stettings.
-////
-//
-//static const char* PREF_NS        = "settings";
-//static const char* PREF_THEME_KEY = "theme_id";
-//
-//static bool saveThemeId(const String& id)
-//{
-//	Preferences p;
-//	if (!p.begin(PREF_NS, false)) return false;
-//	bool ok = p.putString(PREF_THEME_KEY, id) > 0;
-//	p.end();
-//	return ok;
-//}
-//
-//
-//static String loadThemeId()
-//{
-//	Preferences p;
-//	if (!p.begin(PREF_NS, true)) return String();
-//	String id = p.getString(PREF_THEME_KEY, "");
-//	p.end();
-//	return id;
-//}
-//
-//
-//static void clearSavedTheme()
-//{
-//	Preferences p;
-//	if (p.begin(PREF_NS, false))
-//	{
-//		p.remove(PREF_THEME_KEY);
-//		p.end();
-//	}
-//}
+
+
+bool clearSavedTheme()
+{
+	Preferences p;
+	if (!openPrefsRW(p)) return false;
+	bool existed = p.isKey(KEY_THEME_ID);
+	if (existed) p.remove(KEY_THEME_ID);
+	p.end();
+	return true;
+}
