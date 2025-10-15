@@ -1,21 +1,18 @@
 #pragma once
-#include <cstddef>
-#include "theme.h"
 
+// Compact, const-correct theme manager interface.
+// Drop-in replacement for libraries/themes/src/theme_manager.h
+
+struct Theme; // forward declaration
+
+// Initialize the theme system (loads last-used theme if available)
 void        themeInit();
-void        themeUpdate(const tm& now, time_t epoch);
-void        themeShowStartupPattern(uint8_t r, uint8_t g, uint8_t b);
 
-size_t      themeCount();
-const char* themeIdAt(size_t i);   
-const char* themeNameAt(size_t i);
-const char* themeCurrentId();  
-const char* themeCurrentName();
+// Select a theme by string id; returns true on success
+bool        themeSelectById(const char* id);
 
-// Backwards compat:
-bool        themeSelect(const char* name);
+// Select the default theme; returns true on success
+bool        themeSelectDefault();
 
-// Preferred:
-bool        themeSelectById(const char* id);  
-bool        themeSelectDefault();              
-
+// Accessor for the currently selected theme (read-only)
+const Theme* themeCurrent();

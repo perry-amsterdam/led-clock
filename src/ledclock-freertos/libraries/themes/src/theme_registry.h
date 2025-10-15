@@ -3,34 +3,94 @@
 #include <string.h>
 #include "theme.h"
 
-// Lichtgewicht registry zonder heap
+// ============================================================================
+// ThemeRegistry - Lightweight static registry for Theme objects
+// ============================================================================
+// This class provides a simple, static (non-dynamic) registry system to manage
+// a limited number of Theme objects. It avoids dynamic memory allocation (heap)
+// by using fixed-size static arrays and counters. This is ideal for use in
+// embedded systems such as the ESP32, where memory management is critical.
+// ============================================================================
 struct ThemeRegistry
 {
+    // Maximum number of registered themes allowed in the registry.
     static constexpr size_t kMax = 16;
 
+    // ------------------------------------------------------------------------
+    // add()
+    // Adds a theme pointer to the registry, if there is space left.
+    // Does not allocate memory or copy data — only stores the pointer.
+    // ------------------------------------------------------------------------
     static void add(const Theme* t)
     {
-        if (s_count < kMax) s_items[s_count++] = t;
+        if (s_count < kMax)
+		{	
+			s_items[s_count++] = t;
+		}
     }
 
-    static void setDefault(const Theme* t) { s_default = t; }
-    static const Theme* getDefault()       { return s_default ? s_default : (s_count ? s_items[0] : nullptr); }
+    // ------------------------------------------------------------------------
+    // setDefault() / getDefault()
+    // Allows setting and retrieving a default theme.
+    // If no default theme is explicitly set, getDefault() returns the first
+    // registered theme (if available).
+    // ------------------------------------------------------------------------
+    static void setDefault(const Theme* t) 
+	{ 
+		s_default = t; 
+	}
+    static const Theme* getDefault()       
+	{ 
+		return s_default ? s_default : (s_count ? s_items[0] : nullptr); 
+	}
 
-    static size_t size()                   { return s_count; }
-    static const Theme* const* items()     { return s_items; }
+	// ------------------------------------------------------------------------
+    // size() / items()
+    // Utility functions to get the number of registered themes and access
+    // the array of theme pointers directly.
+    // ------------------------------------------------------------------------
+    static size_t size()                   
+	{ 
+		return s_count; 
+	}
+    static const Theme* const* items()     
+	{ 
+		return s_items; 
+	}
 
-    // Nieuw: lookup helpers
+	// ------------------------------------------------------------------------
+    // findById()
+    // Finds a theme by its unique identifier (string ID).
+    // Returns a pointer to the matching Theme, or nullptr if not found.
+    // ------------------------------------------------------------------------
     static const Theme* findById(const char* id)
     {
         if (!id) return nullptr;
-        for (size_t i=0;i<s_count;i++) if (s_items[i]->id && strcmp(s_items[i]->id, id)==0) return s_items[i];
+        for (size_t i=0;i<s_count;i++)
+		{
+			if (s_items[i]->id && strcmp(s_items[i]->id, id)==0) 
+			{
+				return s_items[i];
+			}
+		}
         return nullptr;
-    }
+	}
 
+	// ------------------------------------------------------------------------
+    // findByName()
+    // Finds a theme by its display name (human-readable name).
+    // Returns a pointer to the matching Theme, or nullptr if not found.
+    // ------------------------------------------------------------------------
     static const Theme* findByName(const char* name)
     {
         if (!name) return nullptr;
-        for (size_t i=0;i<s_count;i++) if (s_items[i]->name && strcmp(s_items[i]->name, name)==0) return s_items[i];
+        for (size_t i=0;i<s_count;i++)
+		{	
+			if (s_items[i]->name && strcmp(s_items[i]->name, name)==0)
+			{   	
+				return s_items[i];
+			}
+		}
         return nullptr;
     }
 

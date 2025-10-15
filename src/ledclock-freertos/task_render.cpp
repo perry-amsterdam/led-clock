@@ -11,7 +11,7 @@ void task_render(void*)
 	vTaskDelay(pdMS_TO_TICKS(50));
 	LOG_STACK_WATERMARK("render:init");
 
-	themeInit();
+	//themeInit();
 
 	int direction = 0;
 
@@ -21,17 +21,17 @@ void task_render(void*)
 		if (bits & EVT_PORTAL_ON)
 		{
 			// Captive portal actief  rood pulse
-			themeShowStartupPattern(25,0,0);
+			//showStartupPattern(25,0,0);
 		}
 		else if (!(bits & EVT_WIFI_UP))
 		{
 			// WiFi is niet verbonden  blauw pulse
-			themeShowStartupPattern(0,0,25);
+			//showStartupPattern(0,0,25);
 		}
 		else if (!(bits & EVT_TIME_READY))
 		{
 			// WiFi verbonden, maar tijd nog niet gesynchroniseerd  groen pulse
-			themeShowStartupPattern(0,25,0);
+			//showStartupPattern(0,25,0);
 		}
 
 		hal_delay_ms(500);
@@ -49,7 +49,7 @@ void task_render(void*)
 			unsigned long start = micros();
 			#endif
 
-			themeUpdate(now, epoch);
+			//themeUpdate(now, epoch);
 
 			#if DEBUG_TIMING
 			unsigned long duration = micros() - start;

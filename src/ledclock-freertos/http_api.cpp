@@ -16,7 +16,6 @@ extern "C"
 #include "hal_time_freertos.h"
 #include "config_storage.h"
 #include "task_mdns.h"
-#include "theme_registry.h"
 
 // ======================================================
 // Globals
