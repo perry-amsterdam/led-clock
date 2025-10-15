@@ -100,10 +100,27 @@ private:
     static inline const Theme* s_default     = nullptr;
 };
 
-// Auto-registratie (zoals je al had)
+
+// ---------------------------------------------------------------------------
+// Auto-registratie van thema's
+// ---------------------------------------------------------------------------
+// Gebruik REGISTER_THEME(myTheme) om een thema automatisch te registreren
+// bij opstarten van het programma. De macro maakt een verborgen struct met
+// een constructor die ThemeRegistry::add() aanroept. Zo worden alle thema’s
+// automatisch toegevoegd zonder handmatig beheer.
+// ---------------------------------------------------------------------------
 #define REGISTER_THEME(theme_sym) \
     namespace { struct _ThemeDef_##theme_sym { _ThemeDef_##theme_sym(){ ThemeRegistry::add(&(theme_sym)); } } _ThemeDefInst_##theme_sym; }
 
+
+// ---------------------------------------------------------------------------
+// Auto-registratie van het standaardthema
+// ---------------------------------------------------------------------------
+// Gebruik REGISTER_DEFAULT_THEME(myTheme) om een thema automatisch te
+// registreren én als standaardthema in te stellen bij opstarten.
+// De macro maakt een verborgen struct met een constructor die zowel
+// ThemeRegistry::add() als ThemeRegistry::setDefault() aanroept.
+// ---------------------------------------------------------------------------
 #define REGISTER_DEFAULT_THEME(theme_sym) \
     namespace { struct _ThemeDef_##theme_sym { _ThemeDef_##theme_sym(){ ThemeRegistry::add(&(theme_sym)); ThemeRegistry::setDefault(&(theme_sym)); } } _ThemeDefInst_##theme_sym; }
 
