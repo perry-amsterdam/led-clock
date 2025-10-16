@@ -3,7 +3,7 @@
 #include <time.h>
 #include <stdint.h>
 
-struct Theme;	// forward declaration
+struct Theme;					 // forward declaration
 
 // Initialize the theme system (loads last-used theme if available)
 void        themeInit(const char* id);
@@ -23,4 +23,4 @@ void themeUpdate(const tm& now, time_t epoch);
 // Optioneel: startuppatroon laten zien in theme-stijl
 void themeShowStartupPattern(uint8_t r, uint8_t g, uint8_t b);
 
-const Theme** themeList(size_t* count);
+const Theme* const* themeList(size_t* count);

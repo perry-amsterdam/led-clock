@@ -13,6 +13,7 @@ extern "C"
 
 #include "globals.h"
 #include "theme_registry.h"
+#include <theme_manager.h>
 #include "http_api.h"
 #include "hal_time_freertos.h"
 #include "config_storage.h"
@@ -320,28 +321,31 @@ static void apiHandleTimezoneDelete()
 //
 static void apiHandleThemesList()
 {
+	size_t count = 0;
+	const Theme* const* themes = themeList(&count);
+
 //	auto& reg = ThemeRegistry::get();
-//
 //	const Theme* def = reg.getDefault();
 //	const Theme* cur = reg.getActive();
-//
-//	String json = "[";
-//	bool first = true;
-//	reg.forEach([&](const Theme* t)
-//	{
-//		if (!first) json += ",";
-//			first = false;
-//			json += "{";
-//			// Ik ga er vanuit dat ieder theme een 'id' (technische naam) en 'name' (display) heeft.
-//			json += "\"id\":\"" + String(t->id) + "\"";
-//			json += ",\"name\":\"" + String(t->name) + "\"";
-//			json += ",\"is_default\":" + String(t == def ? "true" : "false");
-//			json += ",\"is_active\":"  + String(t == cur ? "true" : "false");
-//			json += "}";
-//	});
-//	json += "]";
-//
-//	server.send(200, "application/json", json);
+
+	String json = "[";
+	for (size_t i = 0; i < count; ++i)
+	{
+		const Theme* t = themes[i];
+		if (!t) continue;
+
+		if (i > 0) json += ",";	 // komma tussen items
+
+		json += "{";
+		json += "\"id\":\"" + String(t->id) + "\"";
+		json += ",\"name\":\"" + String(t->name) + "\"";
+//		json += ",\"is_default\":" + String(t == def ? "true" : "false");
+//		json += ",\"is_active\":"  + String(t == cur ? "true" : "false");
+		json += "}";
+	}
+	json += "]";
+
+	server.send(200, "application/json", json);
 }
 
 
@@ -371,7 +375,6 @@ static void apiHandleThemesList()
 //
 //	server.send(200, "application/json", json);
 //}
-
 
 ////
 //// ========== Theme: SET (POST) ==========
@@ -450,9 +453,9 @@ void startApi()
 
 	//	// Api themes calls.
 	server.on("/api/themes", HTTP_GET,  apiHandleThemesList);
-//	server.on("/api/theme",  HTTP_GET,  apiHandleThemeGet);
-//	server.on("/api/theme",  HTTP_POST, apiHandleThemeSet);
-//	server.on("/api/theme",  HTTP_DELETE, apiHandleThemeClear);
+	//	server.on("/api/theme",  HTTP_GET,  apiHandleThemeGet);
+	//	server.on("/api/theme",  HTTP_POST, apiHandleThemeSet);
+	//	server.on("/api/theme",  HTTP_DELETE, apiHandleThemeClear);
 
 	server.begin();
 	startHttpTask();
