@@ -7,7 +7,7 @@ static const Theme* currentTheme = nullptr;
 
 void themeInit(const char* id)
 {
-	if (*id == "")
+	if (id == nullptr || id[0] == '\0')
 	{
 		themeSelectDefault();
 	}
@@ -55,7 +55,7 @@ const char* themeCurrentName()
 
 bool themeSelectById(const char* id)
 {
-	if (id == nullptr || *id == "")
+	if (id == nullptr || id[0] == '\0')
 	{
 		return false;
 	}
@@ -68,7 +68,6 @@ bool themeSelectById(const char* id)
 }
 
 
-// Backwards compat  selecteren op display-naam
 bool themeSelect(const char* name)
 {
 	auto t = ThemeRegistry::findByName(name);
