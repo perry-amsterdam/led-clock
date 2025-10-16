@@ -1,12 +1,13 @@
 #include "theme.h"
 #include "theme_registry.h"
+#include "theme_manager.h"
 
 // Huidige thema pointer
 static const Theme* currentTheme = nullptr;
 
 void themeInit(const char* id)
 {
-	if (*id == '')
+	if (*id == "")
 	{
 		themeSelectDefault();
 	}
@@ -54,7 +55,7 @@ const char* themeCurrentName()
 
 bool themeSelectById(const char* id)
 {
-	if (id == nullptr || *id == '')
+	if (id == nullptr || *id == "")
 	{
 		return false;
 	}
