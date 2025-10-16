@@ -143,3 +143,4 @@ extern const Theme THEME_CLASSIC =
 
 // Auto-registratie + markeer als default (of gebruik REGISTER_THEME)
 REGISTER_DEFAULT_THEME(THEME_CLASSIC)
+

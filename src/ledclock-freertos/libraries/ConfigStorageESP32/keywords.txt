@@ -1,0 +1,8 @@
+tz_user_is_set	KEYWORD2
+tz_user_get	KEYWORD2
+tz_user_set	KEYWORD2
+tz_user_clear	KEYWORD2
+theme_is_set	KEYWORD2
+saveThemeId	KEYWORD2
+loadThemeId	KEYWORD2
+clearSavedTheme	KEYWORD2
