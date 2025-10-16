@@ -12,6 +12,7 @@ extern "C"
 
 
 #include "globals.h"
+#include "theme_registry.h"
 #include "http_api.h"
 #include "hal_time_freertos.h"
 #include "config_storage.h"
@@ -314,11 +315,11 @@ static void apiHandleTimezoneDelete()
 }
 
 
-////
-//// ========== Themes: LIST ==========
-////
-//static void apiHandleThemesList()
-//{
+//
+// ========== Themes: LIST ==========
+//
+static void apiHandleThemesList()
+{
 //	auto& reg = ThemeRegistry::get();
 //
 //	const Theme* def = reg.getDefault();
@@ -341,12 +342,12 @@ static void apiHandleTimezoneDelete()
 //	json += "]";
 //
 //	server.send(200, "application/json", json);
-//}
+}
+
+
 //
+// ========== Theme: GET current ==========
 //
-////
-//// ========== Theme: GET current ==========
-////
 //static void apiHandleThemeGet()
 //{
 //	auto& reg = ThemeRegistry::get();
@@ -370,8 +371,8 @@ static void apiHandleTimezoneDelete()
 //
 //	server.send(200, "application/json", json);
 //}
-//
-//
+
+
 ////
 //// ========== Theme: SET (POST) ==========
 //// Ondersteunt: /api/theme?id=<theme_id>  (query) of als form-field "id"
@@ -448,10 +449,10 @@ void startApi()
 	server.on("/api/timezones", HTTP_GET, apiHandleTimezonesGet);
 
 	//	// Api themes calls.
-	//	server.on("/api/themes", HTTP_GET,  apiHandleThemesList);
-	//	server.on("/api/theme",  HTTP_GET,  apiHandleThemeGet);
-	//	server.on("/api/theme",  HTTP_POST, apiHandleThemeSet);
-	//	server.on("/api/theme",  HTTP_DELETE, apiHandleThemeClear);
+	server.on("/api/themes", HTTP_GET,  apiHandleThemesList);
+//	server.on("/api/theme",  HTTP_GET,  apiHandleThemeGet);
+//	server.on("/api/theme",  HTTP_POST, apiHandleThemeSet);
+//	server.on("/api/theme",  HTTP_DELETE, apiHandleThemeClear);
 
 	server.begin();
 	startHttpTask();

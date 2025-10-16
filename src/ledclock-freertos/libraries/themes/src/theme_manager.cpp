@@ -1,6 +1,6 @@
 #include "theme.h"
-#include "theme_registry.h"
 #include "theme_manager.h"
+#include "theme_registry.h"
 
 // Huidige thema pointer
 static const Theme* currentTheme = nullptr;
@@ -106,3 +106,19 @@ void themeShowStartupPattern(uint8_t r, uint8_t g, uint8_t b)
 		currentTheme->showStartupPattern(r,g,b);
 	}
 }
+
+
+const Theme** themeList(size_t* count)
+{
+    static const Theme* cached[ThemeRegistry::THEME_REGISTRY_MAX];
+    size_t n = ThemeRegistry::size();
+    if (n > ThemeRegistry::THEME_REGISTRY_MAX) n = ThemeRegistry::THEME_REGISTRY_MAX;
+
+    for (size_t i = 0; i < n; ++i) {
+        cached[i] = ThemeRegistry::at(i);
+    }
+
+    if (count) *count = n;
+    return cached;
+}
+

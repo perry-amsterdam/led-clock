@@ -17,11 +17,10 @@ bool        themeSelectDefault();
 // Accessor for the currently selected theme (read-only)
 const Theme* themeCurrent();
 
-// Accessor for the currently selected theme (read-only)
-const Theme* themeCurrent();
-
 // Update de huidige theme (animation tick)
 void themeUpdate(const tm& now, time_t epoch);
 
 // Optioneel: startuppatroon laten zien in theme-stijl
 void themeShowStartupPattern(uint8_t r, uint8_t g, uint8_t b);
+
+const Theme** themeList(size_t* count);
