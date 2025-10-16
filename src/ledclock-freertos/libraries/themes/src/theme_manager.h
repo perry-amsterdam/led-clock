@@ -6,7 +6,7 @@
 struct Theme; // forward declaration
 
 // Initialize the theme system (loads last-used theme if available)
-void        themeInit();
+void        themeInit(const char* id);
 
 // Select a theme by string id; returns true on success
 bool        themeSelectById(const char* id);

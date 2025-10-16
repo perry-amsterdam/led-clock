@@ -8,6 +8,7 @@
 #include "task_time.h"
 #include "task_render.h"
 #include "task_mdns.h"
+#include <config_storage.h>
 #include <theme_manager.h>
 
 #if !defined(ESP_ARDUINO_VERSION_MAJOR) || (ESP_ARDUINO_VERSION_MAJOR < 3)
@@ -16,10 +17,26 @@
 
 void setup()
 {
-	mdnsTaskInit();				 // init dedicated mDNS task
+
+	// init dedicated mDNS task
+	mdnsTaskInit();
 
 	// Clear the minuts/seconds and hour leds.
-	themeInit();
+	if (theme_is_set())
+	{
+		String savedId;
+		if (loadThemeId(savedId))
+		{
+			themeInit(savedId.c_str());
+		} else
+		{
+			themeInit("");
+		}
+	}
+	else
+	{
+		themeInit("");
+	}
 
 	// Clear the status led.
 	ledOff();
@@ -38,7 +55,7 @@ void setup()
 
 	// Create RTOS primitives
 	g_sysEvents = xEventGroupCreate();
-	g_ledQueue  = xQueueCreate(LED_QUEUE_LEN, sizeof(LedCmd));
+	//g_ledQueue  = xQueueCreate(LED_QUEUE_LEN, sizeof(LedCmd));
 
 	// Create tasks
 	xTaskCreatePinnedToCore(task_led,    "led",    STACK_LED,    nullptr, PRIO_LED,    nullptr, 1);

@@ -13,7 +13,7 @@ void themeInit(const char* id)
 	}
 	else
 	{
-		if (!themeSelectById(idbuf))
+		if (!themeSelectById(id))
 		{
 			themeSelectDefault();
 		}
@@ -59,7 +59,7 @@ bool themeSelectById(const char* id)
 	{
 		return false;
 	}
-	Theme* t = ThemeRegistry::findById(id);
+	const Theme* t = ThemeRegistry::findById(id);
 	if (!t) return false;
 	if (currentTheme == t) return true;
 	currentTheme = t;
@@ -68,9 +68,10 @@ bool themeSelectById(const char* id)
 }
 
 
+// Backwards compat  selecteren op display-naam
 bool themeSelect(const char* name)
 {
-	auto t = ThemeRegistry::findByName(name);
+	const Theme* t = ThemeRegistry::findByName(name);
 	if (!t) return false;
 	currentTheme = t;
 	if (currentTheme->begin) currentTheme->begin();
@@ -80,7 +81,7 @@ bool themeSelect(const char* name)
 
 bool themeSelectDefault()
 {
-	Theme* def = ThemeRegistry::getDefault();
+	const Theme* def = ThemeRegistry::getDefault();
 	if (!def) return false;
 	if (currentTheme == def) return true;
 	currentTheme = def;
