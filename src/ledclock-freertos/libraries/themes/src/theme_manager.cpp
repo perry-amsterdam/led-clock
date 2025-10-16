@@ -1,24 +1,21 @@
 #include "theme.h"
-#include "theme_storage_bridge.h"
 #include "theme_registry.h"
 
 // Huidige thema pointer
 static const Theme* currentTheme = nullptr;
 
-void themeInit()
+void themeInit(const char* id)
 {
-	// probeer opgeslagen theme te laden, anders default
-	char idbuf[64] = {0};
-	if (themeStorageLoad(idbuf, sizeof(idbuf)))
+	if (*id == '')
+	{
+		themeSelectDefault();
+	}
+	else
 	{
 		if (!themeSelectById(idbuf))
 		{
 			themeSelectDefault();
 		}
-	}
-	else
-	{
-		themeSelectDefault();
 	}
 }
 
@@ -57,15 +54,16 @@ const char* themeCurrentName()
 
 bool themeSelectById(const char* id)
 {
-	if (id == nullptr || *id == '
-		Theme* t = ThemeRegistry::findById(id);
-		if (!t) return false;
-		if (currentTheme == t) return true;
-		currentTheme = t;
-		if (currentTheme && currentTheme->begin) currentTheme->begin();
-		// persist keuze (best-effort)
-		themeStorageSave(currentTheme->id);
-		return true;
+	if (id == nullptr || *id == '')
+	{
+		return false;
+	}
+	Theme* t = ThemeRegistry::findById(id);
+	if (!t) return false;
+	if (currentTheme == t) return true;
+	currentTheme = t;
+	if (currentTheme && currentTheme->begin) currentTheme->begin();
+	return true;
 }
 
 
@@ -73,22 +71,21 @@ bool themeSelectById(const char* id)
 bool themeSelect(const char* name)
 {
 	auto t = ThemeRegistry::findByName(name);
-		if (!t) return false;
-		currentTheme = t;
-		if (currentTheme->begin) currentTheme->begin();
-		return true;
+	if (!t) return false;
+	currentTheme = t;
+	if (currentTheme->begin) currentTheme->begin();
+	return true;
 }
 
 
 bool themeSelectDefault()
 {
 	Theme* def = ThemeRegistry::getDefault();
-		if (!def) return false;
-		if (currentTheme == def) return true;
-		currentTheme = def;
-		if (currentTheme && currentTheme->begin) currentTheme->begin();
-		// opslag niet wissen; call themeStorageClear() elders indien gewenst
-		return true;
+	if (!def) return false;
+	if (currentTheme == def) return true;
+	currentTheme = def;
+	if (currentTheme && currentTheme->begin) currentTheme->begin();
+	return true;
 }
 
 
