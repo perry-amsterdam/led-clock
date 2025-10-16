@@ -1,6 +1,6 @@
 #include "rtos.h"
 EventGroupHandle_t g_sysEvents = nullptr;
-QueueHandle_t      g_ledQueue  = nullptr;
+//QueueHandle_t      g_ledQueue  = nullptr;
 
 void rtos_wait_bits(EventBits_t bits, TickType_t timeoutTicks)
 {

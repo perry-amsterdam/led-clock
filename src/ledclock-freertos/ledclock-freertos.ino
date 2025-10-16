@@ -50,12 +50,13 @@ void setup()
 	Serial.begin(115200);
 	hal_delay_ms(50);
 	Serial.println("\r[Boot] Start (FreeRTOS)");
+
+	// korte test van de status-LED
 	ledBegin();
-	ledSelfTest();				 // korte test van de status-LED
+	ledSelfTest();
 
 	// Create RTOS primitives
 	g_sysEvents = xEventGroupCreate();
-	//g_ledQueue  = xQueueCreate(LED_QUEUE_LEN, sizeof(LedCmd));
 
 	// Create tasks
 	xTaskCreatePinnedToCore(task_led,    "led",    STACK_LED,    nullptr, PRIO_LED,    nullptr, 1);

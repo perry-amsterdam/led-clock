@@ -16,13 +16,13 @@ namespace
 	constexpr const char* KEY_THEME_ID   = "theme_id";
 
 	// Hulpfuncties
-	bool openPrefsRO(Preferences& p) 
-	{ 
-		return p.begin(PREF_NS, true); 
+	bool openPrefsRO(Preferences& p)
+	{
+		return p.begin(PREF_NS, true);
 	}
 	bool openPrefsRW(Preferences& p)
-   	{ 
-		return p.begin(PREF_NS, false); 
+	{
+		return p.begin(PREF_NS, false);
 	}
 
 	// Schrijf alleen als anders om slijtage te beperken
@@ -83,7 +83,7 @@ bool tz_user_clear()
 	bool existed = p.isKey(KEY_TZ_USER);
 	if (existed) p.remove(KEY_TZ_USER);
 	p.end();
-	return true;	// remove geeft geen status; we nemen aan dat end() gelukt is
+	return true;				 // remove geeft geen status; we nemen aan dat end() gelukt is
 }
 
 
@@ -96,6 +96,7 @@ bool theme_is_set()
 	p.end();
 	return id.length() > 0;
 }
+
 
 bool saveThemeId(const String& id)
 {

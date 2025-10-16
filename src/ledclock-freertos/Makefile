@@ -71,7 +71,7 @@ clean: ## Remove build directory
 	rm -rf "$(BUILD_DIR)"
 
 format: ## Format all .cpp, .h and .ino files with bcpp
-	for file in $(shell ls *.cpp *.h *.ino 2>/dev/null); do \
+	for file in $(shell find . -path "./build" -prune -o -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.ino" \) -print 2>/dev/null); do \
 		bcpp -t $$file > $$file.new; \
 		mv -f -v $$file.new $$file; \
 	done
