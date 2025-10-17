@@ -322,23 +322,24 @@ static void apiHandleTimezoneDelete()
 static void apiHandleThemesList()
 {
 	size_t count = 0;
-								 // array van Theme (values)
-	const Theme* themes = themeList(&count);
-								 // pointers
+
+	// array van Theme (values)
+	const Theme* const* themes = themeList(&count);
+
+	// pointers
 	const Theme* def = themeDefault();
 	const Theme* cur = themeCurrent();
 
 	String json = "[";
 	for (size_t i = 0; i < count; ++i)
 	{
-								 // value-referentie
-		const Theme& t = themes[i];
+		const Theme* t = themes[i];
 		if (i > 0) json += ",";
 		json += "{";
-		json += "\"id\":\"" + String(t.id) + "\"";
-		json += ",\"name\":\"" + String(t.name) + "\"";
-		json += ",\"is_default\":" + String((&t == def) ? "true" : "false");
-		json += ",\"is_active\":"  + String((&t == cur) ? "true" : "false");
+		json += "\"id\":\"" + String(t->id) + "\"";
+		json += ",\"name\":\"" + String(t->name) + "\"";
+		json += ",\"is_default\":" + String((t == def) ? "true" : "false");
+		json += ",\"is_active\":"  + String((t == cur) ? "true" : "false");
 		json += "}";
 	}
 	json += "]";
@@ -387,36 +388,33 @@ static void apiHandleThemeSet()
 	String id = server.arg("id");
 	if (id.isEmpty())
 	{
-		if (id.isEmpty())
-		{
-			server.send(400, "application/json", "{\"error\":\"missing id parameter\"}");
-			return;
-		}
-
-		if (!themeExists(id.c_str()))
-		{
-			server.send(404, "application/json", "{\"error\":\"unknown theme id\"}");
-			return;
-		}
-
-		if (!themeSelectById(id.c_str()))
-		{
-			server.send(500, "application/json", "{\"error\":\"failed to select theme\"}");
-			return;
-		}
-		saveThemeId(id);
-
-		const Theme* cur = themeCurrent();
-		const Theme* def = themeDefault();
-
-		String json = "{";
-		json += "\"ok\":true";
-		json += ",\"active_id\":\""   + String(cur ? cur->id   : "") + "\"";
-		json += ",\"active_name\":\"" + String(cur ? cur->name : "") + "\"";
-		json += ",\"is_default\":"     + String((cur == def) ? "true" : "false");
-		json += "}";
-		server.send(200, "application/json", json);
+		server.send(400, "application/json", "{\"error\":\"missing id parameter\"}");
+		return;
 	}
+
+	if (!themeExists(id.c_str()))
+	{
+		server.send(404, "application/json", "{\"error\":\"unknown theme id\"}");
+		return;
+	}
+
+	if (!themeSelectById(id.c_str()))
+	{
+		server.send(500, "application/json", "{\"error\":\"failed to select theme\"}");
+		return;
+	}
+	saveThemeId(id);
+
+	const Theme* cur = themeCurrent();
+	const Theme* def = themeDefault();
+
+	String json = "{";
+	json += "\"ok\":true";
+	json += ",\"active_id\":\""   + String(cur ? cur->id   : "") + "\"";
+	json += ",\"active_name\":\"" + String(cur ? cur->name : "") + "\"";
+	json += ",\"is_default\":"     + String((cur == def) ? "true" : "false");
+	json += "}";
+	server.send(200, "application/json", json);
 }
 
 

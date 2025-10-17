@@ -121,7 +121,7 @@ const Theme* themeDefault()
 }
 
 
-const Theme* themeList(size_t* count)
+const Theme* const* themeList(size_t* count)
 {
 	// Return the registry's internal array directly; caller must use *count to know valid entries.
 	if (count) *count = ThemeRegistry::size();
