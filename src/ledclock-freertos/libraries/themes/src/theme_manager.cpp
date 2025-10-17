@@ -131,11 +131,15 @@ const Theme* const* themeList(size_t* count)
 
 bool themeExists(const char* themeId)
 {
-	size_t count;
-	const Theme* themes = themeList(&count);
-	for (size_t i = 0; i < count; i++)
+	if (!themeId) return false;
+	size_t count = 0;
+
+	// themeList returns an array of pointers to Theme
+	const Theme* const* themes = themeList(&count);
+	for (size_t i = 0; i < count; ++i)
 	{
-		if (strcmp(themes[i]->id, themeId) == 0)
+		const Theme* t = themes[i];
+		if (t && t->id && strcmp(t->id, themeId) == 0)
 		{
 			return true;
 		}
