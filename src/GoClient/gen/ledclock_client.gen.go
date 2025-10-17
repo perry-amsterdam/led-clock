@@ -12,7 +12,15 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/oapi-codegen/runtime"
 )
+
+// PostApiThemeParams defines parameters for PostApiTheme.
+type PostApiThemeParams struct {
+	// Id Thema-id (zie /api/themes)
+	Id string `form:"id" json:"id"`
+}
 
 // PostApiTimezoneJSONBody defines parameters for PostApiTimezone.
 type PostApiTimezoneJSONBody struct {
@@ -102,6 +110,18 @@ type ClientInterface interface {
 	// PostApiSystemReboot request
 	PostApiSystemReboot(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// DeleteApiTheme request
+	DeleteApiTheme(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetApiTheme request
+	GetApiTheme(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostApiTheme request
+	PostApiTheme(ctx context.Context, params *PostApiThemeParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetApiThemes request
+	GetApiThemes(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// DeleteApiTimezone request
 	DeleteApiTimezone(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -131,6 +151,54 @@ func (c *Client) GetApiPing(ctx context.Context, reqEditors ...RequestEditorFn) 
 
 func (c *Client) PostApiSystemReboot(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostApiSystemRebootRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteApiTheme(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteApiThemeRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetApiTheme(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetApiThemeRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostApiTheme(ctx context.Context, params *PostApiThemeParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostApiThemeRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetApiThemes(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetApiThemesRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -248,6 +316,132 @@ func NewPostApiSystemRebootRequest(server string) (*http.Request, error) {
 	}
 
 	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeleteApiThemeRequest generates requests for DeleteApiTheme
+func NewDeleteApiThemeRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/theme")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetApiThemeRequest generates requests for GetApiTheme
+func NewGetApiThemeRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/theme")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostApiThemeRequest generates requests for PostApiTheme
+func NewPostApiThemeRequest(server string, params *PostApiThemeParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/theme")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "id", runtime.ParamLocationQuery, params.Id); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetApiThemesRequest generates requests for GetApiThemes
+func NewGetApiThemesRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/themes")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -425,6 +619,18 @@ type ClientWithResponsesInterface interface {
 	// PostApiSystemRebootWithResponse request
 	PostApiSystemRebootWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*PostApiSystemRebootResponse, error)
 
+	// DeleteApiThemeWithResponse request
+	DeleteApiThemeWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*DeleteApiThemeResponse, error)
+
+	// GetApiThemeWithResponse request
+	GetApiThemeWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetApiThemeResponse, error)
+
+	// PostApiThemeWithResponse request
+	PostApiThemeWithResponse(ctx context.Context, params *PostApiThemeParams, reqEditors ...RequestEditorFn) (*PostApiThemeResponse, error)
+
+	// GetApiThemesWithResponse request
+	GetApiThemesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetApiThemesResponse, error)
+
 	// DeleteApiTimezoneWithResponse request
 	DeleteApiTimezoneWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*DeleteApiTimezoneResponse, error)
 
@@ -492,6 +698,115 @@ func (r PostApiSystemRebootResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r PostApiSystemRebootResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteApiThemeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		ActiveId   string `json:"active_id"`
+		ActiveName string `json:"active_name"`
+		IsDefault  bool   `json:"is_default"`
+		Ok         bool   `json:"ok"`
+	}
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteApiThemeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteApiThemeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetApiThemeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		ActiveId         string  `json:"active_id"`
+		ActiveName       string  `json:"active_name"`
+		HasSavedOverride bool    `json:"has_saved_override"`
+		IsDefault        bool    `json:"is_default"`
+		SavedOverrideId  *string `json:"saved_override_id"`
+	}
+}
+
+// Status returns HTTPResponse.Status
+func (r GetApiThemeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetApiThemeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostApiThemeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		ActiveId   string `json:"active_id"`
+		ActiveName string `json:"active_name"`
+		IsDefault  bool   `json:"is_default"`
+		Ok         bool   `json:"ok"`
+	}
+}
+
+// Status returns HTTPResponse.Status
+func (r PostApiThemeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostApiThemeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetApiThemesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]struct {
+		Id        string `json:"id"`
+		IsActive  bool   `json:"is_active"`
+		IsDefault bool   `json:"is_default"`
+		Name      string `json:"name"`
+	}
+}
+
+// Status returns HTTPResponse.Status
+func (r GetApiThemesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetApiThemesResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -623,6 +938,42 @@ func (c *ClientWithResponses) PostApiSystemRebootWithResponse(ctx context.Contex
 	return ParsePostApiSystemRebootResponse(rsp)
 }
 
+// DeleteApiThemeWithResponse request returning *DeleteApiThemeResponse
+func (c *ClientWithResponses) DeleteApiThemeWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*DeleteApiThemeResponse, error) {
+	rsp, err := c.DeleteApiTheme(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteApiThemeResponse(rsp)
+}
+
+// GetApiThemeWithResponse request returning *GetApiThemeResponse
+func (c *ClientWithResponses) GetApiThemeWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetApiThemeResponse, error) {
+	rsp, err := c.GetApiTheme(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetApiThemeResponse(rsp)
+}
+
+// PostApiThemeWithResponse request returning *PostApiThemeResponse
+func (c *ClientWithResponses) PostApiThemeWithResponse(ctx context.Context, params *PostApiThemeParams, reqEditors ...RequestEditorFn) (*PostApiThemeResponse, error) {
+	rsp, err := c.PostApiTheme(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostApiThemeResponse(rsp)
+}
+
+// GetApiThemesWithResponse request returning *GetApiThemesResponse
+func (c *ClientWithResponses) GetApiThemesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetApiThemesResponse, error) {
+	rsp, err := c.GetApiThemes(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetApiThemesResponse(rsp)
+}
+
 // DeleteApiTimezoneWithResponse request returning *DeleteApiTimezoneResponse
 func (c *ClientWithResponses) DeleteApiTimezoneWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*DeleteApiTimezoneResponse, error) {
 	rsp, err := c.DeleteApiTimezone(ctx, reqEditors...)
@@ -722,6 +1073,131 @@ func ParsePostApiSystemRebootResponse(rsp *http.Response) (*PostApiSystemRebootR
 		var dest struct {
 			Message   *string `json:"message,omitempty"`
 			Rebooting *bool   `json:"rebooting,omitempty"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteApiThemeResponse parses an HTTP response from a DeleteApiThemeWithResponse call
+func ParseDeleteApiThemeResponse(rsp *http.Response) (*DeleteApiThemeResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteApiThemeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			ActiveId   string `json:"active_id"`
+			ActiveName string `json:"active_name"`
+			IsDefault  bool   `json:"is_default"`
+			Ok         bool   `json:"ok"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetApiThemeResponse parses an HTTP response from a GetApiThemeWithResponse call
+func ParseGetApiThemeResponse(rsp *http.Response) (*GetApiThemeResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetApiThemeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			ActiveId         string  `json:"active_id"`
+			ActiveName       string  `json:"active_name"`
+			HasSavedOverride bool    `json:"has_saved_override"`
+			IsDefault        bool    `json:"is_default"`
+			SavedOverrideId  *string `json:"saved_override_id"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostApiThemeResponse parses an HTTP response from a PostApiThemeWithResponse call
+func ParsePostApiThemeResponse(rsp *http.Response) (*PostApiThemeResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostApiThemeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			ActiveId   string `json:"active_id"`
+			ActiveName string `json:"active_name"`
+			IsDefault  bool   `json:"is_default"`
+			Ok         bool   `json:"ok"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetApiThemesResponse parses an HTTP response from a GetApiThemesWithResponse call
+func ParseGetApiThemesResponse(rsp *http.Response) (*GetApiThemesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetApiThemesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []struct {
+			Id        string `json:"id"`
+			IsActive  bool   `json:"is_active"`
+			IsDefault bool   `json:"is_default"`
+			Name      string `json:"name"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
