@@ -43,8 +43,99 @@ func main() {
 	defer cancel()
 
 	// Is er een expliciete actie?
-	opSelected := *getTZ || *listTZ || *reboot || (*setTZ != "") || *clearTZ ||
-		*listThemes || *getTheme || (*setTheme != "") || *clearTheme
+	opSelected := *getTZ || *listTZ || *reboot || (*setTZ != "") || *clearTZ || *listThemes || *getTheme || (*setTheme != "") || *clearTheme
+
+	// --- 0) Ping (alleen wanneer geen gerichte actie is gevraagd)
+	if !opSelected {
+		ping, err := c.GetApiPingWithResponse(ctx)
+		if err != nil {
+			log.Fatalf("GET /api/ping: %v", err)
+		}
+		if *showRaw && ping.Body != nil {
+			fmt.Println(string(ping.Body))
+		} else if ping.JSON200 != nil {
+			nowTime := time.UnixMilli(int64(ping.JSON200.Now)).In(time.Local)
+			uptime := time.Duration(ping.JSON200.UptimeMs) * time.Millisecond
+
+			fmt.Printf("Ping Result:\n-----------\n")
+			fmt.Printf("pong=%v\n", ping.JSON200.Pong)
+			fmt.Printf("now(ms)=%d (%s)\n", ping.JSON200.Now, nowTime.Format("2006-01-02 15:04:05 MST"))
+			fmt.Printf("uptime(ms)=%d (%s)\n", ping.JSON200.UptimeMs, formatDuration(uptime))
+			fmt.Printf("heap_free=%d\nwifi_mode=%s\n",
+				derefInt(ping.JSON200.HeapFree),
+				derefString(ping.JSON200.WifiMode),
+			)
+		}
+	}
+
+	// --- 5) Optioneel: reboot
+	if *reboot {
+		res, err := c.PostApiSystemRebootWithResponse(ctx)
+		if err != nil {
+			log.Fatalf("POST /api/system/reboot: %v", err)
+		}
+		if *showRaw && res.Body != nil {
+			fmt.Println(string(res.Body))
+		}
+		if res.JSON200 != nil && derefBool(res.JSON200.Rebooting) {
+			fmt.Println("rebooting:", derefString(res.JSON200.Message))
+		} else {
+			fmt.Println("reboot request sent (check device)")
+		}
+	}
+
+	// 3) Optioneel: lijst tijdzones
+	if *listTZ {
+		ls, err := c.GetApiTimezonesWithResponse(ctx)
+		if err != nil {
+			log.Fatalf("GET /api/timezones: %v", err)
+		}
+		if *showRaw && ls.Body != nil {
+			fmt.Println(string(ls.Body))
+		} else if ls.JSON200 != nil && ls.JSON200.Timezones != nil {
+			fmt.Println("supported timezones:")
+			for _, z := range *ls.JSON200.Timezones {
+				fmt.Println(" -", z)
+			}
+		}
+	}
+
+	// --- 1) Tijdzone zetten
+	if *setTZ != "" {
+		body := ledclock.PostApiTimezoneJSONRequestBody{Timezone: *setTZ}
+		res, err := c.PostApiTimezoneWithResponse(ctx, body)
+		if err != nil {
+			log.Fatalf("POST /api/timezone: %v", err)
+		}
+		if *showRaw && res.Body != nil {
+			fmt.Println(string(res.Body))
+		}
+		if res.JSON200 == nil || !derefBool(res.JSON200.Success) {
+			log.Fatalf("timezone update failed (status %s)", res.Status())
+		}
+		fmt.Println("timezone updated:", derefString(res.JSON200.Message))
+	}
+
+	// --- 1b) Tijdzone verwijderen (reset)
+	if *clearTZ {
+		res, err := c.DeleteApiTimezoneWithResponse(ctx)
+		if err != nil {
+			log.Fatalf("DELETE /api/timezone: %v", err)
+		}
+		if *showRaw && res.Body != nil {
+			fmt.Println(string(res.Body))
+		} else if res.JSON200 != nil && derefBool(res.JSON200.Success) {
+			msg := derefString(res.JSON200.Message)
+			tz := derefString(res.JSON200.Timezone)
+			fmt.Printf("timezone cleared: %s\n", msg)
+			if tz != "" {
+				fmt.Printf("active timezone now: %s (utc_offset_sec=%d)\n",
+					tz, res.JSON200.UtcOffsetSec)
+			}
+		} else {
+			fmt.Println("timezone clear request sent (check device)")
+		}
+	}
 
 	// --- Tijdzone: alleen huidige TZ opvragen
 	if *getTZ {
@@ -88,65 +179,6 @@ func main() {
 		return
 	}
 
-	// --- 0) Ping (alleen wanneer geen gerichte actie is gevraagd)
-	if !opSelected {
-		ping, err := c.GetApiPingWithResponse(ctx)
-		if err != nil {
-			log.Fatalf("GET /api/ping: %v", err)
-		}
-		if *showRaw && ping.Body != nil {
-			fmt.Println(string(ping.Body))
-		} else if ping.JSON200 != nil {
-			nowTime := time.UnixMilli(int64(ping.JSON200.Now)).In(time.Local)
-			uptime := time.Duration(ping.JSON200.UptimeMs) * time.Millisecond
-
-			fmt.Printf("Ping Result:\n-----------\n")
-			fmt.Printf("pong=%v\n", ping.JSON200.Pong)
-			fmt.Printf("now(ms)=%d (%s)\n", ping.JSON200.Now, nowTime.Format("2006-01-02 15:04:05 MST"))
-			fmt.Printf("uptime(ms)=%d (%s)\n", ping.JSON200.UptimeMs, formatDuration(uptime))
-			fmt.Printf("heap_free=%d\nwifi_mode=%s\n",
-				derefInt(ping.JSON200.HeapFree),
-				derefString(ping.JSON200.WifiMode),
-			)
-		}
-	}
-
-	// --- 1) Tijdzone zetten
-	if *setTZ != "" {
-		body := ledclock.PostApiTimezoneJSONRequestBody{Timezone: *setTZ}
-		res, err := c.PostApiTimezoneWithResponse(ctx, body)
-		if err != nil {
-			log.Fatalf("POST /api/timezone: %v", err)
-		}
-		if *showRaw && res.Body != nil {
-			fmt.Println(string(res.Body))
-		}
-		if res.JSON200 == nil || !derefBool(res.JSON200.Success) {
-			log.Fatalf("timezone update failed (status %s)", res.Status())
-		}
-		fmt.Println("timezone updated:", derefString(res.JSON200.Message))
-	}
-
-	// --- 1b) Tijdzone verwijderen (reset)
-	if *clearTZ {
-		res, err := c.DeleteApiTimezoneWithResponse(ctx)
-		if err != nil {
-			log.Fatalf("DELETE /api/timezone: %v", err)
-		}
-		if *showRaw && res.Body != nil {
-			fmt.Println(string(res.Body))
-		} else if res.JSON200 != nil && derefBool(res.JSON200.Success) {
-			msg := derefString(res.JSON200.Message)
-			tz := derefString(res.JSON200.Timezone)
-			fmt.Printf("timezone cleared: %s\n", msg)
-			if tz != "" {
-				fmt.Printf("active timezone now: %s (utc_offset_sec=%d)\n",
-					tz, res.JSON200.UtcOffsetSec)
-			}
-		} else {
-			fmt.Println("timezone clear request sent (check device)")
-		}
-	}
 
 	// --- 2) Themes: lijst tonen
 	if *listThemes {
@@ -206,22 +238,6 @@ func main() {
 			fmt.Printf("theme reset naar default: %s (%s)\n", res.JSON200.ActiveName, res.JSON200.ActiveId)
 		} else {
 			fmt.Println("kon theme niet resetten")
-		}
-	}
-
-	// --- 5) Optioneel: reboot
-	if *reboot {
-		res, err := c.PostApiSystemRebootWithResponse(ctx)
-		if err != nil {
-			log.Fatalf("POST /api/system/reboot: %v", err)
-		}
-		if *showRaw && res.Body != nil {
-			fmt.Println(string(res.Body))
-		}
-		if res.JSON200 != nil && derefBool(res.JSON200.Rebooting) {
-			fmt.Println("rebooting:", derefString(res.JSON200.Message))
-		} else {
-			fmt.Println("reboot request sent (check device)")
 		}
 	}
 }
