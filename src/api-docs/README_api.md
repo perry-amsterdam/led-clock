@@ -1,7 +1,7 @@
 # LED Clock REST API – Full Documentation
 
 This directory contains the **OpenAPI specification** for the ESP32 LED Clock REST API.
-The full specification is available in [`openapi.json`](./openapi.json) (version **1.3.0**).
+The full specification is available in [`openapi.json`](./openapi.json) (version **1.4.0**).
 
 ---
 
@@ -192,6 +192,74 @@ curl http://ledclock.local/api/timezones
 ```
 
 ---
+
+
+
+---
+
+### 🎨 `GET /api/themes`
+
+**Purpose:** List all available themes.
+
+**Response Example:**
+```json
+[
+  {"id":"default","name":"Default","is_default":true,"is_active":true},
+  {"id":"retro","name":"Retro","is_default":false,"is_active":false}
+]
+```
+
+---
+
+### 🎯 `GET /api/theme`
+
+**Purpose:** Get the currently active theme and status.
+
+**Response Example:**
+```json
+{
+  "active_id": "retro",
+  "active_name": "Retro",
+  "is_default": false,
+  "has_saved_override": true,
+  "saved_override_id": "retro"
+}
+```
+
+---
+
+### ✅ `POST /api/theme?id=<ID>`
+
+**Purpose:** Activate a theme by its `id` (also saved as user override).
+
+**Success Response:**
+```json
+{
+  "ok": true,
+  "active_id": "retro",
+  "active_name": "Retro",
+  "is_default": false
+}
+```
+
+**Errors:** `400` missing/invalid `id`, `404` unknown theme id.
+
+---
+
+### 🗑️ `DELETE /api/theme`
+
+**Purpose:** Clear saved theme override and revert to default theme.
+
+**Response Example:**
+```json
+{
+  "ok": true,
+  "active_id": "default",
+  "active_name": "Default",
+  "is_default": true
+}
+```
+
 
 ## Roadmap
 

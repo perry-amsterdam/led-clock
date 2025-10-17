@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "LED Clock REST API",
-    "version": "1.3.1",
+    "version": "1.4.0",
     "description": "REST API voor ESP32 LED Clock. Bevat ping, reboot, tijdzone endpoints en een compacte tijdzones-lijst."
   },
   "servers": [
@@ -258,6 +258,206 @@
           }
         }
       }
+    },
+    "/api/themes": {
+      "get": {
+        "tags": [
+          "Themes"
+        ],
+        "summary": "Lijst alle beschikbare thema's",
+        "description": "Retourneert een lijst met thema-objecten, inclusief welke actief en standaard is.",
+        "responses": {
+          "200": {
+            "description": "Lijst van thema's",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "name",
+                      "is_default",
+                      "is_active"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "retro"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Retro"
+                      },
+                      "is_default": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "is_active": {
+                        "type": "boolean",
+                        "example": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/theme": {
+      "get": {
+        "tags": [
+          "Themes"
+        ],
+        "summary": "Haal het actieve thema op",
+        "responses": {
+          "200": {
+            "description": "Actief thema en status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "active_id",
+                    "active_name",
+                    "is_default",
+                    "has_saved_override"
+                  ],
+                  "properties": {
+                    "active_id": {
+                      "type": "string",
+                      "example": "retro"
+                    },
+                    "active_name": {
+                      "type": "string",
+                      "example": "Retro"
+                    },
+                    "is_default": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "has_saved_override": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "saved_override_id": {
+                      "type": "string",
+                      "nullable": true,
+                      "example": "retro"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Themes"
+        ],
+        "summary": "Stel een thema in op basis van id",
+        "description": "Selecteert een thema als actief en slaat dit als override op in NVS.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Thema-id (zie /api/themes)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thema geactiveerd",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "ok",
+                    "active_id",
+                    "active_name",
+                    "is_default"
+                  ],
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "active_id": {
+                      "type": "string",
+                      "example": "retro"
+                    },
+                    "active_name": {
+                      "type": "string",
+                      "example": "Retro"
+                    },
+                    "is_default": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ontbrekende of ongeldige id"
+          },
+          "404": {
+            "description": "Onbekend thema id"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Themes"
+        ],
+        "summary": "Verwijder opgeslagen thema-override",
+        "description": "Verwijdert de user override en zet het standaardthema actief.",
+        "responses": {
+          "200": {
+            "description": "Override verwijderd; standaard actief",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "ok",
+                    "active_id",
+                    "active_name",
+                    "is_default"
+                  ],
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "active_id": {
+                      "type": "string",
+                      "example": "default"
+                    },
+                    "active_name": {
+                      "type": "string",
+                      "example": "Default"
+                    },
+                    "is_default": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "tags": [
@@ -272,6 +472,10 @@
     {
       "name": "Time",
       "description": "Tijdzone-instellingen en tijdinformatie"
+    },
+    {
+      "name": "Themes",
+      "description": "Thema-overzicht en selectie"
     }
   ]
 }
