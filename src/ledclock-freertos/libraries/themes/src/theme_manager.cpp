@@ -41,6 +41,11 @@ const char* themeNameAt(size_t i)
 }
 
 
+const Theme* themeCurrent()
+{
+	return currentTheme;
+}
+
 const char* themeCurrentId()
 {
 	return currentTheme ? currentTheme->id : "";
@@ -107,6 +112,11 @@ void themeShowStartupPattern(uint8_t r, uint8_t g, uint8_t b)
 	}
 }
 
+
+const Theme* themeDefault()
+{
+	return ThemeRegistry::getDefault();
+}
 
 const Theme* const* themeList(size_t* count)
 {

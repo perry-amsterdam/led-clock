@@ -324,9 +324,8 @@ static void apiHandleThemesList()
 	size_t count = 0;
 	const Theme* const* themes = themeList(&count);
 
-//	auto& reg = ThemeRegistry::get();
-//	const Theme* def = reg.getDefault();
-//	const Theme* cur = reg.getActive();
+	const Theme* def = themeDefault();
+	const Theme* cur = themeCurrent();
 
 	String json = "[";
 	for (size_t i = 0; i < count; ++i)
@@ -339,8 +338,8 @@ static void apiHandleThemesList()
 		json += "{";
 		json += "\"id\":\"" + String(t->id) + "\"";
 		json += ",\"name\":\"" + String(t->name) + "\"";
-//		json += ",\"is_default\":" + String(t == def ? "true" : "false");
-//		json += ",\"is_active\":"  + String(t == cur ? "true" : "false");
+		json += ",\"is_default\":" + String(t == def ? "true" : "false");
+		json += ",\"is_active\":"  + String(t == cur ? "true" : "false");
 		json += "}";
 	}
 	json += "]";

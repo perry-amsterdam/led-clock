@@ -14,6 +14,9 @@ bool        themeSelectById(const char* id);
 // Select the default theme; returns true on success
 bool        themeSelectDefault();
 
+// Accessor for the default theme (read-only)
+const Theme* themeDefault();
+
 // Accessor for the currently selected theme (read-only)
 const Theme* themeCurrent();
 
