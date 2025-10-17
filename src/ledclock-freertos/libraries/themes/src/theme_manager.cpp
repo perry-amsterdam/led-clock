@@ -3,7 +3,6 @@
 #include "theme_registry.h"
 #include "theme_manager.h"
 
-
 // Huidige thema pointer
 static const Theme* currentTheme = nullptr;
 
@@ -47,6 +46,7 @@ const Theme* themeCurrent()
 {
 	return currentTheme;
 }
+
 
 const char* themeCurrentId()
 {
@@ -129,13 +129,16 @@ const Theme* themeList(size_t* count)
 }
 
 
-bool themeExists(const char* themeId) {
-    size_t count;
-    const Theme* themes = themeList(&count);
-    for (size_t i = 0; i < count; i++) {
-        if (strcmp(themes[i]->id, themeId) == 0) {
-            return true;
-        }
-    }
-    return false;
+bool themeExists(const char* themeId)
+{
+	size_t count;
+	const Theme* themes = themeList(&count);
+	for (size_t i = 0; i < count; i++)
+	{
+		if (strcmp(themes[i]->id, themeId) == 0)
+		{
+			return true;
+		}
+	}
+	return false;
 }

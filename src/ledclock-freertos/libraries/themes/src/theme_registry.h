@@ -13,8 +13,10 @@
 // ============================================================================
 struct ThemeRegistry
 {
-	// Maximum number of registered themes allowed in the registry.
-	static constexpr size_t kMax = 16;
+	static constexpr size_t kMaxThemes = 8;
+	static inline const Theme* s_items[kMaxThemes] = { nullptr };
+	static inline size_t       s_count             = 0;
+	static inline const Theme* s_default           = nullptr;
 
 	// ------------------------------------------------------------------------
 	// add()
@@ -23,10 +25,14 @@ struct ThemeRegistry
 	// ------------------------------------------------------------------------
 	static void add(const Theme* t)
 	{
-		if (s_count < kMax)
+		if (!t) return;
+		if (s_count >= kMaxThemes) return;
+		for (size_t i = 0; i < s_count; ++i)
 		{
-			s_items[s_count++] = t;
+			if (s_items[i] == t) return;
+			if (s_items[i] && s_items[i]->id && t->id && strcmp(s_items[i]->id, t->id) == 0) return;
 		}
+		s_items[s_count++] = t;
 	}
 
 	// ------------------------------------------------------------------------
@@ -45,33 +51,17 @@ struct ThemeRegistry
 	}
 
 	// ------------------------------------------------------------------------
-	// size() / items()
-	// Utility functions to get the number of registered themes and access
-	// the array of theme pointers directly.
-	// ------------------------------------------------------------------------
-	static size_t size()
-	{
-		return s_count;
-	}
-	static const Theme* const* items()
-	{
-		return s_items;
-	}
-
-	// ------------------------------------------------------------------------
 	// findById()
 	// Finds a theme by its unique identifier (string ID).
 	// Returns a pointer to the matching Theme, or nullptr if not found.
 	// ------------------------------------------------------------------------
 	static const Theme* findById(const char* id)
 	{
-		if (!id) return nullptr;
-		for (size_t i=0;i<s_count;i++)
+		if (!id || !id[0]) return nullptr;
+		for (size_t i = 0; i < s_count; ++i)
 		{
-			if (s_items[i]->id && strcmp(s_items[i]->id, id)==0)
-			{
-				return s_items[i];
-			}
+			const Theme* t = s_items[i];
+			if (t && t->id && strcmp(t->id, id) == 0) return t;
 		}
 		return nullptr;
 	}
@@ -83,21 +73,34 @@ struct ThemeRegistry
 	// ------------------------------------------------------------------------
 	static const Theme* findByName(const char* name)
 	{
-		if (!name) return nullptr;
-		for (size_t i=0;i<s_count;i++)
+		if (!name || !name[0]) return nullptr;
+		for (size_t i = 0; i < s_count; ++i)
 		{
-			if (s_items[i]->name && strcmp(s_items[i]->name, name)==0)
-			{
-				return s_items[i];
-			}
+			const Theme* t = s_items[i];
+			if (t && t->name && strcmp(t->name, name) == 0) return t;
 		}
 		return nullptr;
 	}
 
-	private:
-		static inline const Theme* s_items[kMax] = {};
-		static inline size_t       s_count       = 0;
-		static inline const Theme* s_default     = nullptr;
+	static const Theme* const* items()
+	{
+		return s_items;
+	}
+
+	static size_t size()
+	{
+		return s_count;
+	}
+
+	static size_t count()
+	{
+		return s_count;
+	}
+
+	static const Theme* def()
+	{
+		return s_default;
+	}
 };
 
 // ---------------------------------------------------------------------------
@@ -108,17 +111,14 @@ struct ThemeRegistry
 // een constructor die ThemeRegistry::add() aanroept. Zo worden alle themas
 // automatisch toegevoegd zonder handmatig beheer.
 // ---------------------------------------------------------------------------
+
 #define REGISTER_THEME(theme_sym) \
 	namespace \
 	{ \
-		struct _ThemeDef_##theme_sym \
+		struct _ThemeReg_##theme_sym \
 		{ \
-			_ThemeDef_##theme_sym() \
-			{ \
-				ThemeRegistry::add(&(theme_sym)); \
-			} \
-		} \
-		_ThemeDefInst_##theme_sym; \
+			_ThemeReg_##theme_sym() { ThemeRegistry::add(&(theme_sym)); } \
+		} _ThemeRegInst_##theme_sym; \
 	}
 
 // ---------------------------------------------------------------------------
@@ -129,6 +129,7 @@ struct ThemeRegistry
 // De macro maakt een verborgen struct met een constructor die zowel
 // ThemeRegistry::add() als ThemeRegistry::setDefault() aanroept.
 // ---------------------------------------------------------------------------
+
 #define REGISTER_DEFAULT_THEME(theme_sym) \
 	namespace \
 	{ \
@@ -139,6 +140,5 @@ struct ThemeRegistry
 				ThemeRegistry::add(&(theme_sym)); \
 				ThemeRegistry::setDefault(&(theme_sym)); \
 			} \
-		} \
-		_ThemeDefInst_##theme_sym; \
+		} _ThemeDefInst_##theme_sym; \
 	}
