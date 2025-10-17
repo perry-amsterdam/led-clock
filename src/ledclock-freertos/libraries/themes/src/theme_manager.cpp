@@ -1,6 +1,8 @@
 #include "theme.h"
 #include "theme_manager.h"
 #include "theme_registry.h"
+#include "theme_manager.h"
+
 
 // Huidige thema pointer
 static const Theme* currentTheme = nullptr;
@@ -118,9 +120,22 @@ const Theme* themeDefault()
 	return ThemeRegistry::getDefault();
 }
 
-const Theme* const* themeList(size_t* count)
+
+const Theme* themeList(size_t* count)
 {
 	// Return the registry's internal array directly; caller must use *count to know valid entries.
 	if (count) *count = ThemeRegistry::size();
 	return ThemeRegistry::items();
+}
+
+
+bool themeExists(const char* themeId) {
+    size_t count;
+    const Theme* themes = themeList(&count);
+    for (size_t i = 0; i < count; i++) {
+        if (strcmp(themes[i]->id, themeId) == 0) {
+            return true;
+        }
+    }
+    return false;
 }

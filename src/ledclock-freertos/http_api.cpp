@@ -13,7 +13,7 @@ extern "C"
 
 #include "globals.h"
 #include "theme_registry.h"
-#include <theme_manager.h>
+#include "theme_manager.h"
 #include "http_api.h"
 #include "hal_time_freertos.h"
 #include "config_storage.h"
@@ -22,7 +22,7 @@ extern "C"
 // ======================================================
 // Globals
 // ======================================================
-extern DNSServer dns;			 // captive portal DNS server
+extern DNSServer dns;
 static TaskHandle_t httpTaskHandle = nullptr;
 static bool s_api_running = false;
 
@@ -333,7 +333,7 @@ static void apiHandleThemesList()
 		const Theme* t = themes[i];
 		if (!t) continue;
 
-		if (i > 0) json += ",";	 // komma tussen items
+		if (i > 0) json += ",";	 
 
 		json += "{";
 		json += "\"id\":\"" + String(t->id) + "\"";
@@ -379,6 +379,7 @@ static void apiHandleThemeGet()
 	server.send(200, "application/json", json);
 }
 
+
 ////
 //// ========== Theme: SET (POST) ==========
 //// Ondersteunt: /api/theme?id=<theme_id>  (query) of als form-field "id"
@@ -386,8 +387,6 @@ static void apiHandleThemeGet()
 //static void apiHandleThemeSet()
 //{
 //	String id = server.arg("id");// query of form-field
-//								 // fallback alias
-//	if (id.isEmpty()) id = server.arg("name");
 //
 //	if (id.isEmpty())
 //	{
@@ -395,18 +394,15 @@ static void apiHandleThemeGet()
 //		return;
 //	}
 //
-//	auto& reg = ThemeRegistry::get();
-//	const Theme* t = reg.findById(id.c_str());
-//	if (!t)
-//	{
+//	if (!(themeExists(id.c_str)) {
 //		server.send(404, "application/json", "{\"error\":\"unknown theme id\"}");
 //		return;
 //	}
 //
-//	reg.setActive(t);			 // maak dit theme actief
-//	saveThemeId(id);			 // bewaar als user override
+//    setCurrentTheme(id);
+//	saveThemeId(id);
 //
-//	String json = "{";
+//	String json = "{"; 
 //	json += "\"ok\":true";
 //	json += ",\"active_id\":\"" + String(t->id) + "\"";
 //	json += ",\"active_name\":\"" + String(t->name) + "\"";
@@ -422,9 +418,8 @@ static void apiHandleThemeGet()
 //static void apiHandleThemeClear()
 //{
 //	clearSavedTheme();
-//	auto& reg = ThemeRegistry::get();
-//	const Theme* def = reg.getDefault();
-//	if (def) reg.setActive(def); // forceer default als actief (optioneel)
+//	const Theme* def = themeDefault();
+//	loadThemeId(def->id);
 //
 //	String json = "{";
 //	json += "\"ok\":true";
@@ -434,6 +429,7 @@ static void apiHandleThemeGet()
 //	json += "}";
 //	server.send(200, "application/json", json);
 //}
+
 
 // ======================================================
 // startApi / stopApi / startHttpTask / stopHttpTask
@@ -454,7 +450,7 @@ void startApi()
 	server.on("/api/timezone", HTTP_DELETE, apiHandleTimezoneDelete);
 	server.on("/api/timezones", HTTP_GET, apiHandleTimezonesGet);
 
-	//	// Api themes calls.
+	// Api themes calls.
 	server.on("/api/themes", HTTP_GET,  apiHandleThemesList);
 	server.on("/api/theme",  HTTP_GET,  apiHandleThemeGet);
 	//	server.on("/api/theme",  HTTP_POST, apiHandleThemeSet);
