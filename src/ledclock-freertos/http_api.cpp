@@ -322,7 +322,7 @@ static void apiHandleTimezoneDelete()
 static void apiHandleThemesList()
 {
 	size_t count = 0;
-	const Theme* const* themes = themeList(&count);
+	const Theme* themes = themeList(&count);
 
 	const Theme* def = themeDefault();
 	const Theme* cur = themeCurrent();
@@ -330,7 +330,7 @@ static void apiHandleThemesList()
 	String json = "[";
 	for (size_t i = 0; i < count; ++i)
 	{
-		const Theme* t = themes[i];
+		const Theme t = themes[i];
 		if (!t) continue;
 
 		if (i > 0) json += ",";	 
@@ -380,55 +380,56 @@ static void apiHandleThemeGet()
 }
 
 
-////
-//// ========== Theme: SET (POST) ==========
-//// Ondersteunt: /api/theme?id=<theme_id>  (query) of als form-field "id"
-////
-//static void apiHandleThemeSet()
-//{
-//	String id = server.arg("id");// query of form-field
 //
-//	if (id.isEmpty())
-//	{
-//		server.send(400, "application/json", "{\"error\":\"missing id parameter\"}");
-//		return;
-//	}
+// ========== Theme: SET (POST) ==========
+// Ondersteunt: /api/theme?id=<theme_id>  (query) of als form-field "id"
 //
-//	if (!(themeExists(id.c_str)) {
-//		server.send(404, "application/json", "{\"error\":\"unknown theme id\"}");
-//		return;
-//	}
+static void apiHandleThemeSet()
+{
+	String id = server.arg("id");// query of form-field
+
+	if (id.isEmpty())
+	{
+		server.send(400, "application/json", "{\"error\":\"missing id parameter\"}");
+		return;
+	}
+
+	if (!(themeExists(id.c_str)) {
+		server.send(404, "application/json", "{\"error\":\"unknown theme id\"}");
+		return;
+	}
+
+    setCurrentTheme(id);
+	saveThemeId(id);
+
+	String json = "{"; 
+	json += "\"ok\":true";
+	json += ",\"active_id\":\"" + String(t->id) + "\"";
+	json += ",\"active_name\":\"" + String(t->name) + "\"";
+	json += "}";
+	server.send(200, "application/json", json);
+}
+
+
 //
-//    setCurrentTheme(id);
-//	saveThemeId(id);
+// ========== Theme: CLEAR (DELETE) ==========
+// Verwijdert de user override; default wordt weer gebruikt.
 //
-//	String json = "{"; 
-//	json += "\"ok\":true";
-//	json += ",\"active_id\":\"" + String(t->id) + "\"";
-//	json += ",\"active_name\":\"" + String(t->name) + "\"";
-//	json += "}";
-//	server.send(200, "application/json", json);
-//}
-//
-//
-////
-//// ========== Theme: CLEAR (DELETE) ==========
-//// Verwijdert de user override; default wordt weer gebruikt.
-////
-//static void apiHandleThemeClear()
-//{
-//	clearSavedTheme();
-//	const Theme* def = themeDefault();
-//	loadThemeId(def->id);
-//
-//	String json = "{";
-//	json += "\"ok\":true";
-//	json += ",\"active_id\":\"" + String(def ? def->id : "") + "\"";
-//	json += ",\"active_name\":\"" + String(def ? def->name : "") + "\"";
-//	json += ",\"is_default\":true";
-//	json += "}";
-//	server.send(200, "application/json", json);
-//}
+static void apiHandleThemeClear()
+{
+	clearSavedTheme();
+	const Theme* def = themeDefault();
+	loadThemeId(def->id);
+	setCurrentTheme(nullptr);
+
+	String json = "{";
+	json += "\"ok\":true";
+	json += ",\"active_id\":\"" + String(def ? def->id : "") + "\"";
+	json += ",\"active_name\":\"" + String(def ? def->name : "") + "\"";
+	json += ",\"is_default\":true";
+	json += "}";
+	server.send(200, "application/json", json);
+}
 
 
 // ======================================================
