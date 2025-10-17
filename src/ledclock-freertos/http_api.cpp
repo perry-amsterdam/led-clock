@@ -351,29 +351,33 @@ static void apiHandleThemesList()
 //
 // ========== Theme: GET current ==========
 //
-//static void apiHandleThemeGet()
-//{
-//	auto& reg = ThemeRegistry::get();
-//	const Theme* def = reg.getDefault();
-//	const Theme* cur = reg.getActive();
-//
-//	// Probeer ook te laten zien of er een user override is opgeslagen
-//	String saved = loadThemeId();
-//	bool has_override = saved.length() > 0;
-//
-//	String json = "{";
-//	json += "\"active_id\":\"" + String(cur ? cur->id : "") + "\"";
-//	json += ",\"active_name\":\"" + String(cur ? cur->name : "") + "\"";
-//	json += ",\"is_default\":" + String(cur == def ? "true" : "false");
-//	json += ",\"has_saved_override\":" + String(has_override ? "true" : "false");
-//	if (has_override)
-//	{
-//		json += ",\"saved_override_id\":\"" + saved + "\"";
-//	}
-//	json += "}";
-//
-//	server.send(200, "application/json", json);
-//}
+static void apiHandleThemeGet()
+{
+	const Theme* def = themeDefault();
+	const Theme* cur = themeCurrent();
+
+	String savedId;
+	if (theme_is_set())
+	{
+		loadThemeId(savedId);
+	}
+	
+	// Probeer ook te laten zien of er een user override is opgeslagen
+	bool has_override = savedId.length() > 0;
+
+	String json = "{";
+	json += "\"active_id\":\"" + String(cur ? cur->id : "") + "\"";
+	json += ",\"active_name\":\"" + String(cur ? cur->name : "") + "\"";
+	json += ",\"is_default\":" + String(cur == def ? "true" : "false");
+	json += ",\"has_saved_override\":" + String(has_override ? "true" : "false");
+	if (has_override)
+	{
+		json += ",\"saved_override_id\":\"" + savedId + "\"";
+	}
+	json += "}";
+
+	server.send(200, "application/json", json);
+}
 
 ////
 //// ========== Theme: SET (POST) ==========
@@ -452,7 +456,7 @@ void startApi()
 
 	//	// Api themes calls.
 	server.on("/api/themes", HTTP_GET,  apiHandleThemesList);
-	//	server.on("/api/theme",  HTTP_GET,  apiHandleThemeGet);
+	server.on("/api/theme",  HTTP_GET,  apiHandleThemeGet);
 	//	server.on("/api/theme",  HTTP_POST, apiHandleThemeSet);
 	//	server.on("/api/theme",  HTTP_DELETE, apiHandleThemeClear);
 
