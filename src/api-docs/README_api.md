@@ -260,7 +260,6 @@ curl http://ledclock.local/api/timezones
 ## Roadmap
 
 * [ ] Add authentication (API key or JWT)
-* [ ] Introduce endpoints for LED animations and brightness control
 * [ ] Add `/api/time` for real-time NTP sync information
 * [ ] Implement versioned API structure (`/v1`, `/v2`, ...)
 

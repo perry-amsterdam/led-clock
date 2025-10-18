@@ -4,6 +4,7 @@
 #include <DNSServer.h>
 #include <Preferences.h>
 #include <time.h>
+#include "rtos.h"
 extern "C"
 {
 	#include "freertos/FreeRTOS.h"
@@ -263,6 +264,8 @@ static void apiHandleTimezonePost()
 	setenv("TZ", tz.c_str(), 1);
 	tzset();
 
+	xEventGroupSetBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
+
 	sendJson(200, "{\"success\":true,\"message\":\"Timezone updated successfully\"}");
 }
 
@@ -305,6 +308,10 @@ static void apiHandleTimezoneDelete()
 	{
 		off = (long)g_gmtOffsetSec + (long)g_daylightSec;
 	}
+
+	tz_user_clear();
+
+	xEventGroupSetBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
 
 	String json = "{";
 	json += "\"success\":true";

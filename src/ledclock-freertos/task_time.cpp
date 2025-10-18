@@ -14,52 +14,48 @@ void task_time(void*)
 	rtos_wait_bits(EVT_WIFI_UP);
 	LOG_STACK_WATERMARK("time:wifi");
 
-	// 1) TZ uit NVS proberen te lezen
-	bool haveSavedTz = false;
-	{
-		Preferences p;
-		if (p.begin("sys", true))// read-only
-		{
-			String tz = p.getString("tz", "");
-			p.end();
-			if (tz.length() > 0)
-			{
-				// bewaar in global (wordt al door API gebruikt)
-				g_timezoneIANA = tz;
+	//	// 1) TZ uit NVS proberen te lezen
+	//	bool haveSavedTz = false;
+	//	{
+	//		Preferences p;
+	//		if (p.begin("sys", true))// read-only
+	//		{
+	//			String tz = p.getString("tz", "");
+	//			p.end();
+	//			if (tz.length() > 0)
+	//			{
+	//				// bewaar in global (wordt al door API gebruikt)
+	//				g_timezoneIANA = tz;
+	//
+	//				// runtime TZ instellen
+	//				setenv("TZ", tz.c_str(), 1);
+	//				tzset();
+	//				haveSavedTz = true;
+	//			}
+	//		}
+	//	}
 
-				// runtime TZ instellen
-				setenv("TZ", tz.c_str(), 1);
-				tzset();
-				haveSavedTz = true;
-			}
-		}
-	}
-
-	// 2) NTP & TZ setup
-	//    - Als we al een geldige TZ hebben: alleen tijd syncen (geen online TZ-lookup).
-	//    - Als niet: doe de volledige internet-setup (inclusief TZ-lookup).
-	bool ok = false;
-	if (haveSavedTz)
-	{
-		// aanname: false = geen online TZ nodig
-		ok = setupTimeFromInternet(false);
-	}
-	else
-	{
-		// true = mag TZ online bepalen
-		ok = setupTimeFromInternet(true);
-	}
-
+	// NTP & TZ setup
+	bool ok = setupTimeFromInternet(true);
 	if (ok)
 	{
 		xEventGroupSetBits(g_sysEvents, EVT_TIME_READY);
+		xEventGroupClearBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
 		LOG_STACK_WATERMARK("time:ntp");
 	}
 
-	// 3) Periodieke tijds-onderhoud/sync
+	// Periodieke tijds-onderhoud/sync
 	for(;;)
 	{
-		netTimeMaintain();
+		EventBits_t bits = xEventGroupGetBits(g_sysEvents);
+		if (bits & EVT_TIME_UPDATE_RETRY)
+		{
+			bool ok = setupTimeFromInternet(true);
+			if (ok)
+			{
+				xEventGroupClearBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
+			}
+		}
 		hal_delay_ms(1000);
 	}
 }

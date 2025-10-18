@@ -6,9 +6,10 @@
 #include <freertos/queue.h>
 
 // ----- Event bits -----
-constexpr EventBits_t EVT_WIFI_UP      = 1 << 0;
-constexpr EventBits_t EVT_TIME_READY   = 1 << 1;
-constexpr EventBits_t EVT_PORTAL_ON    = 1 << 2;
+constexpr EventBits_t EVT_WIFI_UP             = 1 << 0;
+constexpr EventBits_t EVT_TIME_READY          = 1 << 1;
+constexpr EventBits_t EVT_TIME_UPDATE_RETRY   = 1 << 2;
+constexpr EventBits_t EVT_PORTAL_ON           = 1 << 3;
 
 extern EventGroupHandle_t g_sysEvents;
 

@@ -176,20 +176,19 @@ static bool fetchOffsetsFromWorldTimeAPI(const String& ianaTz, String& timezone,
 
 // --- Public API ---
 
-// Haal country code op (2-letter) via eenvoudige endpoint
-String fetchCountryCode()
-{
-	String body;
-	if (!httpGetToString(URL_COUNTRYCODE, body, true))
-	{
-		return "";
-	}
-
-	// ipapi.co/country/ geeft letterlijk bv. "NL\n"
-	body.trim();
-	return body;
-}
-
+//// Haal country code op (2-letter) via eenvoudige endpoint
+//String fetchCountryCode()
+//{
+//	String body;
+//	if (!httpGetToString(URL_COUNTRYCODE, body, true))
+//	{
+//		return "";
+//	}
+//
+//	// ipapi.co/country/ geeft letterlijk bv. "NL\n"
+//	body.trim();
+//	return body;
+//}
 
 // Configureer SNTP + TZ; Keert true terug als tijd plausibel gezet is
 bool setupTimeFromInternet(bool acceptAllHttps)
@@ -227,15 +226,14 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 		Serial.printf("[TZ] Using manual TZ with fetched offsets: %s\n", tzIana.c_str());
 		#endif
 	}
-	Serial.printf("[TZ] From IP: tz=%s raw=%d dst_off=%d\n", tzIana.c_str(), gmtOffset, dstOffset);
 
 	// 1) Probeer IANA TZ te zetten (voor wie dit ondersteunt)
-	if (tzIana.length() > 0)
+	if (timezone.length() > 0)
 	{
-		setenv("TZ", tzIana.c_str(), 1);
+		setenv("TZ", timezone.c_str(), 1);
 		tzset();
 		#ifdef DEBUG_TZ
-		Serial.printf("[TIME] TZ set to IANA: %s\n", tzIana.c_str());
+		Serial.printf("[TIME] TZ set to IANA: %s\n", timezone.c_str());
 		#endif
 	}
 
@@ -267,20 +265,21 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 }
 
 
-// Eenvoudig onderhoud: check 1x per minuut of tijd nog ok is en resync zo nodig
-void netTimeMaintain()
-{
-	static uint32_t last = 0;
-	uint32_t now_ms = hal_millis();
-
-	// run roughly once per minute
-	if (now_ms - last < 60000) return;
-	last = now_ms;
-
-	time_t now = time(nullptr);
-	// If epoch looks invalid (< 8 hours since boot default), try to resync.
-	if (now < 8 * 3600)
-	{
-		setupTimeFromInternet(true);
-	}
-}
+//
+//// Eenvoudig onderhoud: check 1x per minuut of tijd nog ok is en resync zo nodig
+//void netTimeMaintain()
+//{
+//	static uint32_t last = 0;
+//	uint32_t now_ms = hal_millis();
+//
+//	// run roughly once per minute
+//	if (now_ms - last < 60000) return;
+//	last = now_ms;
+//
+//	time_t now = time(nullptr);
+//	// If epoch looks invalid (< 8 hours since boot default), try to resync.
+//	if (now < 8 * 3600)
+//	{
+//		setupTimeFromInternet(true);
+//	}
+//}

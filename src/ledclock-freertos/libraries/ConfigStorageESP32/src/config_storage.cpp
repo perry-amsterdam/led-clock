@@ -91,10 +91,20 @@ bool tz_user_clear()
 bool theme_is_set()
 {
 	Preferences p;
-	if (!p.begin("sys", true)) return false;
+	if (!openPrefsRO(p)) return false;
 	String id = p.getString("theme_id", "");
 	p.end();
 	return id.length() > 0;
+}
+
+
+bool loadThemeId(String& out)
+{
+	Preferences p;
+	if (!openPrefsRO(p)) return false;
+	out = p.getString(KEY_THEME_ID, "");
+	p.end();
+	return isNonEmpty(out);
 }
 
 
@@ -108,16 +118,6 @@ bool saveThemeId(const String& id)
 	bool ok = writeIfChanged(p, KEY_THEME_ID, id);
 	p.end();
 	return ok;
-}
-
-
-bool loadThemeId(String& out)
-{
-	Preferences p;
-	if (!openPrefsRO(p)) return false;
-	out = p.getString(KEY_THEME_ID, "");
-	p.end();
-	return isNonEmpty(out);
 }
 
 
