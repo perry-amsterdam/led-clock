@@ -92,10 +92,10 @@ struct ThemeRegistry
 		return s_count;
 	}
 
-	static size_t count()
-	{
-		return s_count;
-	}
+	//static size_t count()
+	//{
+	//	return s_count;
+	//}
 
 	static const Theme* def()
 	{

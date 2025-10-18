@@ -108,10 +108,19 @@ static bool httpGetToString(const String& url, String& out, bool acceptAllHttps)
 }
 
 
-// Fetch offsets for a given IANA TZ using WorldTimeAPI
-static bool fetchOffsetsForIanaFromWorldTimeAPI(const String& ianaTz, int& gmtOffsetSec, int& daylightOffsetSec, bool acceptAllHttps)
+// Fetch offsets using WorldTimeAPI
+static bool fetchOffsetsFromWorldTimeAPI(const String& ianaTz, String& timezone, int& gmtOffsetSec, int& daylightOffsetSec, bool acceptAllHttps)
 {
-	String url = String(URL_TZ_IANA_BASE) + ianaTz;
+
+	String url;
+	if (ianaTz[0] == '\0')
+	{
+		url = String(URL_TIMEINFO);
+	}
+	else
+	{
+		url = String(URL_TZ_IANA_BASE) + ianaTz;
+	}
 	String body;
 
 	if (!httpGetToString(url, body, acceptAllHttps))
@@ -145,14 +154,21 @@ static bool fetchOffsetsForIanaFromWorldTimeAPI(const String& ianaTz, int& gmtOf
 	int raw = doc["raw_offset"] | 0;
 	int dst = doc["dst_offset"] | 0;
 
-	// Debug (optioneel)
-	Serial.printf("raw_offset=%d, dst_offset=%d\n", raw, dst);
+	if (!doc.containsKey("timezone"))
+	{
+		Serial.printf("[JSON] Key not found: %s\n", "timezone");
+		return false;
+	}
+
+	// veilig uitlezen als C-string, dan naar Arduino String
+	const char* tz = doc["timezone"] | "";
 
 	gmtOffsetSec      = (int)raw;
 	daylightOffsetSec = (int)dst;
+	timezone		  = tz;
 
 	#ifdef DEBUG_TZ
-	Serial.printf("[TZ] IANA '%s' raw=%d dst_off=%d\n", ianaTz.c_str(), gmtOffsetSec, daylightOffsetSec);
+	Serial.printf("[TZ] '%s' raw=%d dst_off=%d\n", timezone.c_str(), gmtOffsetSec, daylightOffsetSec);
 	#endif
 	return true;
 }
@@ -175,117 +191,43 @@ String fetchCountryCode()
 }
 
 
-// Bepaalt tzIana en offsets.
-// 1) Als user-TZ gezet is: die gebruiken, offsets via WorldTimeAPI proberen (fallback 0/0).
-// 2) Anders: IP-based lookup via URL_TIMEINFO (WorldTimeAPI /api/ip), haal timezone+offsets daaruit.
-bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bool acceptAllHttps)
-{
-	// 1) Respecteer via-API ingestelde timezone
-	{
-		String manualTz;
-		if (tz_user_is_set() && tz_user_get(manualTz) && manualTz.length() > 0)
-		{
-			tzIana = manualTz;
-
-			// offsets via WorldTimeAPI voor exact deze IANA
-			if (!fetchOffsetsForIanaFromWorldTimeAPI(tzIana, gmtOffsetSec, daylightOffsetSec, acceptAllHttps))
-			{
-				gmtOffsetSec = 0;
-				daylightOffsetSec = 0;
-				#ifdef DEBUG_TZ
-				Serial.printf("[TZ] Using manual TZ without fetched offsets: %s\n", tzIana.c_str());
-				#endif
-			}
-			else
-			{
-				#ifdef DEBUG_TZ
-				Serial.printf("[TZ] Using manual TZ with fetched offsets: %s\n", tzIana.c_str());
-				#endif
-			}
-			Serial.printf("[TZ] From IP: tz=%s raw=%d dst_off=%d\n", tzIana.c_str(), gmtOffsetSec, daylightOffsetSec);
-			return true;
-		}
-	}
-
-	// 2) Fallback: via uitgaande IP
-	String body;
-	if (!httpGetToString(URL_TIMEINFO, body, acceptAllHttps))
-	{
-		#ifdef DEBUG_TZ
-		Serial.println("[TZ] IP-based timeinfo request failed");
-		#endif
-		return false;
-	}
-
-	dumpPreview(body);
-
-	// WorldTimeAPI /api/ip velden: "timezone":"Europe/Amsterdam", "raw_offset":7200, "dst_offset":3600, "dst":true
-
-	// Parse JSON body
-	DynamicJsonDocument doc(4096);
-	DeserializationError err = deserializeJson(doc, body);
-	if (err)
-	{
-		Serial.print("JSON parse error: ");
-		Serial.println(err.f_str());
-		return false;
-	}
-
-	if (!doc.containsKey("timezone"))
-	{
-		Serial.printf("[JSON] Key not found: %s\n", "timezone");
-		return false;
-	}
-
-	// veilig uitlezen als C-string, dan naar Arduino String
-	const char* tz_c = doc["timezone"] | "";
-	String tz = String(tz_c);
-
-	if (tz.length() == 0)
-	{
-		#ifdef DEBUG_TZ
-		Serial.println("[TZ] Could not find 'timezone' in response");
-		#endif
-		return false;
-	}
-
-	tzIana = tz;
-
-	// Controleer of beide keys bestaan
-	if (!doc.containsKey("raw_offset") || !doc.containsKey("dst_offset"))
-	{
-		#ifdef DEBUG_TZ
-		Serial.println("[TZ] Missing raw_offset/dst_offset in WorldTimeAPI response");
-		#endif
-		return false;
-	}
-
-	// Lees offsets direct als integers
-	gmtOffsetSec = doc["raw_offset"] | 0;
-	daylightOffsetSec = doc["dst_offset"] | 0;
-
-	#ifdef DEBUG_TZ
-	Serial.printf("[TZ] From IP: tz=%s raw=%d dst_off=%d\n", tzIana.c_str(), gmtOffsetSec, daylightOffsetSec);
-	#endif
-
-	return true;
-}
-
-
 // Configureer SNTP + TZ; Keert true terug als tijd plausibel gezet is
 bool setupTimeFromInternet(bool acceptAllHttps)
 {
 	String tzIana;
+	String timezone;
 	int gmtOffset = 0;
 	int dstOffset = 0;
 
-	if (!fetchTimeInfo(tzIana, gmtOffset, dstOffset, acceptAllHttps))
+	// Bepaalt tzIana en offsets.
+	// 1) Als user-TZ gezet is: die gebruiken, offsets via WorldTimeAPI proberen (fallback 0/0).
+	// 2) Anders: IP-based lookup via URL_TIMEINFO (WorldTimeAPI /api/ip), haal timezone+offsets daaruit.
+	String manualTz;
+	if (tz_user_is_set() && tz_user_get(manualTz) && manualTz.length() > 0)
+	{
+		tzIana = manualTz;
+	}  else
+	{
+		tzIana = "";
+	}
+
+	// offsets via WorldTimeAPI.
+	if (!fetchOffsetsFromWorldTimeAPI(tzIana, timezone, gmtOffset, dstOffset, acceptAllHttps))
+	{
+		gmtOffset = 0;
+		dstOffset = 0;
+		timezone = "";
+		#ifdef DEBUG_TZ
+		Serial.printf("[TZ] Using manual TZ without fetched offsets: %s\n", tzIana.c_str());
+		#endif
+	}
+	else
 	{
 		#ifdef DEBUG_TZ
-		Serial.println("[TIME] fetchTimeInfo failed");
+		Serial.printf("[TZ] Using manual TZ with fetched offsets: %s\n", tzIana.c_str());
 		#endif
-		return false;
 	}
+	Serial.printf("[TZ] From IP: tz=%s raw=%d dst_off=%d\n", tzIana.c_str(), gmtOffset, dstOffset);
 
 	// 1) Probeer IANA TZ te zetten (voor wie dit ondersteunt)
 	if (tzIana.length() > 0)
