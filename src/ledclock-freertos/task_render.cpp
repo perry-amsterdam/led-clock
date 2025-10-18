@@ -58,6 +58,6 @@ void task_render(void*)
 		}
 
 		// ~4 FPS animation.
-		hal_delay_ms(250);
+		hal_delay_ms(40);
 	}
 }

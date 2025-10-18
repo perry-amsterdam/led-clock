@@ -22,14 +22,14 @@
 #define COLOR_MIN_R   0
 #endif
 #ifndef COLOR_MIN_G
-#define COLOR_MIN_G   80
+#define COLOR_MIN_G   150
 #endif
 #ifndef COLOR_MIN_B
 #define COLOR_MIN_B   0
 #endif
 
 #ifndef COLOR_HOUR_R
-#define COLOR_HOUR_R  140
+#define COLOR_HOUR_R  150
 #endif
 #ifndef COLOR_HOUR_G
 #define COLOR_HOUR_G  0
@@ -45,23 +45,23 @@
 // Tip: verhoog/verlaag alle drie samen als je ze feller/zachter wil.
 // ---------------------------------------------------
 #ifndef TICK_MIN_R
-#define TICK_MIN_R  20
+#define TICK_MIN_R  30
 #endif
 #ifndef TICK_MIN_G
-#define TICK_MIN_G  16
+#define TICK_MIN_G  24
 #endif
 #ifndef TICK_MIN_B
-#define TICK_MIN_B  10
+#define TICK_MIN_B  15
 #endif
 
 #ifndef TICK_HOUR_R
-#define TICK_HOUR_R  20
+#define TICK_HOUR_R  30
 #endif
 #ifndef TICK_HOUR_G
-#define TICK_HOUR_G  16
+#define TICK_HOUR_G  24
 #endif
 #ifndef TICK_HOUR_B
-#define TICK_HOUR_B  10
+#define TICK_HOUR_B  15
 #endif
 
 #include <Arduino.h>
@@ -162,8 +162,8 @@ static void updateRainbow(const tm& now, time_t epoch)
 	ledhwClearAll();
 
 	static uint8_t hue = 0;
-	renderRainbow(hue, 128);	// brightness = 64 (25%)
-	hue += 2;			// schuift de regenboog
+	renderRainbow(hue, 2);	// brightness = 5 
+	hue += 1;				// schuift de regenboog
 
 	if (kRainbow.showMinuteTicks)
 	{
