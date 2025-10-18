@@ -64,6 +64,64 @@
 #define TICK_HOUR_B  10
 #endif
 
+#include <Arduino.h>
+#include "ledhw.h"
+#include "theme_rainbow.h"
+
+// ---- HSV  RGB helper -------------------------------------------------------
+// Snel integer-gebaseerde omzetting voor WS2812B (0..255 bereik)
+static inline void hsvToRgb(uint8_t h, uint8_t s, uint8_t v,
+uint8_t& r, uint8_t& g, uint8_t& b)
+{
+	if (s == 0) { r = g = b = v; return; }
+	uint8_t region = h / 43;	 // 0..5
+	uint8_t remainder = (h - (region * 43)) * 6;
+
+	uint8_t p = (uint16_t(v) * (255 - s)) >> 8;
+	uint8_t q = (uint16_t(v) * (255 - ((uint16_t(s) * remainder) >> 8))) >> 8;
+	uint8_t t = (uint16_t(v) * (255 - ((uint16_t(s) * (255 - remainder)) >> 8))) >> 8;
+
+	switch (region)
+	{
+		default:
+		case 0: r = v; g = t; b = p; break;
+		case 1: r = q; g = v; b = p; break;
+		case 2: r = p; g = v; b = t; break;
+		case 3: r = p; g = q; b = v; break;
+		case 4: r = t; g = p; b = v; break;
+		case 5: r = v; g = p; b = q; break;
+	}
+}
+
+
+// ---- Rainbow-renderer -------------------------------------------------------
+// Tekent een regenboog over beide ringen.
+// - hueOffset schuift het kleurenspectrum (0..255)
+// - brightness (0..255) bepaalt de intensiteit.
+void renderRainbow(uint8_t hueOffset, uint8_t brightness)
+{
+	ledhwClearAll();
+
+	// 60-LED ring
+	for (int i = 0; i < 60; ++i)
+	{
+		uint8_t hue = uint8_t((uint16_t(i) * 256 / 60) + hueOffset);
+		uint8_t r, g, b;
+		hsvToRgb(hue, 255, brightness, r, g, b);
+		ledhwAdd60(ring60Index(i), r, g, b);
+	}
+
+	// 24-LED ring
+	for (int i = 0; i < 24; ++i)
+	{
+		uint8_t hue = uint8_t((uint16_t(i) * 256 / 24) + hueOffset);
+		uint8_t r, g, b;
+		hsvToRgb(hue, 255, brightness, r, g, b);
+		ledhwAdd24(ring24Index(i), r, g, b);
+	}
+}
+
+
 static void beginRainbow()
 {
 	ledhwSetGlobalBrightness(kRainbow.brightness);
@@ -102,6 +160,10 @@ static void updateRainbow(const tm& now, time_t epoch)
 {
 	(void)epoch;
 	ledhwClearAll();
+
+	static uint8_t hue = 0;
+	renderRainbow(hue, 128);	// brightness = 64 (25%)
+	hue += 2;			// schuift de regenboog
 
 	if (kRainbow.showMinuteTicks)
 	{
