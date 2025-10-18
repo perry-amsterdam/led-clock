@@ -1,0 +1,30 @@
+# Flutter & Dart
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.flutter-versions
+
+# Platform-specific builds
+ios/
+android/
+macos/
+windows/
+linux/
+web/
+
+# Tests (optioneel)
+test/
+
+# IDE / Editor
+.idea/
+.vscode/
+*.iml
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
