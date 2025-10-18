@@ -165,7 +165,7 @@ static bool fetchOffsetsFromWorldTimeAPI(const String& ianaTz, String& timezone,
 
 	gmtOffsetSec      = (int)raw;
 	daylightOffsetSec = (int)dst;
-	timezone		  = tz;
+	timezone          = tz;
 
 	#ifdef DEBUG_TZ
 	Serial.printf("[TZ] '%s' raw=%d dst_off=%d\n", timezone.c_str(), gmtOffsetSec, daylightOffsetSec);
