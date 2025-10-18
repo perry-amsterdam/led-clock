@@ -232,6 +232,7 @@ void handleNotFound()
 void startPortal()
 {
 	// --- Ensure portal task is running ---
+	s_portalOn = true;
 	startPortalTask();
 
 	/*__STARTPORTAL_MUTEX__*/
