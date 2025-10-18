@@ -196,7 +196,7 @@ static void updateRainbow(const tm& now, time_t epoch)
 // definitie (heeft externe linkage nodig)
 extern const Theme THEME_RAINBOW =
 {
-	.id     = "theme_rainbow",
+	.id     = "rainbow",
 	.name   = "Rainbow",
 	.begin  = beginRainbow,
 	.update = updateRainbow,
