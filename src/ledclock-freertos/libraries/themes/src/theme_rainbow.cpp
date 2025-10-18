@@ -162,7 +162,7 @@ static void updateRainbow(const tm& now, time_t epoch)
 	ledhwClearAll();
 
 	static uint8_t hue = 0;
-	renderRainbow(hue, 2);	// brightness = 5 
+	renderRainbow(hue, 4);	// brightness = 5 
 	hue += 1;				// schuift de regenboog
 
 	if (kRainbow.showMinuteTicks)

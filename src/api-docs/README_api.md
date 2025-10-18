@@ -145,58 +145,6 @@ All responses are in JSON format.
 }
 ```
 
-**Notes:**
-
-* This is a compact list that can be expanded in future versions.
-
----
-
-## Using the Specification
-
-### 1. In Postman
-
-1. Open **Postman**.
-2. Go to **File → Import**.
-3. Select `openapi.json`.
-4. Postman automatically creates a collection with all endpoints.
-
-### 2. In Swagger UI (locally or online)
-
-You can visualize and test the API live in your browser:
-
-1. Go to [https://editor.swagger.io/](https://editor.swagger.io/)
-2. Open `openapi.json` via **File → Import File**.
-3. The full API documentation will load, allowing you to test each endpoint interactively.
-
-### 3. Generate Client Code
-
-**Example (Go client via `oapi-codegen`):**
-
-```bash
-oapi-codegen -generate types,client -o ledclock_client.gen.go -package ledclock docs/openapi.json
-```
-
-**Supported generators:** Go (`oapi-codegen`), Python (`openapi-python-client`), TypeScript (`openapi-typescript`), etc.
-
-### 4. Test with curl
-
-If your ESP32 is reachable (e.g., in AP mode on `ledclock.local`):
-
-```bash
-curl http://ledclock.local/api/ping
-curl -X POST http://ledclock.local/api/system/reboot
-curl http://ledclock.local/api/timezone
-curl -X POST -H "Content-Type: application/json" -d '{"timezone": "Europe/Amsterdam"}' http://ledclock.local/api/timezone
-curl -X DELETE http://ledclock.local/api/timezone
-curl http://ledclock.local/api/timezones
-```
-
----
-
-
-
----
-
 ### 🎨 `GET /api/themes`
 
 **Purpose:** List all available themes.
@@ -259,6 +207,54 @@ curl http://ledclock.local/api/timezones
   "is_default": true
 }
 ```
+
+**Notes:**
+
+* This is a compact list that can be expanded in future versions.
+
+---
+
+## Using the Specification
+
+### 1. In Postman
+
+1. Open **Postman**.
+2. Go to **File → Import**.
+3. Select `openapi.json`.
+4. Postman automatically creates a collection with all endpoints.
+
+### 2. In Swagger UI (locally or online)
+
+You can visualize and test the API live in your browser:
+
+1. Go to [https://editor.swagger.io/](https://editor.swagger.io/)
+2. Open `openapi.json` via **File → Import File**.
+3. The full API documentation will load, allowing you to test each endpoint interactively.
+
+### 3. Generate Client Code
+
+**Example (Go client via `oapi-codegen`):**
+
+```bash
+oapi-codegen -generate types,client -o ledclock_client.gen.go -package ledclock docs/openapi.json
+```
+
+**Supported generators:** Go (`oapi-codegen`), Python (`openapi-python-client`), TypeScript (`openapi-typescript`), etc.
+
+### 4. Test with curl
+
+If your ESP32 is reachable (e.g., in AP mode on `ledclock.local`):
+
+```bash
+curl http://ledclock.local/api/ping
+curl -X POST http://ledclock.local/api/system/reboot
+curl http://ledclock.local/api/timezone
+curl -X POST -H "Content-Type: application/json" -d '{"timezone": "Europe/Amsterdam"}' http://ledclock.local/api/timezone
+curl -X DELETE http://ledclock.local/api/timezone
+curl http://ledclock.local/api/timezones
+```
+
+---
 
 
 ## Roadmap
