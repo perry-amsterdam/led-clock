@@ -84,13 +84,13 @@ static void apiHandleReboot()
 	sendJson(200, "{\"rebooting\":true,\"message\":\"Rebooting system...\"}");
 	xTaskCreate(
 		[](void*)
-		{
-			vTaskDelay(pdMS_TO_TICKS(250));
+	{
+		vTaskDelay(pdMS_TO_TICKS(250));
 			ESP.restart();
 			vTaskDelete(nullptr);
-		},
+	},
 		"reboot_task", 2048, nullptr, tskIDLE_PRIORITY + 3, nullptr
-	);
+		);
 }
 
 
@@ -143,6 +143,7 @@ static bool isValidIanaTimezone(const String& tz)
 	return false;
 }
 
+
 static void apiHandleTimezonesGet()
 {
 	server.sendHeader("Access-Control-Allow-Origin", "*");
@@ -174,7 +175,8 @@ static void apiHandleTimezonesGet()
 static void apiHandleTimezoneGet()
 {
 	String tz;
-	if (tz_user_is_set() && tz_user_get(tz) && tz.length() > 0) {
+	if (tz_user_is_set() && tz_user_get(tz) && tz.length() > 0)
+	{
 		tz_user_get(tz);
 	} else
 	{
@@ -294,32 +296,32 @@ static void apiHandleTimezoneDelete()
 		return;
 	}
 
-//	// Clear user timezone in NVS en runtime
-//	g_timezoneIANA = "";
-//
-//	// Bouw response zoals GET
-//	String tz;
-//	if (g_timezoneIANA.length())
-//	{
-//		tz = g_timezoneIANA;
-//	}
-//	else
-//	{
-//		tz_user_get(tz);
-//	}
-//
-//	time_t now = time(nullptr);
-//	long off = 0;
-//	if (now > 8 * 3600)			 // sanity check
-//	{
-//		struct tm lt = *localtime(&now);
-//		struct tm gmt = *gmtime(&now);
-//		off = (long)difftime(mktime(&lt), mktime(&gmt));
-//	}
-//	else
-//	{
-//		off = (long)g_gmtOffsetSec + (long)g_daylightSec;
-//	}
+	//	// Clear user timezone in NVS en runtime
+	//	g_timezoneIANA = "";
+	//
+	//	// Bouw response zoals GET
+	//	String tz;
+	//	if (g_timezoneIANA.length())
+	//	{
+	//		tz = g_timezoneIANA;
+	//	}
+	//	else
+	//	{
+	//		tz_user_get(tz);
+	//	}
+	//
+	//	time_t now = time(nullptr);
+	//	long off = 0;
+	//	if (now > 8 * 3600)			 // sanity check
+	//	{
+	//		struct tm lt = *localtime(&now);
+	//		struct tm gmt = *gmtime(&now);
+	//		off = (long)difftime(mktime(&lt), mktime(&gmt));
+	//	}
+	//	else
+	//	{
+	//		off = (long)g_gmtOffsetSec + (long)g_daylightSec;
+	//	}
 
 	// If timezone is set then clear it.
 	if (tz_user_is_set())
