@@ -40,3 +40,37 @@ bool connectWiFi(const String& ssid, const String& pass, uint32_t timeoutMs)
 
 	Serial.println("[WiFi] FAILED"); return false;
 }
+
+void disconnectWiFi(bool turnOffRadio, bool eraseCredentials)
+{
+    if (DEBUG_NET) { Serial.println("[WiFi] Disconnecting..."); }
+
+    // Als je een WebServer gebruikt, stop hem netjes
+    #ifdef WebServer_h
+    // 'server' is extern hierboven gedeclareerd in dit bestand
+    server.stop();
+    #endif
+
+    // ESP32 Arduino: WiFi.disconnect(wifioff=false, eraseap=false)
+    // We doen eerst een normale disconnect om de link te verbreken.
+    WiFi.disconnect(turnOffRadio /*wifioff*/, eraseCredentials /*eraseap*/);
+
+    // Eventueel radio uitzetten om stroom te besparen
+    if (turnOffRadio) {
+        WiFi.mode(WIFI_OFF);
+    } else {
+        // Laat de stack in een nette staat; Station-mode zonder verbinding
+        WiFi.mode(WIFI_STA);
+    }
+
+    // Kleine statusmelding
+    if (WiFi.getMode() == WIFI_OFF) {
+        if (DEBUG_NET) { Serial.println("[WiFi] Disconnected. Radio OFF"); }
+    } else {
+        if (DEBUG_NET) { Serial.println("[WiFi] Disconnected. Radio ON (STA idle)"); }
+    }
+
+    // (Optioneel) status LED update — alleen als je daar helpers voor hebt
+    // ledRed();   // of ledOff(); comment laten staan als je geen rode LED hebt
+}
+

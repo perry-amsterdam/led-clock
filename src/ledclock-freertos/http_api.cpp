@@ -84,11 +84,12 @@ static void apiHandleReboot()
 	sendJson(200, "{\"rebooting\":true,\"message\":\"Rebooting system...\"}");
 	xTaskCreate(
 		[](void*)
-	{
-		vTaskDelay(pdMS_TO_TICKS(250));
+		{
+			disconnectWiFi(false, false)
+			vTaskDelay(pdMS_TO_TICKS(250));
 			ESP.restart();
 			vTaskDelete(nullptr);
-	},
+		},
 		"reboot_task", 2048, nullptr, tskIDLE_PRIORITY + 3, nullptr
 		);
 }

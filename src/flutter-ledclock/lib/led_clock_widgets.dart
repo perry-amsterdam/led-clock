@@ -10,17 +10,41 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'led_clock_api.dart';
 
 class LedClockControlPanel extends StatefulWidget {
-  final String host;
-  const LedClockControlPanel({super.key, required this.host});
+  final String initialHost;
+  const LedClockControlPanel({super.key, required this.initialHost});
 
   @override
   State<LedClockControlPanel> createState() => _LedClockControlPanelState();
 }
 
 class _LedClockControlPanelState extends State<LedClockControlPanel> {
+  String _host = 'ledclock.local';
+  final TextEditingController _hostController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    _host = widget.initialHost;
+    _hostController.text = _host;
+    api = LedClockApi(host: _host);
+    _refreshAll();
+  }
+  @override
+  void didUpdateWidget(covariant LedClockControlPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialHost != widget.initialHost) {
+      setState(() { 
+        _host = widget.initialHost;
+        _hostController.text = _host;
+        api = LedClockApi(host: _host);
+      });
+      _refreshAll();
+    }
+  }
+
   late final LedClockApi api;
   String status = '—';
   PingResponse? ping;
@@ -29,15 +53,7 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
   List<ThemeItem> themes = const [];
   ActiveTheme? active;
   bool busy = false;
-
-  @override
-  void initState() {
-    super.initState();
-    api = LedClockApi(host: widget.host);
-    _refreshAll();
-  }
-
-  Future<void> _run(Future<void> Function() task) async {
+Future<void> _run(Future<void> Function() task) async {
     setState(() => busy = true);
     try {
       await task();
@@ -75,6 +91,41 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Host input row: allows overriding mDNS with manual IP/host
+            Row(
+              children: [
+                const Text('Host:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _hostController,
+                    decoration: const InputDecoration(
+                      hintText: 'ledclock.local or 192.168.x.x[:port]',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () async {
+                    final newHost = _hostController.text.trim();
+                    if (newHost.isEmpty) return;
+                    setState(() {
+                      _host = newHost;
+                      status = 'Connecting to ' + _host + '…';
+                      api = LedClockApi(host: _host);
+                    });
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setString('ledclock_host', _host);
+                    await _refreshAll();
+                  },
+                  child: const Text('Connect'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             Row(
               children: [
                 const Text('LED Clock Control', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),

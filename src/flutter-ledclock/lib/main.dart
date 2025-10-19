@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'led_clock_api.dart';
 import 'led_clock_widgets.dart';
 
@@ -9,9 +10,37 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        body: LedClockControlPanel(host: 'ledclock.local'), // of "192.168.1.50:80"
-      ),
+      home: const HostLoader(),
+    );
+  }
+}
+
+class HostLoader extends StatefulWidget {
+  const HostLoader({super.key});
+  @override
+  State<HostLoader> createState() => _HostLoaderState();
+}
+
+class _HostLoaderState extends State<HostLoader> {
+  String _host = 'ledclock.local';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHost();
+  }
+
+  Future<void> _loadHost() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _host = prefs.getString('ledclock_host') ?? 'ledclock.local';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: LedClockControlPanel(initialHost: _host),
     );
   }
 }
