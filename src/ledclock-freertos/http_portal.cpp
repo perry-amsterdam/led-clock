@@ -389,15 +389,3 @@ void stopPortalTask()
 		Serial.println("[Portal] Task gestopt");
 	}
 }
-
-
-//	TickType_t deadline = xTaskGetTickCount() + pdMS_TO_TICKS(250);
-//	while (s_portalTask != nullptr && xTaskGetTickCount() < deadline)
-//	{
-//		vTaskDelay(pdMS_TO_TICKS(10));
-//	}
-//	if (s_portalTask != nullptr)
-//	{
-//		vTaskDelete(s_portalTask);
-//		s_portalTask = nullptr;
-//	}

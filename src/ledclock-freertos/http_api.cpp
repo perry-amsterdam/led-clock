@@ -296,33 +296,6 @@ static void apiHandleTimezoneDelete()
 		return;
 	}
 
-	//	// Clear user timezone in NVS en runtime
-	//	g_timezoneIANA = "";
-	//
-	//	// Bouw response zoals GET
-	//	String tz;
-	//	if (g_timezoneIANA.length())
-	//	{
-	//		tz = g_timezoneIANA;
-	//	}
-	//	else
-	//	{
-	//		tz_user_get(tz);
-	//	}
-	//
-	//	time_t now = time(nullptr);
-	//	long off = 0;
-	//	if (now > 8 * 3600)			 // sanity check
-	//	{
-	//		struct tm lt = *localtime(&now);
-	//		struct tm gmt = *gmtime(&now);
-	//		off = (long)difftime(mktime(&lt), mktime(&gmt));
-	//	}
-	//	else
-	//	{
-	//		off = (long)g_gmtOffsetSec + (long)g_daylightSec;
-	//	}
-
 	// If timezone is set then clear it.
 	if (tz_user_is_set())
 	{

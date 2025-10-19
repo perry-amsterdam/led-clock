@@ -176,20 +176,6 @@ static bool fetchFromWorldTimeAPI(const String& ianaTz, String& timezone, int& g
 
 // --- Public API ---
 
-//// Haal country code op (2-letter) via eenvoudige endpoint
-//String fetchCountryCode()
-//{
-//	String body;
-//	if (!httpGetToString(URL_COUNTRYCODE, body, true))
-//	{
-//		return "";
-//	}
-//
-//	// ipapi.co/country/ geeft letterlijk bv. "NL\n"
-//	body.trim();
-//	return body;
-//}
-
 // Configureer SNTP + TZ; Keert true terug als tijd plausibel gezet is
 bool setupTimeFromInternet(bool acceptAllHttps)
 {
@@ -260,22 +246,3 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 
 	return (now >= 8 * 3600);
 }
-
-
-//// Eenvoudig onderhoud: check 1x per minuut of tijd nog ok is en resync zo nodig
-//void netTimeMaintain()
-//{
-//	static uint32_t last = 0;
-//	uint32_t now_ms = hal_millis();
-//
-//	// run roughly once per minute
-//	if (now_ms - last < 60000) return;
-//	last = now_ms;
-//
-//	time_t now = time(nullptr);
-//	// If epoch looks invalid (< 8 hours since boot default), try to resync.
-//	if (now < 8 * 3600)
-//	{
-//		xEventGroupClearBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
-//	}
-//}
