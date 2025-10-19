@@ -84,15 +84,29 @@ Future<void> _run(Future<void> Function() task) async {
 
   @override
   Widget build(BuildContext context) {
-    return AbsorbPointer(
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(children:[
+          Container(width: 12, height: 12, decoration: const BoxDecoration(color: Color(0xFFFFCC00), shape: BoxShape.circle)),
+          const SizedBox(width: 10),
+          const Text('LED Clock', style: TextStyle(fontWeight: FontWeight.w800)),
+          const SizedBox(width: 10),
+          const Text('Control', style: TextStyle(fontWeight: FontWeight.w400)),
+        ]),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(4),
+          child: SizedBox(height: 4, child: ColoredBox(color: Color(0xFFFFCC00))),
+        ),
+      ),
+      body: AbsorbPointer(
       absorbing: busy,
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
+        child: ListView(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Host input row: allows overriding mDNS with manual IP/host
-            Row(
+            Card(child: Padding(padding: const EdgeInsets.all(16), child: Row(
               children: [
                 const Text('Host:', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(width: 12),
@@ -107,7 +121,7 @@ Future<void> _run(Future<void> Function() task) async {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () async {
                     final newHost = _hostController.text.trim();
@@ -124,7 +138,7 @@ Future<void> _run(Future<void> Function() task) async {
                   child: const Text('Connect'),
                 ),
               ],
-            ),
+            )),),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -140,7 +154,7 @@ Future<void> _run(Future<void> Function() task) async {
                 )
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(12),
@@ -148,11 +162,11 @@ Future<void> _run(Future<void> Function() task) async {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('Health', style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Text('Uptime (ms): ${ping?.uptimeMs ?? "—"}'),
                     Text('Heap free: ${ping?.heapFree ?? "—"}'),
                     Text('WiFi mode: ${ping?.wifiMode ?? "—"}'),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     ElevatedButton.icon(
                       onPressed: () => _run(() async {
                         await api.reboot();
@@ -164,7 +178,7 @@ Future<void> _run(Future<void> Function() task) async {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(12),
@@ -172,9 +186,9 @@ Future<void> _run(Future<void> Function() task) async {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('Timezone', style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Text('Current: ${tz?.timezone ?? "—"} (offset: ${tz?.utcOffsetSec ?? "—"}s)'),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -206,7 +220,7 @@ Future<void> _run(Future<void> Function() task) async {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(12),
@@ -214,9 +228,9 @@ Future<void> _run(Future<void> Function() task) async {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('Themes', style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     if (active != null) Text('Active: ${active!.activeName} (${active!.activeId}) ${active!.isDefault ? "(default)" : ""}'),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Wrap(
                       spacing: 8,
                       children: [

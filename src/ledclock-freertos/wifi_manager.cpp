@@ -3,7 +3,7 @@
 #include <WebServer.h>
 extern WebServer server;
 extern void handlePing();
-#include "wifi.h"
+#include "wifi_manager.h"
 #include "http_api.h"
 #include "http_portal.h"
 #include "status_led.h"

@@ -15,6 +15,7 @@ extern "C"
 #include "globals.h"
 #include "theme_registry.h"
 #include "theme_manager.h"
+#include "wifi_manager.h"
 #include "http_api.h"
 #include "hal_time_freertos.h"
 #include "config_storage.h"
@@ -82,10 +83,10 @@ static void apiHandlePing()
 static void apiHandleReboot()
 {
 	sendJson(200, "{\"rebooting\":true,\"message\":\"Rebooting system...\"}");
+	disconnectWiFi(false, false);
 	xTaskCreate(
 		[](void*)
 		{
-			disconnectWiFi(false, false)
 			vTaskDelay(pdMS_TO_TICKS(250));
 			ESP.restart();
 			vTaskDelete(nullptr);

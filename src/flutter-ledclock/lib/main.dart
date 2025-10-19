@@ -10,6 +10,47 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Color(0xFF0058A3),
+          primary: Color(0xFF0058A3),
+          secondary: Color(0xFFFFCC00),
+          brightness: Brightness.light,
+        ),
+        scaffoldBackgroundColor: const Color(0xFFF7F7F7),
+        appBarTheme: const AppBarTheme(centerTitle: false, elevation: 0),
+        textTheme: const TextTheme(
+          headlineSmall: TextStyle(fontWeight: FontWeight.w700, letterSpacing: -0.2),
+          titleMedium: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        inputDecorationTheme: const InputDecorationTheme(
+          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+          focusedBorder: OutlineInputBorder(borderSide: BorderSide(width: 2)),
+          isDense: true,
+          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        ),
+        cardTheme: const CardTheme(
+          elevation: 0.5,
+          margin: EdgeInsets.symmetric(vertical: 8),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ButtonStyle(
+            shape: MaterialStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+            padding: const MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 14, vertical: 12)),
+          ),
+        ),
+        filledButtonTheme: FilledButtonThemeData(
+          style: ButtonStyle(
+            shape: MaterialStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+            padding: const MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 14, vertical: 12)),
+            backgroundColor: const MaterialStatePropertyAll(Color(0xFF0058A3)),
+            foregroundColor: const MaterialStatePropertyAll(Colors.white),
+          ),
+        ),
+      ),
       home: const HostLoader(),
     );
   }
