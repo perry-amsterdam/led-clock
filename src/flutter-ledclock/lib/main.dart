@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
           isDense: true,
           contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         ),
-        cardTheme: const CardTheme(
+        cardTheme: const CardThemeData(
           elevation: 0.5,
           margin: EdgeInsets.symmetric(vertical: 8),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),

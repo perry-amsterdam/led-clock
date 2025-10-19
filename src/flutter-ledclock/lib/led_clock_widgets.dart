@@ -103,7 +103,6 @@ Future<void> _run(Future<void> Function() task) async {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Host input row: allows overriding mDNS with manual IP/host
             Card(child: Padding(padding: const EdgeInsets.all(16), child: Row(
@@ -138,7 +137,7 @@ Future<void> _run(Future<void> Function() task) async {
                   child: const Text('Connect'),
                 ),
               ],
-            )),),
+            ))),
             const SizedBox(height: 16),
             Row(
               children: [
