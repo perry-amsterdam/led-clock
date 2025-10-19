@@ -101,6 +101,8 @@ void handleRoot()
 		"<div class='field'>"
 		"<label for='ssid'>SSID</label>"
 		"<input id='ssid' name='ssid' placeholder='Bijv. MijnNetwerk' autocapitalize='none'/>"
+		"<button type='button' id='scanBtn'>Scan</button>"
+		"<datalist id='ssidList'></datalist>"
 		"</div>"
 
 		"<div class='field'>"
@@ -144,7 +146,7 @@ void handleRoot()
 
 	// Password show/hide
 	page += "var s=document.getElementById('showpw'),p=document.getElementById('pass');"
-		"if(s&&p){s.addEventListener('change',function(){p.type=this.checked?'text':'password';});}";
+		"if(s&&p){s.addEventListener('change',function(){p.type=this.checked?'text':'password';});}var sb=document.getElementById('scanBtn');var dl=document.getElementById('ssidList');if(sb&&dl){sb.addEventListener('click',async function(){try{var r=await fetch('/scan');var data=await r.json();dl.innerHTML='';for(var i=0;i<data.length;i++){var item=data[i];var s=(item&&item.ssid)?item.ssid:item;if(!s) continue;var o=document.createElement('option');o.value=s;dl.appendChild(o);}}catch(e){console&&console.log&&console.log('scan fail',e);}});}";
 
 	// Reboot-knop (bevestiging + POST)
 	page += F("document.getElementById('rebootBtn').addEventListener('click',function(){"
