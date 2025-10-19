@@ -44,9 +44,25 @@ void task_time(void*)
 		LOG_STACK_WATERMARK("time:ntp");
 	}
 
+	static uint32_t last = 0;
+
 	// Periodieke tijds-onderhoud/sync
 	for(;;)
 	{
+		
+		// run roughly once per minute
+		uint32_t now_ms = hal_millis();
+		if (now_ms - last < 60000) return;
+		last = now_ms;
+
+		// If epoch looks invalid (< 8 hours since boot default), schedule time update.
+		time_t now = time(nullptr);
+		if (now < 8 * 3600)
+		{
+			xEventGroupSetBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
+		}
+
+		// A time update was scheduled.
 		EventBits_t bits = xEventGroupGetBits(g_sysEvents);
 		if (bits & EVT_TIME_UPDATE_RETRY)
 		{
@@ -55,7 +71,7 @@ void task_time(void*)
 			{
 				xEventGroupClearBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
 			}
-		}
+		} 
 		hal_delay_ms(1000);
 	}
 }

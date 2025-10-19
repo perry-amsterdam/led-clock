@@ -109,7 +109,7 @@ static bool httpGetToString(const String& url, String& out, bool acceptAllHttps)
 
 
 // Fetch offsets using WorldTimeAPI
-static bool fetchOffsetsFromWorldTimeAPI(const String& ianaTz, String& timezone, int& gmtOffsetSec, int& daylightOffsetSec, bool acceptAllHttps)
+static bool fetchFromWorldTimeAPI(const String& ianaTz, String& timezone, int& gmtOffsetSec, int& daylightOffsetSec, bool acceptAllHttps)
 {
 
 	String url;
@@ -210,24 +210,24 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 		tzIana = "";
 	}
 
-	// offsets via WorldTimeAPI.
-	if (!fetchOffsetsFromWorldTimeAPI(tzIana, timezone, gmtOffset, dstOffset, acceptAllHttps))
+	// Timezone en offsets via WorldTimeAPI.
+	if (!fetchFromWorldTimeAPI(tzIana, timezone, gmtOffset, dstOffset, acceptAllHttps))
 	{
 		gmtOffset = 0;
 		dstOffset = 0;
 		timezone = "";
 		#ifdef DEBUG_TZ
-		Serial.printf("[TZ] Using manual TZ without fetched offsets: %s\n", tzIana.c_str());
+		Serial.printf("[TZ] Using TZ without fetched offsets: %s\n", tzIana.c_str());
 		#endif
 	}
 	else
 	{
 		#ifdef DEBUG_TZ
-		Serial.printf("[TZ] Using manual TZ with fetched offsets: %s\n", tzIana.c_str());
+		Serial.printf("[TZ] Using TZ with fetched offsets: %s\n", tzIana.c_str());
 		#endif
 	}
 
-	// 1) Probeer IANA TZ te zetten (voor wie dit ondersteunt)
+	// Probeer IANA TZ te zetten (voor wie dit ondersteunt)
 	if (timezone.length() > 0)
 	{
 		setenv("TZ", timezone.c_str(), 1);
@@ -237,12 +237,9 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 		#endif
 	}
 
-	// 2) **Belangrijk**: configureer SNTP inclusief offsets zodat tijd lokaal klopt
-	//    (werkt ook wanneer IANA TZ niet wordt ondersteund).
-	configTime(gmtOffset, dstOffset,
-		"europe.pool.ntp.org",
-		"time.google.com",
-		"pool.ntp.org");
+	// **Belangrijk**: configureer SNTP inclusief offsets zodat tijd lokaal klopt
+	//  (werkt ook wanneer IANA TZ niet wordt ondersteund).
+	configTime(gmtOffset, dstOffset, "europe.pool.ntp.org", "time.google.com", "pool.ntp.org");
 
 	// Wacht even op tijd-sync (niet te lang)
 	const uint32_t start = hal_millis();
@@ -265,7 +262,6 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 }
 
 
-//
 //// Eenvoudig onderhoud: check 1x per minuut of tijd nog ok is en resync zo nodig
 //void netTimeMaintain()
 //{
@@ -280,6 +276,6 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 //	// If epoch looks invalid (< 8 hours since boot default), try to resync.
 //	if (now < 8 * 3600)
 //	{
-//		setupTimeFromInternet(true);
+//		xEventGroupClearBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
 //	}
 //}

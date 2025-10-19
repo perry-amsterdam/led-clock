@@ -5,6 +5,6 @@
 String extractJsonString(const String& json, const String& key);
 void dumpPreview(const String& payload);
 bool fetchTimeInfo(String& tzIana, int& gmtOffsetSec, int& daylightOffsetSec, bool acceptAllHttps = false);
-String fetchCountryCode();
+//String fetchCountryCode();
 bool setupTimeFromInternet(bool acceptAllHttps = false);
 void netTimeMaintain();

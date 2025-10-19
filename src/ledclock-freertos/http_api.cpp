@@ -60,6 +60,41 @@ static void sendJson(WebServer& server, int code, const String& json)
 
 
 // ======================================================
+// /api/ping
+// ======================================================
+static void apiHandlePing()
+{
+	uint64_t epoch_ms = (uint64_t)(time(nullptr)) * 1000ULL;
+	String json = "{";
+	json += "\"pong\":true";
+	json += ",\"now\":" + String((long long)epoch_ms);
+	json += ",\"uptime_ms\":" + String((uint32_t)hal_millis());
+	json += ",\"heap_free\":" + String((int)ESP.getFreeHeap());
+	json += ",\"wifi_mode\":\"" + wifiModeStr() + "\"";
+	json += "}";
+	sendJson(200, json);
+}
+
+
+// ======================================================
+// /api/system/reboot (POST)
+// ======================================================
+static void apiHandleReboot()
+{
+	sendJson(200, "{\"rebooting\":true,\"message\":\"Rebooting system...\"}");
+	xTaskCreate(
+		[](void*)
+		{
+			vTaskDelay(pdMS_TO_TICKS(250));
+			ESP.restart();
+			vTaskDelete(nullptr);
+		},
+		"reboot_task", 2048, nullptr, tskIDLE_PRIORITY + 3, nullptr
+	);
+}
+
+
+// ======================================================
 // Compacte wereldlijst met veelgebruikte tijdzones
 // ======================================================
 static const char* kTimezones[] PROGMEM =
@@ -108,7 +143,6 @@ static bool isValidIanaTimezone(const String& tz)
 	return false;
 }
 
-
 static void apiHandleTimezonesGet()
 {
 	server.sendHeader("Access-Control-Allow-Origin", "*");
@@ -135,54 +169,23 @@ static void apiHandleTimezonesGet()
 
 
 // ======================================================
-// /api/ping
-// ======================================================
-static void apiHandlePing()
-{
-	uint64_t epoch_ms = (uint64_t)(time(nullptr)) * 1000ULL;
-	String json = "{";
-	json += "\"pong\":true";
-	json += ",\"now\":" + String((long long)epoch_ms);
-	json += ",\"uptime_ms\":" + String((uint32_t)hal_millis());
-	json += ",\"heap_free\":" + String((int)ESP.getFreeHeap());
-	json += ",\"wifi_mode\":\"" + wifiModeStr() + "\"";
-	json += "}";
-	sendJson(200, json);
-}
-
-
-// ======================================================
-// /api/system/reboot (POST)
-// ======================================================
-static void apiHandleReboot()
-{
-	sendJson(200, "{\"rebooting\":true,\"message\":\"Rebooting system...\"}");
-	xTaskCreate(
-		[](void*)
-	{
-		vTaskDelay(pdMS_TO_TICKS(250));
-			ESP.restart();
-			vTaskDelete(nullptr);
-	},
-		"reboot_task", 2048, nullptr, tskIDLE_PRIORITY + 3, nullptr
-		);
-}
-
-
-// ======================================================
 // /api/timezone (GET)
 // ======================================================
 static void apiHandleTimezoneGet()
 {
-	// Prefer runtime globals filled at startup; fallback to NVS
 	String tz;
-	if (g_timezoneIANA.length())
-	{
-		tz = g_timezoneIANA;
-	}
-	else
-	{
+	if (tz_user_is_set() && tz_user_get(tz) && tz.length() > 0) {
 		tz_user_get(tz);
+	} else
+	{
+		if (g_timezoneIANA.length())
+		{
+			tz = g_timezoneIANA;
+		}
+		else
+		{
+			tz = "";
+		}
 	}
 
 	// Compute current total UTC offset from localtime vs gmtime if time is valid
@@ -259,11 +262,21 @@ static void apiHandleTimezonePost()
 		return;
 	}
 
-	// Save & apply
-	tz_user_set(tz.c_str());
-	setenv("TZ", tz.c_str(), 1);
-	tzset();
+	// If timezone changes the save it.
+	String old_tz;
+	if (tz_user_is_set() && tz_user_get(old_tz) && old_tz.length() > 0)
+	{
+		if (old_tz != tz)
+		{
+			tz_user_set(tz.c_str());
+		}
+	}
+	else
+	{
+		tz_user_set(tz.c_str());
+	}
 
+	// Timezone was changed so trigger a time retry event,
 	xEventGroupSetBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
 
 	sendJson(200, "{\"success\":true,\"message\":\"Timezone updated successfully\"}");
@@ -281,43 +294,45 @@ static void apiHandleTimezoneDelete()
 		return;
 	}
 
-	// Clear user timezone in NVS en runtime
-	tz_user_clear();
-	g_timezoneIANA = "";
+//	// Clear user timezone in NVS en runtime
+//	g_timezoneIANA = "";
+//
+//	// Bouw response zoals GET
+//	String tz;
+//	if (g_timezoneIANA.length())
+//	{
+//		tz = g_timezoneIANA;
+//	}
+//	else
+//	{
+//		tz_user_get(tz);
+//	}
+//
+//	time_t now = time(nullptr);
+//	long off = 0;
+//	if (now > 8 * 3600)			 // sanity check
+//	{
+//		struct tm lt = *localtime(&now);
+//		struct tm gmt = *gmtime(&now);
+//		off = (long)difftime(mktime(&lt), mktime(&gmt));
+//	}
+//	else
+//	{
+//		off = (long)g_gmtOffsetSec + (long)g_daylightSec;
+//	}
 
-	// Bouw response zoals GET
-	String tz;
-	if (g_timezoneIANA.length())
+	// If timezone is set then clear it.
+	if (tz_user_is_set())
 	{
-		tz = g_timezoneIANA;
-	}
-	else
-	{
-		tz_user_get(tz);
+		tz_user_clear();
 	}
 
-	time_t now = time(nullptr);
-	long off = 0;
-	if (now > 8 * 3600)			 // sanity check
-	{
-		struct tm lt = *localtime(&now);
-		struct tm gmt = *gmtime(&now);
-		off = (long)difftime(mktime(&lt), mktime(&gmt));
-	}
-	else
-	{
-		off = (long)g_gmtOffsetSec + (long)g_daylightSec;
-	}
-
-	tz_user_clear();
-
+	// Timezone was changed so trigger a time retry event,
 	xEventGroupSetBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
 
 	String json = "{";
 	json += "\"success\":true";
 	json += ",\"message\":\"Timezone cleared; using default\"";
-	json += ",\"timezone\":\"" + (tz.length() ? tz : String("")) + "\"";
-	json += ",\"utc_offset_sec\":" + String((long)off);
 	json += "}";
 	sendJson(200, json);
 }
