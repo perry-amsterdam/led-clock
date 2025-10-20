@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'led_clock_api.dart';
 
 class LedClockControlPanel extends StatefulWidget {
-  const LedClockControlPanel({super.key});
+  LedClockControlPanel({super.key});
 
   @override
   State<LedClockControlPanel> createState() => _LedClockControlPanelState();
@@ -82,22 +82,22 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
             Container(
               width: 12,
               height: 12,
-              decoration: const BoxDecoration(
-                color: Color(0xFFFFCC00),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.secondary,
                 shape: BoxShape.circle,
               ),
             ),
-            const SizedBox(width: 10),
-            const Text('LED Clock', style: TextStyle(fontWeight: FontWeight.w800)),
-            const SizedBox(width: 10),
-            const Text('Control', style: TextStyle(fontWeight: FontWeight.w400)),
+            SizedBox(width: 10),
+            Text('LED Clock', style: TextStyle(fontWeight: FontWeight.w800)),
+            SizedBox(width: 10),
+            Text('Control', style: TextStyle(fontWeight: FontWeight.w400)),
           ],
         ),
-        bottom: const PreferredSize(
+        bottom: PreferredSize(
           preferredSize: Size.fromHeight(4),
           child: SizedBox(
             height: 4,
-            child: ColoredBox(color: Color(0xFFFFCC00)),
+            child: ColoredBox(color: Theme.of(context).colorScheme.secondary),
           ),
         ),
       ),
@@ -113,49 +113,49 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      const Text('Host:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(width: 12),
+                      Text('Host:', style: TextStyle(fontWeight: FontWeight.bold)),
+                      SizedBox(width: 12),
                       Expanded(
                         child: TextField(
                           controller: _hostController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             hintText: 'ledclock.local of 192.168.x.y',
                           ),
                           onSubmitted: (_) => _connect(),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       ElevatedButton(
                         onPressed: _connect,
-                        child: const Text('Connect'),
+                        child: Text('Connect'),
                       ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
 
               // Status row
               Card(
                 child: ListTile(
-                  leading: const Icon(Icons.info_outline),
-                  title: const Text('Status'),
+                  leading: Icon(Icons.info_outline),
+                  title: Text('Status'),
                   subtitle: Text(status),
-                  trailing: busy ? const SizedBox(
+                  trailing: busy ? SizedBox(
                     width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2),
                   ) : IconButton(
-                    icon: const Icon(Icons.refresh),
+                    icon: Icon(Icons.refresh),
                     onPressed: _refreshAll,
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
 
               // Ping row
               Card(
                 child: ListTile(
-                  leading: const Icon(Icons.wifi_tethering),
-                  title: const Text('Ping'),
+                  leading: Icon(Icons.wifi_tethering),
+                  title: Text('Ping'),
                   subtitle: Text(ping?.message ?? '—'),
                   trailing: TextButton(
                     onPressed: () async {
@@ -165,11 +165,11 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
                         setState(() {});
                       });
                     },
-                    child: const Text('Ping'),
+                    child: Text('Ping'),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
 
               // Timezone row
               Card(
@@ -178,12 +178,12 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Timezone', style: TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
+                      Text('Timezone', style: TextStyle(fontWeight: FontWeight.bold)),
+                      SizedBox(height: 8),
                       DropdownButton<String>(
                         value: tz?.timezone,
                         isExpanded: true,
-                        hint: const Text('Select timezone'),
+                        hint: Text('Select timezone'),
                         items: tzList.map((e) => DropdownMenuItem(
                           value: e,
                           child: Text(e),
@@ -202,7 +202,7 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
 
               // Themes row
               Card(
@@ -211,8 +211,8 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Themes', style: TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
+                      Text('Themes', style: TextStyle(fontWeight: FontWeight.bold)),
+                      SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
@@ -240,7 +240,7 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
                                 setState(() {});
                               });
                             },
-                            child: const Text('Use default theme'),
+                            child: Text('Use default theme'),
                           ),
                         ],
                       )
