@@ -41,6 +41,7 @@ bool connectWiFi(const String& ssid, const String& pass, uint32_t timeoutMs)
 	Serial.println("[WiFi] FAILED"); return false;
 }
 
+
 void disconnectWiFi(bool turnOffRadio, bool eraseCredentials)
 {
     if (DEBUG_NET) { Serial.println("[WiFi] Disconnecting..."); }
