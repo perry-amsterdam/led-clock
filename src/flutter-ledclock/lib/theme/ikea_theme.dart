@@ -10,18 +10,14 @@ final ColorScheme _lightScheme = const ColorScheme(
   onPrimary: Colors.white,
   primaryContainer: Color(0xFFCCE1F6),
   onPrimaryContainer: Color(0xFF001C36),
-
   secondary: ikeaYellow,
   onSecondary: Colors.black,
   secondaryContainer: Color(0xFFFFF3B0),
   onSecondaryContainer: Color(0xFF231B00),
-
   tertiary: Color(0xFF4A6FA5),
   onTertiary: Colors.white,
-
   error: Color(0xFFB3261E),
   onError: Colors.white,
-
   background: Colors.white,
   onBackground: Color(0xFF111111),
   surface: Colors.white,
@@ -37,22 +33,18 @@ final ColorScheme _lightScheme = const ColorScheme(
 
 final ColorScheme _darkScheme = const ColorScheme(
   brightness: Brightness.dark,
-  primary: Color(0xFF7FB5E8), // derived from ikeaBlue for contrast
+  primary: Color(0xFF7FB5E8),
   onPrimary: Color(0xFF001527),
   primaryContainer: Color(0xFF004275),
   onPrimaryContainer: Colors.white,
-
-  secondary: Color(0xFFFFE067), // softened ikeaYellow
+  secondary: Color(0xFFFFE067),
   onSecondary: Color(0xFF221B00),
   secondaryContainer: Color(0xFF574800),
   onSecondaryContainer: Colors.white,
-
   tertiary: Color(0xFF9EC2F2),
   onTertiary: Color(0xFF09223C),
-
   error: Color(0xFFF2B8B5),
   onError: Color(0xFF601410),
-
   background: Color(0xFF121212),
   onBackground: Colors.white,
   surface: Color(0xFF121212),
@@ -117,7 +109,6 @@ ThemeData ikeaLightTheme() {
       behavior: SnackBarBehavior.floating,
     ),
     dividerTheme: DividerThemeData(
-      color: scheme.outline.withOpacity(0.4),
       thickness: 1,
     ),
     chipTheme: ChipThemeData(

@@ -20,6 +20,21 @@ class LedClockControlPanel extends StatefulWidget {
 }
 
 class _LedClockControlPanelState extends State<LedClockControlPanel> {
+  String _formatUptime(int? ms) {
+    if (ms == null) return '—';
+    final d = Duration(milliseconds: ms);
+    final days = d.inDays;
+    final hours = d.inHours % 24;
+    final minutes = d.inMinutes % 60;
+    final seconds = d.inSeconds % 60;
+    final parts = <String>[];
+    if (days > 0) parts.add('${days}d');
+    parts.add('${hours}h');
+    parts.add('${minutes}m');
+    parts.add('${seconds}s');
+    return parts.join(' ');
+  }
+
   late final LedClockApi api;
   String status = '—';
   PingResponse? ping;
@@ -92,9 +107,9 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Health', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    const Text('Health', style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
-                    Text('Uptime (ms): ${ping?.uptimeMs ?? "—"}'),
+                    Text('Uptime: ${_formatUptime(ping?.uptimeMs)}'),
                     Text('Heap free: ${ping?.heapFree ?? "—"}'),
                     Text('WiFi mode: ${ping?.wifiMode ?? "—"}'),
                     const SizedBox(height: 8),
@@ -118,7 +133,7 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
                   children: [
                     const Text('Timezone', style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
-                    Text('Current: ${tz?.timezone ?? "—"},
+                    Text('Current: ${tz?.timezone ?? "—"}'),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
