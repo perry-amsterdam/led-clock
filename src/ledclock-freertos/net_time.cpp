@@ -231,7 +231,7 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 	const uint32_t start = hal_millis();
 	while ((time(nullptr) < 8 * 3600) && (hal_millis() - start < 10000))
 	{
-		hal_delay_ms(150);
+		hal_delay_ms(200);
 	}
 
 	time_t now = time(nullptr);

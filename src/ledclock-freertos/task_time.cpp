@@ -15,12 +15,16 @@ void task_time(void*)
 	LOG_STACK_WATERMARK("time:wifi");
 
 	// NTP & TZ setup
-	bool ok = setupTimeFromInternet(true);
-	if (ok)
-	{
-		xEventGroupSetBits(g_sysEvents, EVT_TIME_READY);
-		xEventGroupClearBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
-		LOG_STACK_WATERMARK("time:ntp");
+	bool ok = false;
+	for (int i = 0; (!ok && i < 10) ; i++) {
+		ok = setupTimeFromInternet(true);
+		if (ok)
+		{
+			xEventGroupSetBits(g_sysEvents, EVT_TIME_READY);
+			xEventGroupClearBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
+			LOG_STACK_WATERMARK("time:ntp");
+		}
+		hal_delay_ms(1000);
 	}
 
 	static uint32_t last = 0;

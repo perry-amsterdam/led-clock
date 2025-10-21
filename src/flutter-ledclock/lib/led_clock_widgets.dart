@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'led_clock_api.dart';
+import 'theme/ikea_theme.dart';
 
 class LedClockControlPanel extends StatefulWidget {
   LedClockControlPanel({super.key});
@@ -125,10 +126,7 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
                         ),
                       ),
                       SizedBox(width: 12),
-                      ElevatedButton(
-                        onPressed: _connect,
-                        child: Text('Connect'),
-                      ),
+                      IkeaCtaButton(onPressed: _connect, leading: Icons.link, child: const Text('Connect')),
                     ],
                   ),
                 ),
@@ -157,8 +155,7 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
                   leading: Icon(Icons.wifi_tethering),
                   title: Text('Ping'),
                   subtitle: Text(ping?.message ?? '—'),
-                  trailing: TextButton(
-                    onPressed: () async {
+                  trailing: OutlinedButton(onPressed: () async {
                       await _run(() async {
                         ping = await api.ping();
                         if (!mounted) return;
@@ -239,9 +236,7 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
                                 if (!mounted) return;
                                 setState(() {});
                               });
-                            },
-                            child: Text('Use default theme'),
-                          ),
+                            }, child: const Text('Use default theme')),
                         ],
                       )
                     ],
