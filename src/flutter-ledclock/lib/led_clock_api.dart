@@ -1,5 +1,3 @@
-import 'dart:developer' as dev;
-
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 // LED Clock REST API – Flutter/Dart client (HTTP-only)
 //
@@ -16,51 +14,6 @@ import 'dart:developer' as dev;
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
-/// Simple HTTP logging wrapper so all API calls end up in `adb logcat`.
-class HttpLoggingClient extends http.BaseClient {
-  HttpLoggingClient(this._inner, {this.tag = 'LEDClock.API', this.maxBodyLogBytes = 4096});
-  final http.Client _inner;
-  final String tag;
-  final int maxBodyLogBytes;
-
-  @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) async {
-    final startedAt = DateTime.now();
-    final reqHeaders = Map<String, String>.from(request.headers);
-    dev.log('→ ${request.method} ${request.url}\nheaders: $reqHeaders', name: tag);
-    try {
-      final response = await _inner.send(request);
-      final duration = DateTime.now().difference(startedAt);
-      final bytes = await http.ByteStream(response.stream).toBytes();
-      final logged = bytes.length > maxBodyLogBytes ? bytes.sublist(0, maxBodyLogBytes) : bytes;
-      String bodyPreview;
-      try {
-        bodyPreview = utf8.decode(logged, allowMalformed: true);
-      } catch (_) {
-        bodyPreview = '<non-utf8 ${logged.length} bytes>';
-      }
-      dev.log(
-        '← ${request.method} ${request.url}  status=${response.statusCode}  elapsed=${duration.inMilliseconds}ms'
-        '${bytes.isNotEmpty ? "\nbody(${bytes.length}B,trunc=${bytes.length > maxBodyLogBytes}): $bodyPreview" : ""}',
-        name: tag,
-      );
-      final newStream = http.ByteStream.fromBytes(bytes);
-      return http.StreamedResponse(
-        newStream,
-        response.statusCode,
-        contentLength: response.contentLength,
-        request: response.request,
-        headers: response.headers,
-        reasonPhrase: response.reasonPhrase,
-        isRedirect: response.isRedirect,
-      );
-    } catch (e, st) {
-      dev.log('✗ ${request.method} ${request.url} threw: $e', name: tag, error: e, stackTrace: st);
-      rethrow;
-    }
-  }
-}
 
 class ApiException implements Exception {
   final int statusCode;

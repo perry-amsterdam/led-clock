@@ -1,10 +1,3 @@
-import 'dart:developer' as dev;
-import 'dart:async';
-import 'package:flutter/material.dart';
-import 'led_clock_api.dart';
-
-void ledClockUiLog(String msg) => dev.log(msg, name: 'LEDClock.UI');
-
 // A tiny Flutter widget that exercises the entire LED Clock API.
 // Drop this into your app (e.g. lib/led_clock_widgets.dart) and use LedClockControlPanel().
 //
@@ -13,6 +6,10 @@ void ledClockUiLog(String msg) => dev.log(msg, name: 'LEDClock.UI');
 //
 // Example:
 // MaterialApp(home: Scaffold(body: LedClockControlPanel(host: 'ledclock.local')))
+
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'led_clock_api.dart';
 
 class LedClockControlPanel extends StatefulWidget {
   final String host;
@@ -198,5 +195,3 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
     );
   }
 }
-
-// [LOGGING PATCHED VERSION READY]
