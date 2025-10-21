@@ -92,7 +92,7 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Health', style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text('Health', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     Text('Uptime (ms): ${ping?.uptimeMs ?? "—"}'),
                     Text('Heap free: ${ping?.heapFree ?? "—"}'),
@@ -118,7 +118,7 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
                   children: [
                     const Text('Timezone', style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
-                    Text('Current: ${tz?.timezone ?? "—"} (offset: ${tz?.utcOffsetSec ?? "—"}s)'),
+                    Text('Current: ${tz?.timezone ?? "—"},
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,

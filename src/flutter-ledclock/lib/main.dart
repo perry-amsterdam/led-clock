@@ -1,3 +1,4 @@
+import 'theme/ikea_theme.dart';
 import 'package:flutter/material.dart';
 import 'host_config.dart';
 import 'led_clock_api.dart';
@@ -12,7 +13,13 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(debugShowCheckedModeBanner: false, home: HomeScreen());
+    return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ikeaLightTheme(),
+        darkTheme: ikeaDarkTheme(),
+        themeMode: ThemeMode.system,
+        home: const HomeScreen(),
+      );
   }
 }
 
