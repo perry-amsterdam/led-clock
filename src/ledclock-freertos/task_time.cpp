@@ -16,7 +16,8 @@ void task_time(void*)
 
 	// NTP & TZ setup
 	bool ok = false;
-	for (int i = 0; (!ok && i < 10) ; i++) {
+	for (int i = 0; (!ok && i < 10) ; i++)
+	{
 		ok = setupTimeFromInternet(true);
 		if (ok)
 		{

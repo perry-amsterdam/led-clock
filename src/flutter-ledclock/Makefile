@@ -13,6 +13,7 @@ help:
 	@echo "  make build    - Build een release APK (flutter build apk)"
 	@echo "  make install  - Install the built flutter-apk using adb"
 	@echo "  make clean    - Verwijder build output en .dart_tool/"
+	@echo "  make format   - Format all Dart files in lib/ using flutter format (line length 128)"
 	@echo ""
 
 create:
@@ -38,3 +39,7 @@ clean:
 
 install:
 	find -type f -name "*.apk" | grep flutter-apk | xargs adb install
+
+
+format:
+	dart format lib --line-length 128

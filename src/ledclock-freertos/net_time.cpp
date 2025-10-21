@@ -22,11 +22,11 @@
 #define URL_TZ_IANA_BASE "https://worldtimeapi.org/api/timezone/"
 #endif
 
-#ifndef URL_COUNTRYCODE
-// Simpele country code resolver
-#define URL_COUNTRYCODE "https://ipapi.co/country/"
-#endif
-// ------------------------------------------------------------------------
+//#ifndef URL_COUNTRYCODE
+//// Simpele country code resolver
+//#define URL_COUNTRYCODE "https://ipapi.co/country/"
+//#endif
+//// ------------------------------------------------------------------------
 
 // Preview helper for HTTP payloads (guarded by DEBUG_TZ)
 void dumpPreview(const String& payload)
@@ -90,7 +90,7 @@ static bool httpGetToString(const String& url, String& out, bool acceptAllHttps)
 	{
 		code = http.GET();
 		if (code == HTTP_CODE_OK) break;
-		hal_delay_ms(200);
+		hal_delay_ms(250);
 	}
 
 	if (code != HTTP_CODE_OK)

@@ -86,11 +86,11 @@ static void apiHandleReboot()
 	disconnectWiFi(false, false);
 	xTaskCreate(
 		[](void*)
-		{
-			vTaskDelay(pdMS_TO_TICKS(250));
+	{
+		vTaskDelay(pdMS_TO_TICKS(250));
 			ESP.restart();
 			vTaskDelete(nullptr);
-		},
+	},
 		"reboot_task", 2048, nullptr, tskIDLE_PRIORITY + 3, nullptr
 		);
 }
