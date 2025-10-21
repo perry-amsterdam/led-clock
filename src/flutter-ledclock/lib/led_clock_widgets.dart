@@ -158,23 +158,30 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Themes', style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    if (active != null)
-                      Text('Active: ${active!.activeName} (${active!.activeId}) ${active!.isDefault ? "(default)" : ""}'),
-                    const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
+                      runSpacing: 8,
                       children: [
-                        for (final t in themes)
-                          OutlinedButton(
-                            onPressed: () => _run(() async {
-                              await api.setTheme(t.id);
+                        DropdownButton<String>(
+                          value: themes.any((t) => t.id == active?.activeId) ? active?.activeId : null,
+                          hint: const Text('Select theme'),
+                          items: themes
+                              .map(
+                                (t) => DropdownMenuItem<String>(
+                                  value: t.id,
+                                  child: Text(t.name + (t.isDefault ? ' • default' : '') + (t.isActive ? ' • active' : '')),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (id) {
+                            if (id == null) return;
+                            _run(() async {
+                              await api.setTheme(id);
                               active = await api.getActiveTheme();
                               setState(() {});
-                            }),
-                            child: Text(t.name + (t.isDefault ? ' • default' : '') + (t.isActive ? ' • active' : '')),
-                          ),
+                            });
+                          },
+                        ),
                         ElevatedButton(
                           onPressed: () => _run(() async {
                             await api.clearThemeOverride();
