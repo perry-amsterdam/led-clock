@@ -164,58 +164,6 @@ static void drawCandyCaneBand(int start, int length)
 }
 
 
-//static void drawTwinkles(uint32_t seed, uint8_t level)
-//{
-//	if(level==0) return;
-//	// spawn few white sparkles on the 60 ring each frame
-//	// count scales roughly with level
-//	int count = 1 + (level/16);
-//	uint32_t s = seed ^ 0xA5A5BEEF;
-//	for(int n=0;n<count;n++)
-//	{
-//		s = 1664525u*s + 1013904223u;
-//		int pos = (s>>24)%60;
-//		s = 1664525u*s + 1013904223u;
-//								 // 16..79
-//		uint8_t br = 16 + ((s>>24)&0x3F);
-//		add60(pos, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
-//	}
-//}
-
-
-//// Vervang je bestaande drawTwinkles(...) door deze versie
-//static void drawTwinkles(uint32_t seed, uint8_t level)
-//{
-//    if(level==0) return;
-//
-//    // Twinkles op BEIDE ringen. 24-ring wat spaarzamer om clutter te voorkomen.
-//    int count60 = 1 + (level/16);      // oorspronkelijke dichtheid 60-ring
-//    int count24 = max(1, level/32);    // iets minder voor 24-ring
-//
-//    uint32_t s = seed ^ 0xA5A5BEEF;
-//
-//    // 60-ring twinkles (wit, 16..79)
-//    for(int n=0; n<count60; n++)
-//    {
-//        s = 1664525u*s + 1013904223u;
-//        int pos = (s>>24)%60;
-//        s = 1664525u*s + 1013904223u;
-//        uint8_t br = 16 + ((s>>24)&0x3F); // 16..79
-//        add60(pos, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
-//    }
-//
-//    // 24-ring twinkles (ook wit, iets gedimder: 12..63)
-//    for(int n=0; n<count24; n++)
-//    {
-//        s = 1664525u*s + 1013904223u;
-//        int pos = (s>>24)%24;
-//        s = 1664525u*s + 1013904223u;
-//        uint8_t br = 12 + ((s>>24)&0x33); // 12..63
-//        add24(pos, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
-//    }
-//}
-
-
 static void drawTwinkles(uint32_t seed, uint8_t level, uint8_t speed)
 {
     if(level==0) return;
@@ -279,27 +227,12 @@ static void updateChristmas(const tm& now, time_t epoch)
 	int sec = now.tm_sec % 60;
 	int min = now.tm_min % 60;
 	int hour12 = now.tm_hour % 12;
-	// hour mapped onto 0..59
-	int hourPos60 = (hour12*5 + (min/12)) % 60;
 
 	// Candy cane band centered on minute hand
 	//drawCandyCaneBand((min - 4 + 60)%60, 9);
 
-	// Hands: hour = red w/ short tail, minute = white candy cane band already plus white head, seconds = green w/ longer tail
-	// hour
-	//drawHandWithTail60(hourPos60, COLOR_RED_R, COLOR_RED_G, COLOR_RED_B, 2, 80);
-	// minute head
-	//drawHandWithTail60(min, COLOR_WHITE_R, COLOR_WHITE_G, COLOR_WHITE_B, 1, 120);
-	// seconds sweeping tail
-	//drawHandWithTail60(sec, COLOR_GREEN_R, COLOR_GREEN_G, COLOR_GREEN_B, 6, 30);
-
-	// 24h inner ring: mark current hour in red, next in green for AM/PM hint
-	//add24(now.tm_hour % 24, 120, 20, 20);
-	//add24((now.tm_hour+1) % 24, 20, 100, 20);
-	//
-	
-	g_cfg.twinkleLevel = 128;   // gematigde snelheid
-	g_cfg.twinkleSpeed = 80;   // gematigde snelheid
+	g_cfg.twinkleLevel = 64;   // gematigde snelheid
+	g_cfg.twinkleSpeed = 10;   // gematigde snelheid
 
 	// snowy twinkles
 	uint32_t ms = hal_millis();
@@ -307,6 +240,14 @@ static void updateChristmas(const tm& now, time_t epoch)
 	drawTwinkles(frameRand, g_cfg.twinkleLevel, g_cfg.twinkleSpeed);
 
 	drawTicks();
+
+	const int s = now.tm_sec % 60;
+	const int m = now.tm_min % 60;
+	const int h = now.tm_hour % 12;
+
+	ledhwAdd60(ring60Index(sec), COLOR_SEC_R, COLOR_SEC_G, COLOR_SEC_B);
+	ledhwAdd60(ring60Index(min), COLOR_MIN_R, COLOR_MIN_G, COLOR_MIN_B);
+	ledhwAdd24(ring24Index(hour12*2), COLOR_HOUR_R, COLOR_HOUR_G, COLOR_HOUR_B);
 
 	ledhwShow();
 }
