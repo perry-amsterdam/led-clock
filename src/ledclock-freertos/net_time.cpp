@@ -22,11 +22,7 @@
 #define URL_TZ_IANA_BASE "https://worldtimeapi.org/api/timezone/"
 #endif
 
-//#ifndef URL_COUNTRYCODE
-//// Simpele country code resolver
-//#define URL_COUNTRYCODE "https://ipapi.co/country/"
-//#endif
-//// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
 
 // Preview helper for HTTP payloads (guarded by DEBUG_TZ)
 void dumpPreview(const String& payload)
@@ -90,7 +86,7 @@ static bool httpGetToString(const String& url, String& out, bool acceptAllHttps)
 	{
 		code = http.GET();
 		if (code == HTTP_CODE_OK) break;
-		hal_delay_ms(250);
+		hal_delay_ms(100);
 	}
 
 	if (code != HTTP_CODE_OK)
@@ -234,7 +230,7 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 	const uint32_t start = hal_millis();
 	while ((!getLocalTime(&timeinfo)) && ((hal_millis() - start) < 10000))
 	{
-		hal_delay_ms(250);
+		hal_delay_ms(100);
 	}
 
 	time_t now = time(nullptr);

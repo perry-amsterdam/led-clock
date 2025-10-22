@@ -7,6 +7,7 @@ struct ChristmasConfig
 	bool    showHourTicks;		 // show 12 markers on 60-ring
 	bool    showMinuteTicks;	 // show 60 faint markers on 60-ring
 	uint8_t twinkleLevel;		 // 0..255 how many/bright twinkles
+    uint8_t twinkleSpeed; 
 };
 
 // Sensible defaults for a cozy Xmas look

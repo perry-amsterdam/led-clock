@@ -38,7 +38,7 @@ void task_time(void*)
 
 		// run roughly once per minute
 		uint32_t now_ms = hal_millis();
-		if ((uint32_t)(now_ms - last_ms) >= 60000u)
+		if ((uint32_t)(now_ms - last_ms) >= 60000)
 		{
 			last_ms = now_ms;
 			last = now_ms;
@@ -86,6 +86,6 @@ void task_time(void*)
 			}
 		}
 
-		hal_delay_ms(1000);
+		hal_delay_ms(100);
 	}
 }

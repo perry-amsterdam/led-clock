@@ -1,5 +1,6 @@
 import 'theme/ikea_theme.dart';
 import 'package:flutter/material.dart';
+import 'splash_screen.dart';
 import 'host_config.dart';
 import 'led_clock_api.dart';
 import 'led_clock_widgets.dart'; // of waar LedClockControlPanel staat
@@ -18,7 +19,13 @@ class MyApp extends StatelessWidget {
       theme: ikeaLightTheme(),
       darkTheme: ikeaDarkTheme(),
       themeMode: ThemeMode.system,
-      home: const HomeScreen(),
+      home: SplashScreen(
+        appName: 'Ledclock',
+        makerName: 'Perry Couprie',
+        onEnterApp: (ctx) {
+          Navigator.of(ctx).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
+        },
+      ),
     );
   }
 }
@@ -129,7 +136,7 @@ class _IpSettingsDialogState extends State<_IpSettingsDialog> {
         ],
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Annuleer')),
+        TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Annuleer')),
         TextButton(
           onPressed: () async {
             // Wissen: veld leeg laten
@@ -142,7 +149,7 @@ class _IpSettingsDialogState extends State<_IpSettingsDialog> {
                 return; // invalid, niet sluiten
               }
             }
-            if (context.mounted) Navigator.of(context).pop();
+            if (context.mounted) Navigator.of(ctx).pop();
           },
           child: const Text('Opslaan'),
         ),

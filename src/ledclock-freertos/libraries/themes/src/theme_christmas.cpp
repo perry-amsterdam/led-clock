@@ -9,6 +9,65 @@
 static inline uint8_t qadd8(uint8_t a, uint8_t b){ uint16_t s = uint16_t(a)+uint16_t(b); return (s>255)?255:uint8_t(s); }
 static inline uint8_t qmul8(uint8_t a, uint8_t b){ return uint8_t((uint16_t(a)*uint16_t(b))/255); }
 
+// ---------------------------------------------------
+// Wijzerkleuren (RGB 0..255)  pas aan naar smaak
+// ---------------------------------------------------
+#ifndef COLOR_SEC_R
+#define COLOR_SEC_R   0
+#endif
+#ifndef COLOR_SEC_G
+#define COLOR_SEC_G   0
+#endif
+#ifndef COLOR_SEC_B
+#define COLOR_SEC_B   150
+#endif
+
+#ifndef COLOR_MIN_R
+#define COLOR_MIN_R   0
+#endif
+#ifndef COLOR_MIN_G
+#define COLOR_MIN_G   80
+#endif
+#ifndef COLOR_MIN_B
+#define COLOR_MIN_B   0
+#endif
+
+#ifndef COLOR_HOUR_R
+#define COLOR_HOUR_R  140
+#endif
+#ifndef COLOR_HOUR_G
+#define COLOR_HOUR_G  0
+#endif
+#ifndef COLOR_HOUR_B
+#define COLOR_HOUR_B  0
+#endif
+
+// ---------------------------------------------------
+// Tick-kleuren (warm wit, gedimd standaard)
+// - Minuten-ticks op 60-ring (elke 5)
+// - Uur-ticks op 24-ring (elke 3)
+// Tip: verhoog/verlaag alle drie samen als je ze feller/zachter wil.
+// ---------------------------------------------------
+#ifndef TICK_MIN_R
+#define TICK_MIN_R  20
+#endif
+#ifndef TICK_MIN_G
+#define TICK_MIN_G  20
+#endif
+#ifndef TICK_MIN_B
+#define TICK_MIN_B  20
+#endif
+
+#ifndef TICK_HOUR_R
+#define TICK_HOUR_R  20
+#endif
+#ifndef TICK_HOUR_G
+#define TICK_HOUR_G  20
+#endif
+#ifndef TICK_HOUR_B
+#define TICK_HOUR_B  20
+#endif
+
 // Warm cozy colors
 #ifndef COLOR_RED_R
 #define COLOR_RED_R   255
@@ -68,25 +127,19 @@ static void drawTicks()
 {
 	if(!g_cfg.showMinuteTicks && !g_cfg.showHourTicks) return;
 
-	// minute ticks: very faint warm white
-	if(g_cfg.showMinuteTicks)
+	if (g_cfg.showMinuteTicks)
 	{
-		for(int i=0;i<60;i++)
+		for (int m=0; m<60; m+=5)
 		{
-			uint8_t br = (i%5==0)? 0 : 10;
-			if(br)
-			{
-				add60(i, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
-			}
+			ledhwAdd60(ring60Index(m), TICK_MIN_R, TICK_MIN_G, TICK_MIN_B);
 		}
 	}
-	// hour ticks: brighter
-	if(g_cfg.showHourTicks)
+
+	if (g_cfg.showHourTicks)
 	{
-		for(int i=0;i<60;i+=5)
+		for (int h=0; h<12; h+=3)
 		{
-			uint8_t br = 40;
-			add60(i, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
+			ledhwAdd24(ring24Index(h*2), TICK_HOUR_R, TICK_HOUR_G, TICK_HOUR_B);
 		}
 	}
 }
@@ -111,22 +164,90 @@ static void drawCandyCaneBand(int start, int length)
 }
 
 
-static void drawTwinkles(uint32_t seed, uint8_t level)
+//static void drawTwinkles(uint32_t seed, uint8_t level)
+//{
+//	if(level==0) return;
+//	// spawn few white sparkles on the 60 ring each frame
+//	// count scales roughly with level
+//	int count = 1 + (level/16);
+//	uint32_t s = seed ^ 0xA5A5BEEF;
+//	for(int n=0;n<count;n++)
+//	{
+//		s = 1664525u*s + 1013904223u;
+//		int pos = (s>>24)%60;
+//		s = 1664525u*s + 1013904223u;
+//								 // 16..79
+//		uint8_t br = 16 + ((s>>24)&0x3F);
+//		add60(pos, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
+//	}
+//}
+
+
+//// Vervang je bestaande drawTwinkles(...) door deze versie
+//static void drawTwinkles(uint32_t seed, uint8_t level)
+//{
+//    if(level==0) return;
+//
+//    // Twinkles op BEIDE ringen. 24-ring wat spaarzamer om clutter te voorkomen.
+//    int count60 = 1 + (level/16);      // oorspronkelijke dichtheid 60-ring
+//    int count24 = max(1, level/32);    // iets minder voor 24-ring
+//
+//    uint32_t s = seed ^ 0xA5A5BEEF;
+//
+//    // 60-ring twinkles (wit, 16..79)
+//    for(int n=0; n<count60; n++)
+//    {
+//        s = 1664525u*s + 1013904223u;
+//        int pos = (s>>24)%60;
+//        s = 1664525u*s + 1013904223u;
+//        uint8_t br = 16 + ((s>>24)&0x3F); // 16..79
+//        add60(pos, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
+//    }
+//
+//    // 24-ring twinkles (ook wit, iets gedimder: 12..63)
+//    for(int n=0; n<count24; n++)
+//    {
+//        s = 1664525u*s + 1013904223u;
+//        int pos = (s>>24)%24;
+//        s = 1664525u*s + 1013904223u;
+//        uint8_t br = 12 + ((s>>24)&0x33); // 12..63
+//        add24(pos, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
+//    }
+//}
+
+
+static void drawTwinkles(uint32_t seed, uint8_t level, uint8_t speed)
 {
-	if(level==0) return;
-	// spawn few white sparkles on the 60 ring each frame
-	// count scales roughly with level
-	int count = 1 + (level/16);
-	uint32_t s = seed ^ 0xA5A5BEEF;
-	for(int n=0;n<count;n++)
-	{
-		s = 1664525u*s + 1013904223u;
-		int pos = (s>>24)%60;
-		s = 1664525u*s + 1013904223u;
-								 // 16..79
-		uint8_t br = 16 + ((s>>24)&0x3F);
-		add60(pos, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
-	}
+    if(level==0) return;
+
+    // Hoe hoger speed, hoe vaker de twinkles “wisselen”.
+    // Gebruik speed om de random seed per frame te variëren.
+    uint32_t frameSeed = seed + (g_frameCounter * (1 + (speed / 16)));
+
+    int count60 = 1 + (level/16);
+    int count24 = max(1, level/32);
+
+    uint32_t s = frameSeed ^ 0xA5A5BEEF;
+
+    // 60-ring twinkles
+    for(int n=0; n<count60; n++)
+    {
+        s = 1664525u*s + 1013904223u;
+        int pos = (s>>24)%60;
+        s = 1664525u*s + 1013904223u;
+        uint8_t br = 16 + ((s>>24)&0x3F);
+        add60(pos, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
+    }
+
+    // 24-ring twinkles
+    for(int n=0; n<count24; n++)
+    {
+        s = 1664525u*s + 1013904223u;
+        int pos = (s>>24)%24;
+        s = 1664525u*s + 1013904223u;
+        uint8_t br = 12 + ((s>>24)&0x33);
+        add24(pos, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
+    }
 }
 
 
@@ -157,30 +278,34 @@ static void updateChristmas(const tm& now, time_t epoch)
 	int sec = now.tm_sec % 60;
 	int min = now.tm_min % 60;
 	int hour12 = now.tm_hour % 12;
-								 // hour mapped onto 0..59
+	// hour mapped onto 0..59
 	int hourPos60 = (hour12*5 + (min/12)) % 60;
 
-	drawTicks();
-
 	// Candy cane band centered on minute hand
-	drawCandyCaneBand((min - 4 + 60)%60, 9);
+	//drawCandyCaneBand((min - 4 + 60)%60, 9);
 
 	// Hands: hour = red w/ short tail, minute = white candy cane band already plus white head, seconds = green w/ longer tail
 	// hour
-	drawHandWithTail60(hourPos60, COLOR_RED_R, COLOR_RED_G, COLOR_RED_B, 2, 80);
+	//drawHandWithTail60(hourPos60, COLOR_RED_R, COLOR_RED_G, COLOR_RED_B, 2, 80);
 	// minute head
-	drawHandWithTail60(min, COLOR_WHITE_R, COLOR_WHITE_G, COLOR_WHITE_B, 1, 120);
+	//drawHandWithTail60(min, COLOR_WHITE_R, COLOR_WHITE_G, COLOR_WHITE_B, 1, 120);
 	// seconds sweeping tail
-	drawHandWithTail60(sec, COLOR_GREEN_R, COLOR_GREEN_G, COLOR_GREEN_B, 6, 30);
+	//drawHandWithTail60(sec, COLOR_GREEN_R, COLOR_GREEN_G, COLOR_GREEN_B, 6, 30);
 
 	// 24h inner ring: mark current hour in red, next in green for AM/PM hint
-	add24(now.tm_hour % 24, 120, 20, 20);
-	add24((now.tm_hour+1) % 24, 20, 100, 20);
+	//add24(now.tm_hour % 24, 120, 20, 20);
+	//add24((now.tm_hour+1) % 24, 20, 100, 20);
+	//
+	
+	g_cfg.twinkleLevel = 128;   // gematigde snelheid
+	g_cfg.twinkleSpeed = 80;   // gematigde snelheid
 
 	// snowy twinkles
 	uint32_t ms = hal_millis();
 	frameRand = (uint32_t(now.tm_mday)<<24) ^ (uint32_t(now.tm_hour)<<16) ^ (uint32_t(ms/40)<<8) ^ 0x1234;
-	drawTwinkles(frameRand, g_cfg.twinkleLevel);
+	drawTwinkles(frameRand, g_cfg.twinkleLevel, g_cfg.twinkleSpeed);
+
+	drawTicks();
 
 	ledhwShow();
 }
