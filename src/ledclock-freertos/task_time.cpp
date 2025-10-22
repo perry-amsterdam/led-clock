@@ -29,17 +29,18 @@ void task_time(void*)
 	}
 
 	uint32_t last = 0;
-    uint32_t last_ms = hal_millis();
-    int last_trigger_yday = -1;  // -1 = nog nooit getriggerd
+	uint32_t last_ms = hal_millis();
+	int last_trigger_yday = -1;	 // -1 = nog nooit getriggerd
 
 	// Periodieke tijds-onderhoud/sync
 	for(;;)
 	{
 
 		// run roughly once per minute
-        uint32_t now_ms = hal_millis();
-        if ((uint32_t)(now_ms - last_ms) >= 60000u) {
-            last_ms = now_ms;
+		uint32_t now_ms = hal_millis();
+		if ((uint32_t)(now_ms - last_ms) >= 60000u)
+		{
+			last_ms = now_ms;
 			last = now_ms;
 
 			// If epoch looks invalid (< 8 hours since boot default), schedule time update.
@@ -50,23 +51,28 @@ void task_time(void*)
 			}
 
 			// 1b) 03:00 lokale tijd trigger (eenmaal per dag)
-            struct tm lt;
-            if (localtime_r(&now, &lt)) {
+			struct tm lt;
+			if (localtime_r(&now, &lt))
+			{
 
-                // tolerant window 03:00..03:05
-                bool in_window = (lt.tm_hour == 3 && lt.tm_min <= 5);
-                if (in_window) {
-                    if (lt.tm_yday != last_trigger_yday) { 
-                        xEventGroupSetBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
-                        last_trigger_yday = lt.tm_yday;
-                        Serial.printf("Nachtelijke resync gepland op dag %d\n", lt.tm_yday);
-                    }
-                } 
-            } else {
+				// tolerant window 03:00..03:05
+				bool in_window = (lt.tm_hour == 3 && lt.tm_min <= 5);
+				if (in_window)
+				{
+					if (lt.tm_yday != last_trigger_yday)
+					{
+						xEventGroupSetBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
+						last_trigger_yday = lt.tm_yday;
+						Serial.printf("Nachtelijke resync gepland op dag %d\n", lt.tm_yday);
+					}
+				}
+			}
+			else
+			{
 
-                // lokale tijd niet beschikbaar is, forceer time update retry.
-                xEventGroupSetBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
-            }
+				// lokale tijd niet beschikbaar is, forceer time update retry.
+				xEventGroupSetBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
+			}
 		}
 
 		// A time update was scheduled.

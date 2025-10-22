@@ -1,7 +1,6 @@
-
 import 'package:flutter/material.dart';
 
-const ikeaBlue   = Color(0xFF0058AB);
+const ikeaBlue = Color(0xFF0058AB);
 const ikeaYellow = Color(0xFFFBD914);
 
 final ColorScheme _lightScheme = const ColorScheme(
@@ -77,11 +76,7 @@ ThemeData ikeaLightTheme() {
         shape: const StadiumBorder(),
       ),
     ),
-    textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: scheme.primary,
-      ),
-    ),
+    textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: scheme.primary)),
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: scheme.secondary,
       foregroundColor: scheme.onSecondary,
@@ -108,9 +103,7 @@ ThemeData ikeaLightTheme() {
       contentTextStyle: TextStyle(color: scheme.onPrimary),
       behavior: SnackBarBehavior.floating,
     ),
-    dividerTheme: DividerThemeData(
-      thickness: 1,
-    ),
+    dividerTheme: DividerThemeData(thickness: 1),
     chipTheme: ChipThemeData(
       backgroundColor: scheme.secondaryContainer,
       labelStyle: TextStyle(color: scheme.onSecondaryContainer),
@@ -124,11 +117,7 @@ ThemeData ikeaDarkTheme() {
   final base = ikeaLightTheme();
   return base.copyWith(
     colorScheme: scheme,
-    appBarTheme: AppBarTheme(
-      backgroundColor: scheme.surface,
-      foregroundColor: scheme.onSurface,
-      centerTitle: true,
-    ),
+    appBarTheme: AppBarTheme(backgroundColor: scheme.surface, foregroundColor: scheme.onSurface, centerTitle: true),
     snackBarTheme: base.snackBarTheme.copyWith(
       backgroundColor: scheme.primary,
       contentTextStyle: TextStyle(color: scheme.onPrimary),

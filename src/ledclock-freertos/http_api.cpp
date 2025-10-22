@@ -220,7 +220,7 @@ static void apiHandleTimezoneGet()
 	// JSON antwoord bouwen
 	String json = "{";
 	json += "\"timezone\":\"" + tzString + "\"";
-	json += ",\"utc_offset_sec\":" + String(off);
+	//json += ",\"utc_offset_sec\":" + String(off);
 	json += "}";
 	sendJson(200, json);
 }

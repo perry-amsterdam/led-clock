@@ -14,12 +14,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ikeaLightTheme(),
-        darkTheme: ikeaDarkTheme(),
-        themeMode: ThemeMode.system,
-        home: const HomeScreen(),
-      );
+      debugShowCheckedModeBanner: false,
+      theme: ikeaLightTheme(),
+      darkTheme: ikeaDarkTheme(),
+      themeMode: ThemeMode.system,
+      home: const HomeScreen(),
+    );
   }
 }
 

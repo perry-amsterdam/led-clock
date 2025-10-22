@@ -74,6 +74,12 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
     });
   }
 
+  Future<void> _reloadThemesAndActive() async {
+    themes = await api.listThemes();
+    active = await api.getActiveTheme();
+    setState(() {});
+  }
+
   @override
   void dispose() {
     api.close();
@@ -192,7 +198,7 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
                             if (id == null) return;
                             _run(() async {
                               await api.setTheme(id);
-                              active = await api.getActiveTheme();
+                              await _reloadThemesAndActive();
                               setState(() {});
                             });
                           },
@@ -200,7 +206,7 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
                         ElevatedButton(
                           onPressed: () => _run(() async {
                             await api.clearThemeOverride();
-                            active = await api.getActiveTheme();
+                            await _reloadThemesAndActive();
                             setState(() {});
                           }),
                           child: const Text('Use default theme'),

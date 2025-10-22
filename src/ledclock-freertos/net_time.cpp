@@ -227,7 +227,6 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 	//  (werkt ook wanneer IANA TZ niet wordt ondersteund).
 	configTime(gmtOffset, dstOffset, "europe.pool.ntp.org", "time.google.com", "pool.ntp.org");
 
-
 	Serial.print("Wachten op NTP sync");
 	struct tm timeinfo;
 
