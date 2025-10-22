@@ -222,7 +222,8 @@ static void drawTwinkles(uint32_t seed, uint8_t level, uint8_t speed)
 
     // Hoe hoger speed, hoe vaker de twinkles “wisselen”.
     // Gebruik speed om de random seed per frame te variëren.
-    uint32_t frameSeed = seed + (g_frameCounter * (1 + (speed / 16)));
+	uint32_t divisor = (uint32_t)((64 - speed) ? (64 - speed) : 1); // hogere speed => sneller wisselen
+	uint32_t frameSeed = seed + (hal_millis() / divisor);
 
     int count60 = 1 + (level/16);
     int count24 = max(1, level/32);

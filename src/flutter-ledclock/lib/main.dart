@@ -136,7 +136,7 @@ class _IpSettingsDialogState extends State<_IpSettingsDialog> {
         ],
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Annuleer')),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Annuleer')),
         TextButton(
           onPressed: () async {
             // Wissen: veld leeg laten
@@ -149,7 +149,7 @@ class _IpSettingsDialogState extends State<_IpSettingsDialog> {
                 return; // invalid, niet sluiten
               }
             }
-            if (context.mounted) Navigator.of(ctx).pop();
+            if (mounted) Navigator.of(context).pop();
           },
           child: const Text('Opslaan'),
         ),
