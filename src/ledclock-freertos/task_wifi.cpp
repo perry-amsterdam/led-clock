@@ -69,6 +69,7 @@ void task_wifi(void*)
 			Serial.println("[WiFi] Connection restored.");
 			stopPortal();
 			startApi();
+			xEventGroupSetBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
 			LOG_STACK_WATERMARK("wifi:ip");
 		}
 		else if (!link_up && last_link_up)

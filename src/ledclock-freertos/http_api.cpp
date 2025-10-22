@@ -176,40 +176,51 @@ static void apiHandleTimezonesGet()
 // ======================================================
 static void apiHandleTimezoneGet()
 {
-	String tz;
-	if (tz_user_is_set() && tz_user_get(tz) && tz.length() > 0)
+	// A time update was scheduled.
+	const uint32_t start = hal_millis();
+	while((xEventGroupGetBits(g_sysEvents) & EVT_TIME_UPDATE_RETRY) && (hal_millis() - start < 2000))
 	{
-		tz_user_get(tz);
-	} else
-	{
-		if (g_timezoneIANA.length())
-		{
-			tz = g_timezoneIANA;
-		}
-		else
-		{
-			tz = "";
-		}
+		hal_delay_ms(250);
 	}
 
-	// Compute current total UTC offset from localtime vs gmtime if time is valid
-	time_t now = time(nullptr);
-	long off = 0;
-	if (now > 8 * 3600)			 // sanity check
+	String tzString;
+
+	// Eerst proberen de gebruikers-TZ op te halen
+	if (tz_user_is_set() && tz_user_get(tzString) && tzString.length() > 0)
 	{
-		struct tm lt = *localtime(&now);
-		struct tm gmt = *gmtime(&now);
-		off = (long)difftime(mktime(&lt), mktime(&gmt));
+		// OK, tzString bevat de user timezone
 	}
 	else
 	{
-		// if time not valid yet, use stored offsets if we have them
-		off = (long)g_gmtOffsetSec + (long)g_daylightSec;
+		// Anders proberen de systeem TZ uit environment
+		const char* tzEnv = getenv("TZ");
+		if (tzEnv != nullptr)
+		{
+			tzString = tzEnv;
+			Serial.printf("Huidige TZ: %s\n", tzEnv);
+		}
+		else
+		{
+			tzString = "";
+			Serial.println("Geen TZ ingesteld");
+		}
 	}
 
+	// Controleer of de offsetwaarden geldig zijn
+	long off = 0;
+	if (g_gmtOffsetSec != 0 || g_daylightSec != 0)
+	{
+		off = (long)g_gmtOffsetSec + (long)g_daylightSec;
+	}
+	else
+	{
+		Serial.println("Waarschuwing: offsetwaarden niet ingesteld!");
+	}
+
+	// JSON antwoord bouwen
 	String json = "{";
-	json += "\"timezone\":\"" + (tz.length() ? tz : String("")) + "\"";
-	json += ",\"utc_offset_sec\":" + String((long)off);
+	json += "\"timezone\":\"" + tzString + "\"";
+	json += ",\"utc_offset_sec\":" + String(off);
 	json += "}";
 	sendJson(200, json);
 }

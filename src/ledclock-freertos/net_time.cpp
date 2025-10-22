@@ -203,13 +203,13 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 		dstOffset = 0;
 		timezone = "";
 		#ifdef DEBUG_TZ
-		Serial.printf("[TZ] Using TZ without fetched offsets: %s\n", tzIana.c_str());
+		Serial.printf("[TZ] Using TZ without fetched offsets: %s\n", timezone.c_str());
 		#endif
 	}
 	else
 	{
 		#ifdef DEBUG_TZ
-		Serial.printf("[TZ] Using TZ with fetched offsets: %s\n", tzIana.c_str());
+		Serial.printf("[TZ] Using TZ with fetched offsets: %s\n", timezone.c_str());
 		#endif
 	}
 
@@ -227,11 +227,15 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 	//  (werkt ook wanneer IANA TZ niet wordt ondersteund).
 	configTime(gmtOffset, dstOffset, "europe.pool.ntp.org", "time.google.com", "pool.ntp.org");
 
+
+	Serial.print("Wachten op NTP sync");
+	struct tm timeinfo;
+
 	// Wacht even op tijd-sync (niet te lang)
 	const uint32_t start = hal_millis();
-	while ((time(nullptr) < 8 * 3600) && (hal_millis() - start < 10000))
+	while ((!getLocalTime(&timeinfo)) && ((hal_millis() - start) < 10000))
 	{
-		hal_delay_ms(200);
+		hal_delay_ms(250);
 	}
 
 	time_t now = time(nullptr);
