@@ -29,3 +29,7 @@ void themeShowStartupPattern(uint8_t r, uint8_t g, uint8_t b);
 const Theme* const* themeList(size_t* count);
 
 bool themeExists(const char* themeId);
+
+void themeShowStatus(ThemeStatus status);
+
+uint16_t themeFrameDelayMs();

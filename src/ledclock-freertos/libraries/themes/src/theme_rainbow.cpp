@@ -28,14 +28,24 @@
 #define COLOR_MIN_B   0
 #endif
 
-#ifndef COLOR_HOUR_R
-#define COLOR_HOUR_R  150
+#ifndef COLOR_HOUR_PM_R
+#define COLOR_HOUR_PM_R  150
 #endif
-#ifndef COLOR_HOUR_G
-#define COLOR_HOUR_G  0
+#ifndef COLOR_HOUR_PM_G
+#define COLOR_HOUR_PM_G  0
 #endif
-#ifndef COLOR_HOUR_B
-#define COLOR_HOUR_B  0
+#ifndef COLOR_HOUR_PM_B
+#define COLOR_HOUR_PM_B  0
+#endif
+
+#ifndef COLOR_HOUR_AM_R
+#define COLOR_HOUR_AM_R  0
+#endif
+#ifndef COLOR_HOUR_AM_G
+#define COLOR_HOUR_AM_G  150
+#endif
+#ifndef COLOR_HOUR_AM_B
+#define COLOR_HOUR_AM_B  0
 #endif
 
 // ---------------------------------------------------
@@ -184,12 +194,47 @@ static void updateRainbow(const tm& now, time_t epoch)
 	const int s = now.tm_sec % 60;
 	const int m = now.tm_min % 60;
 	const int h = now.tm_hour % 12;
+	const int h24 = now.tm_hour % 24;
 
 	ledhwAdd60(ring60Index(s), COLOR_SEC_R, COLOR_SEC_G, COLOR_SEC_B);
 	ledhwAdd60(ring60Index(m), COLOR_MIN_R, COLOR_MIN_G, COLOR_MIN_B);
-	ledhwAdd24(ring24Index(h*2), COLOR_HOUR_R, COLOR_HOUR_G, COLOR_HOUR_B);
+
+	if (h24 > 12)
+	{
+		ledhwAdd24(ring24Index(h*2), COLOR_HOUR_AM_R, COLOR_HOUR_AM_G, COLOR_HOUR_AM_B);
+	}
+	else
+	{
+		ledhwAdd24(ring24Index(h*2), COLOR_HOUR_PM_R, COLOR_HOUR_PM_G, COLOR_HOUR_PM_B);
+	}
 
 	ledhwShow();
+}
+
+
+static void showStatus(ThemeStatus status)
+{
+	ledhwClearAll();
+	uint8_t h = (hal_millis()/6) & 0xFF;
+	switch (status)
+	{
+		case ThemeStatus::WifiNotConnected:
+			renderRainbow(h, 32);
+			break;
+		case ThemeStatus::PortalActive:
+			renderRainbow(h*2, 48);
+			break;
+		case ThemeStatus::TimeReady:
+			for (int i=0;i<60;i+=5) ledhwAdd60(i, 24,24,24);
+			break;
+	}
+	ledhwShow();
+}
+
+
+static uint16_t frameDelayMs()
+{
+	return 33;					 // ~30 FPS
 }
 
 
@@ -201,6 +246,8 @@ extern const Theme THEME_RAINBOW =
 	.begin  = beginRainbow,
 	.update = updateRainbow,
 	.showStartupPattern = showStartupPattern,
+	.showStatus = showStatus,
+	.frameDelayMs = frameDelayMs,
 };
 
 // Auto-registratie + markeer als default (of gebruik REGISTER_THEME)

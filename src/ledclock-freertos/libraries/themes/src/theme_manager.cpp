@@ -146,3 +146,22 @@ bool themeExists(const char* themeId)
 	}
 	return false;
 }
+
+
+void themeShowStatus(ThemeStatus status)
+{
+	if (currentTheme && currentTheme->showStatus)
+	{
+		currentTheme->showStatus(status);
+	}
+}
+
+
+uint16_t themeFrameDelayMs()
+{
+	if (currentTheme && currentTheme->frameDelayMs)
+	{
+		return currentTheme->frameDelayMs();
+	}
+	return 33;  // default ~30 FPS
+}

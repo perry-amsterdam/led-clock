@@ -4,14 +4,13 @@
 #include "net_time.h"
 #include <time.h>
 #include "hal_time_freertos.h"
+#include <theme.h>
 #include <theme_manager.h>
 
 void task_render(void*)
 {
 	vTaskDelay(pdMS_TO_TICKS(50));
 	LOG_STACK_WATERMARK("render:init");
-
-	//themeInit();
 
 	int direction = 0;
 
@@ -21,17 +20,20 @@ void task_render(void*)
 		if (bits & EVT_PORTAL_ON)
 		{
 			// Captive portal actief  rood pulse
-			themeShowStartupPattern(25,0,0);
+			//themeShowStartupPattern(25,0,0);
+			themeShowStatus(ThemeStatus::PortalActive);
 		}
 		else if (!(bits & EVT_WIFI_UP))
 		{
 			// WiFi is niet verbonden  blauw pulse
-			themeShowStartupPattern(0,0,25);
+			//themeShowStartupPattern(0,0,25);
+			themeShowStatus(ThemeStatus::WifiNotConnected);
 		}
 		else if (!(bits & EVT_TIME_READY))
 		{
 			// WiFi verbonden, maar tijd nog niet gesynchroniseerd  groen pulse
-			themeShowStartupPattern(0,25,0);
+			//themeShowStartupPattern(0,25,0);
+			themeShowStatus(ThemeStatus::TimeReady);
 		}
 
 		hal_delay_ms(500);
@@ -57,7 +59,7 @@ void task_render(void*)
 			#endif
 		}
 
-		// ~4 FPS animation.
-		hal_delay_ms(40);
+		// Render delay.
+		vTaskDelay(pdMS_TO_TICKS(themeFrameDelayMs()));
 	}
 }

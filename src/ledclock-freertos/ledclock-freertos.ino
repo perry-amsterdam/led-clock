@@ -9,6 +9,7 @@
 #include "task_render.h"
 #include "task_mdns.h"
 #include <config_storage.h>
+#include <theme.h>
 #include <theme_manager.h>
 
 #if !defined(ESP_ARDUINO_VERSION_MAJOR) || (ESP_ARDUINO_VERSION_MAJOR < 3)

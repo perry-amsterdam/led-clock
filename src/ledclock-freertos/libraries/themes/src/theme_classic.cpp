@@ -131,6 +131,31 @@ static void updateClassic(const tm& now, time_t epoch)
 }
 
 
+static void showStatus(ThemeStatus status)
+{
+	ledhwClearAll();
+	switch (status)
+	{
+		case ThemeStatus::WifiNotConnected:
+			for (int i=0; i<24; i+=6) ledhwAdd24(i, 32, 16, 16);
+			break;
+		case ThemeStatus::PortalActive:
+			ledhwAdd60((hal_millis()/40) % 60, 16, 32, 16);
+			break;
+		case ThemeStatus::TimeReady:
+			for (int i=0; i<60; i+=5) ledhwAdd60(i, 12,12,12);
+			break;
+	}
+	ledhwShow();
+}
+
+
+static uint16_t frameDelayMs()
+{
+	return 50;					 // classic iets rustiger
+}
+
+
 // definitie (heeft externe linkage nodig)
 extern const Theme THEME_CLASSIC =
 {
@@ -139,6 +164,8 @@ extern const Theme THEME_CLASSIC =
 	.begin  = beginClassic,
 	.update = updateClassic,
 	.showStartupPattern = showStartupPattern,
+	.showStatus = showStatus,
+	.frameDelayMs = frameDelayMs,
 };
 
 // Auto-registratie + markeer als default (of gebruik REGISTER_THEME)

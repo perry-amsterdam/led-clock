@@ -166,37 +166,38 @@ static void drawCandyCaneBand(int start, int length)
 
 static void drawTwinkles(uint32_t seed, uint8_t level, uint8_t speed)
 {
-    if(level==0) return;
+	if(level==0) return;
 
-    // Hoe hoger speed, hoe vaker de twinkles “wisselen”.
-    // Gebruik speed om de random seed per frame te variëren.
-	uint32_t divisor = (uint32_t)((64 - speed) ? (64 - speed) : 1); // hogere speed => sneller wisselen
+	// Hoe hoger speed, hoe vaker de twinkles wisselen.
+	// Gebruik speed om de random seed per frame te variren.
+								 // hogere speed => sneller wisselen
+	uint32_t divisor = (uint32_t)((64 - speed) ? (64 - speed) : 1);
 	uint32_t frameSeed = seed + (hal_millis() / divisor);
 
-    int count60 = 1 + (level/16);
-    int count24 = max(1, level/32);
+	int count60 = 1 + (level/16);
+	int count24 = max(1, level/32);
 
-    uint32_t s = frameSeed ^ 0xA5A5BEEF;
+	uint32_t s = frameSeed ^ 0xA5A5BEEF;
 
-    // 60-ring twinkles
-    for(int n=0; n<count60; n++)
-    {
-        s = 1664525u*s + 1013904223u;
-        int pos = (s>>24)%60;
-        s = 1664525u*s + 1013904223u;
-        uint8_t br = 16 + ((s>>24)&0x3F);
-        add60(pos, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
-    }
+	// 60-ring twinkles
+	for(int n=0; n<count60; n++)
+	{
+		s = 1664525u*s + 1013904223u;
+		int pos = (s>>24)%60;
+		s = 1664525u*s + 1013904223u;
+		uint8_t br = 16 + ((s>>24)&0x3F);
+		add60(pos, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
+	}
 
-    // 24-ring twinkles
-    for(int n=0; n<count24; n++)
-    {
-        s = 1664525u*s + 1013904223u;
-        int pos = (s>>24)%24;
-        s = 1664525u*s + 1013904223u;
-        uint8_t br = 12 + ((s>>24)&0x33);
-        add24(pos, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
-    }
+	// 24-ring twinkles
+	for(int n=0; n<count24; n++)
+	{
+		s = 1664525u*s + 1013904223u;
+		int pos = (s>>24)%24;
+		s = 1664525u*s + 1013904223u;
+		uint8_t br = 12 + ((s>>24)&0x33);
+		add24(pos, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
+	}
 }
 
 
@@ -231,8 +232,8 @@ static void updateChristmas(const tm& now, time_t epoch)
 	// Candy cane band centered on minute hand
 	//drawCandyCaneBand((min - 4 + 60)%60, 9);
 
-	g_cfg.twinkleLevel = 64;   // gematigde snelheid
-	g_cfg.twinkleSpeed = 10;   // gematigde snelheid
+	g_cfg.twinkleLevel = 64;	 // gematigde snelheid
+	g_cfg.twinkleSpeed = 10;	 // gematigde snelheid
 
 	// snowy twinkles
 	uint32_t ms = hal_millis();
@@ -279,6 +280,34 @@ static void showStartupPattern(uint8_t r, uint8_t g, uint8_t b)
 }
 
 
+static void showStatus(ThemeStatus status)
+{
+	ledhwClearAll();
+	switch (status)
+	{
+		case ThemeStatus::WifiNotConnected:
+								 // rood
+			ledhwAdd24(0, 32, 0, 0);
+			break;
+		case ThemeStatus::PortalActive:
+								 // groen
+			ledhwAdd24(6, 0, 32, 0);
+			break;
+		case ThemeStatus::TimeReady:
+								 // wit
+			for (int i=0; i<24; i+=6) ledhwAdd24(i, 16,16,16);
+			break;
+	}
+	ledhwShow();
+}
+
+
+static uint16_t frameDelayMs()
+{
+	return 40;					 // iets sneller dan classic
+}
+
+
 // definitie (heeft externe linkage nodig)
 extern const Theme THEME_CHRISTMAS =
 {
@@ -287,6 +316,8 @@ extern const Theme THEME_CHRISTMAS =
 	.begin  = beginChristmas,
 	.update = updateChristmas,
 	.showStartupPattern = showStartupPattern,
+	.showStatus = showStatus,
+	.frameDelayMs = frameDelayMs,
 };
 
 // Auto-registratie (selecteer eventueel als default met REGISTER_DEFAULT_THEME)
