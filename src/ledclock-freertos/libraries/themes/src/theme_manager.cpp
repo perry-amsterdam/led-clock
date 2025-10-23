@@ -154,5 +154,5 @@ uint16_t themeFrameDelayMs()
 	{
 		return currentTheme->frameDelayMs();
 	}
-	return 33; // default ~30 FPS
+	return 33;					 // default ~30 FPS
 }
