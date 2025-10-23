@@ -140,32 +140,6 @@ static void beginRainbow()
 }
 
 
-// Functie to display status during startup on the leds (24 en 60).
-static void showStartupPattern(uint8_t r, uint8_t g, uint8_t b)
-{
-	ledhwClearAll();
-
-	for (int index = 0; index < 60; index += 5)
-	{
-		// Positie = (statische offset + lus-index)
-		ledhwAdd60(ring60Index(index), r, g, b);
-	}
-
-	for (int index = 0; index < 24; index += 3)
-	{
-		// Positie = (statische offset + lus-index)
-		ledhwAdd24(ring24Index(index), r, g, b);
-	}
-
-	ledhwShow();
-
-	hal_delay_ms(500);
-
-	ledhwClearAll();
-	ledhwShow();
-}
-
-
 static void updateRainbow(const tm& now, time_t epoch)
 {
 	(void)epoch;
@@ -245,7 +219,6 @@ extern const Theme THEME_RAINBOW =
 	.name   = "Rainbow",
 	.begin  = beginRainbow,
 	.update = updateRainbow,
-	.showStartupPattern = showStartupPattern,
 	.showStatus = showStatus,
 	.frameDelayMs = frameDelayMs,
 };

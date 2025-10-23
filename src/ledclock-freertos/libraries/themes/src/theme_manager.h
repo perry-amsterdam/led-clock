@@ -23,9 +23,6 @@ const Theme* themeCurrent();
 // Update de huidige theme (animation tick)
 void themeUpdate(const tm& now, time_t epoch);
 
-// Optioneel: startuppatroon laten zien in theme-stijl
-void themeShowStartupPattern(uint8_t r, uint8_t g, uint8_t b);
-
 const Theme* const* themeList(size_t* count);
 
 bool themeExists(const char* themeId);

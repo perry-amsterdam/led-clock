@@ -106,15 +106,6 @@ void themeUpdate(const tm& now, time_t epoch)
 }
 
 
-void themeShowStartupPattern(uint8_t r, uint8_t g, uint8_t b)
-{
-	if (currentTheme && currentTheme->showStartupPattern)
-	{
-		currentTheme->showStartupPattern(r,g,b);
-	}
-}
-
-
 const Theme* themeDefault()
 {
 	return ThemeRegistry::getDefault();
@@ -163,5 +154,5 @@ uint16_t themeFrameDelayMs()
 	{
 		return currentTheme->frameDelayMs();
 	}
-	return 33;  // default ~30 FPS
+	return 33; // default ~30 FPS
 }

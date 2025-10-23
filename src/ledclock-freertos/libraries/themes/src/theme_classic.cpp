@@ -72,32 +72,6 @@ static void beginClassic()
 }
 
 
-// Functie to display status during startup on the leds (24 en 60).
-static void showStartupPattern(uint8_t r, uint8_t g, uint8_t b)
-{
-	ledhwClearAll();
-
-	for (int index = 0; index < 60; index += 5)
-	{
-		// Positie = (statische offset + lus-index)
-		ledhwAdd60(ring60Index(index), r, g, b);
-	}
-
-	for (int index = 0; index < 24; index += 3)
-	{
-		// Positie = (statische offset + lus-index)
-		ledhwAdd24(ring24Index(index), r, g, b);
-	}
-
-	ledhwShow();
-
-	hal_delay_ms(500);
-
-	ledhwClearAll();
-	ledhwShow();
-}
-
-
 static void updateClassic(const tm& now, time_t epoch)
 {
 	(void)epoch;
@@ -163,7 +137,6 @@ extern const Theme THEME_CLASSIC =
 	.name   = "Classic",
 	.begin  = beginClassic,
 	.update = updateClassic,
-	.showStartupPattern = showStartupPattern,
 	.showStatus = showStatus,
 	.frameDelayMs = frameDelayMs,
 };

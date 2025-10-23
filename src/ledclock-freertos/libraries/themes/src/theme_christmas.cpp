@@ -102,7 +102,6 @@ static inline uint8_t qmul8(uint8_t a, uint8_t b){ return uint8_t((uint16_t(a)*u
 // --------- Forward declarations ---------
 static void beginChristmas();
 static void updateChristmas(const tm& now, time_t epoch);
-static void showStartupPattern(uint8_t r, uint8_t g, uint8_t b);
 
 // --------- Internal state ---------
 static ChristmasConfig g_cfg = kChristmas;
@@ -254,32 +253,6 @@ static void updateChristmas(const tm& now, time_t epoch)
 }
 
 
-static void showStartupPattern(uint8_t r, uint8_t g, uint8_t b)
-{
-	ledhwSetGlobalBrightness(g_cfg.brightness);
-	ledhwClearAll();
-	// spin red-green-white wipe
-	for(int round=0; round<2; ++round)
-	{
-		for(int i=0;i<60;i++)
-		{
-			ledhwClearAll();
-			// stripe of 6 pixels cycling R-G-W
-			for(int k=0;k<6;k++)
-			{
-				int j = (i+k)%60;
-				uint8_t rr = (k%3==0)? 200:0;
-				uint8_t gg = (k%3==1)? 200:0;
-				uint8_t bb = (k%3==2)? 180:0;
-				add60(j, rr, gg, bb);
-			}
-			ledhwShow();
-			hal_delay_ms(18);
-		}
-	}
-}
-
-
 static void showStatus(ThemeStatus status)
 {
 	ledhwClearAll();
@@ -315,7 +288,6 @@ extern const Theme THEME_CHRISTMAS =
 	.name   = "Christmas",
 	.begin  = beginChristmas,
 	.update = updateChristmas,
-	.showStartupPattern = showStartupPattern,
 	.showStatus = showStatus,
 	.frameDelayMs = frameDelayMs,
 };
