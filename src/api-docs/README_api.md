@@ -1,7 +1,7 @@
 # LED Clock REST API – Full Documentation
 
 This directory contains the **OpenAPI specification** for the ESP32 LED Clock REST API.
-The full specification is available in [`openapi.json`](./openapi.json) (version **1.4.0**).
+The full specification is available in [`openapi.json`](./openapi.json) (version **1.5.0**).
 
 ---
 
@@ -72,14 +72,16 @@ All responses are in JSON format.
 ```json
 {
   "timezone": "Europe/Amsterdam",
-  "utc_offset_sec": 7200
+  "gmtoffset": 3600,
+  "dstoffset": 3600
 }
 ```
 
 **Fields:**
 
 * `timezone`: Current IANA timezone string.
-* `utc_offset_sec`: UTC offset in seconds (including DST if applicable).
+* `gmtoffset`: Base UTC offset in seconds (without DST).
+* `dstoffset`: Daylight saving offset in seconds.
 
 ---
 
@@ -100,7 +102,10 @@ All responses are in JSON format.
 ```json
 {
   "success": true,
-  "message": "Timezone updated successfully"
+  "message": "Timezone cleared; using default",
+  "timezone": "Etc/UTC",
+  "gmtoffset": 0,
+  "dstoffset": 0
 }
 ```
 

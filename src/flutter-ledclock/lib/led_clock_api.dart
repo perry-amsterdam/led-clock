@@ -10,7 +10,7 @@
 // final ping = await api.ping();
 // print(ping.uptimeMs);
 //
-// Generated from: openapi.json (LED Clock REST API 1.4.0)
+// Generated from: openapi.json (LED Clock REST API 1.5.0)
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -159,13 +159,15 @@ class RebootResponse {
 // GET /api/timezone
 class TimezoneInfo {
   final String timezone;
-  final int utcOffsetSec;
-  TimezoneInfo({required this.timezone, required this.utcOffsetSec});
+  final int gmtoffset;
+  final int dstoffset;
+  TimezoneInfo({required this.timezone, required this.gmtoffset, required this.dstoffset});
   factory TimezoneInfo.fromJson(Map<String, dynamic> json) => TimezoneInfo(
     timezone: json['timezone'] as String? ?? 'Etc/UTC',
-    utcOffsetSec: (json['utc_offset_sec'] as num?)?.toInt() ?? 0,
+    gmtoffset: (json['gmtoffset'] as num?)?.toInt() ?? 0,
+    dstoffset: (json['dstoffset'] as num?)?.toInt() ?? 0,
   );
-  Map<String, dynamic> toJson() => {'timezone': timezone, 'utc_offset_sec': utcOffsetSec};
+  Map<String, dynamic> toJson() => {'timezone': timezone, 'gmtoffset': gmtoffset, 'dstoffset': dstoffset};
 }
 
 // POST /api/timezone
@@ -183,22 +185,24 @@ class ClearTimezoneResult {
   final bool? success;
   final String? message;
   final String? timezone;
-  final int? utcOffsetSec;
-  ClearTimezoneResult({this.success, this.message, this.timezone, this.utcOffsetSec});
+  final int? gmtoffset;
+  final int? dstoffset;
+  ClearTimezoneResult({this.success, this.message, this.timezone, this.gmtoffset, this.dstoffset});
   factory ClearTimezoneResult.fromJson(Map<String, dynamic> json) => ClearTimezoneResult(
     success: json['success'] as bool?,
     message: json['message'] as String?,
     timezone: json['timezone'] as String?,
-    utcOffsetSec: (json['utc_offset_sec'] as num?)?.toInt(),
+    gmtoffset: (json['gmtoffset'] as num?)?.toInt(),
+    dstoffset: (json['dstoffset'] as num?)?.toInt(),
   );
   Map<String, dynamic> toJson() => {
     if (success != null) 'success': success,
     if (message != null) 'message': message,
     if (timezone != null) 'timezone': timezone,
-    if (utcOffsetSec != null) 'utc_offset_sec': utcOffsetSec,
+    if (gmtoffset != null) 'gmtoffset': gmtoffset,
+    if (dstoffset != null) 'dstoffset': dstoffset,
   };
 }
-
 // GET /api/timezones -> { timezones: string[] } handled inline
 
 // GET /api/themes

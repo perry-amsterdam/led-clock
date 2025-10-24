@@ -129,8 +129,7 @@ func main() {
 			tz := derefString(res.JSON200.Timezone)
 			fmt.Printf("timezone cleared: %s\n", msg)
 			if tz != "" {
-				fmt.Printf("active timezone now: %s (utc_offset_sec=%d)\n",
-					tz, res.JSON200.UtcOffsetSec)
+				fmt.Printf("active timezone now: %s (gmtoffset=%d, dstoffset=%d) ", tz, derefInt(res.JSON200.Gmtoffset), derefInt(res.JSON200.Dstoffset))
 			}
 		} else {
 			fmt.Println("timezone clear request sent (check device)")
@@ -146,7 +145,9 @@ func main() {
 		if *showRaw && res.Body != nil {
 			fmt.Println(string(res.Body))
 		} else if res.JSON200 != nil {
-			fmt.Println(res.JSON200.Timezone)
+			fmt.Printf("Current timezone: %s\n", res.JSON200.Timezone)
+			fmt.Printf("  GMT offset: %d seconds\n", res.JSON200.Gmtoffset)
+			fmt.Printf("  DST offset: %d seconds\n", res.JSON200.Dstoffset)
 		} else {
 			fmt.Println("kon huidige tijdzone niet ophalen")
 		}
@@ -178,7 +179,6 @@ func main() {
 		}
 		return
 	}
-
 
 	// --- 2) Themes: lijst tonen
 	if *listThemes {
@@ -279,4 +279,3 @@ func formatDuration(d time.Duration) string {
 	}
 	return fmt.Sprintf("%02dh %02dm %02ds", hours, minutes, secs)
 }
-

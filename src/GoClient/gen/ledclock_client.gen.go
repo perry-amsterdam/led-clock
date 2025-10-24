@@ -817,14 +817,16 @@ type DeleteApiTimezoneResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
-		Message *string `json:"message,omitempty"`
-		Success *bool   `json:"success,omitempty"`
+		// Dstoffset Zomertijd-offset in seconden na reset.
+		Dstoffset *int `json:"dstoffset,omitempty"`
+
+		// Gmtoffset Vaste offset t.o.v. UTC in seconden na reset.
+		Gmtoffset *int    `json:"gmtoffset,omitempty"`
+		Message   *string `json:"message,omitempty"`
+		Success   *bool   `json:"success,omitempty"`
 
 		// Timezone Actieve tijdzone na reset (standaard of automatisch)
 		Timezone *string `json:"timezone,omitempty"`
-
-		// UtcOffsetSec Offset t.o.v. UTC in seconden
-		UtcOffsetSec *int `json:"utc_offset_sec,omitempty"`
 	}
 }
 
@@ -848,10 +850,12 @@ type GetApiTimezoneResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
-		Timezone string `json:"timezone"`
+		// Dstoffset Zomertijd-offset in seconden (meestal 0 of 3600).
+		Dstoffset int `json:"dstoffset"`
 
-		// UtcOffsetSec Offset t.o.v. UTC in seconden (inclusief DST indien actief).
-		UtcOffsetSec int `json:"utc_offset_sec"`
+		// Gmtoffset Vaste offset t.o.v. UTC in seconden (zonder DST).
+		Gmtoffset int    `json:"gmtoffset"`
+		Timezone  string `json:"timezone"`
 	}
 }
 
@@ -1225,14 +1229,16 @@ func ParseDeleteApiTimezoneResponse(rsp *http.Response) (*DeleteApiTimezoneRespo
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			Message *string `json:"message,omitempty"`
-			Success *bool   `json:"success,omitempty"`
+			// Dstoffset Zomertijd-offset in seconden na reset.
+			Dstoffset *int `json:"dstoffset,omitempty"`
+
+			// Gmtoffset Vaste offset t.o.v. UTC in seconden na reset.
+			Gmtoffset *int    `json:"gmtoffset,omitempty"`
+			Message   *string `json:"message,omitempty"`
+			Success   *bool   `json:"success,omitempty"`
 
 			// Timezone Actieve tijdzone na reset (standaard of automatisch)
 			Timezone *string `json:"timezone,omitempty"`
-
-			// UtcOffsetSec Offset t.o.v. UTC in seconden
-			UtcOffsetSec *int `json:"utc_offset_sec,omitempty"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -1260,10 +1266,12 @@ func ParseGetApiTimezoneResponse(rsp *http.Response) (*GetApiTimezoneResponse, e
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			Timezone string `json:"timezone"`
+			// Dstoffset Zomertijd-offset in seconden (meestal 0 of 3600).
+			Dstoffset int `json:"dstoffset"`
 
-			// UtcOffsetSec Offset t.o.v. UTC in seconden (inclusief DST indien actief).
-			UtcOffsetSec int `json:"utc_offset_sec"`
+			// Gmtoffset Vaste offset t.o.v. UTC in seconden (zonder DST).
+			Gmtoffset int    `json:"gmtoffset"`
+			Timezone  string `json:"timezone"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err

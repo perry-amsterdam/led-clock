@@ -25,12 +25,19 @@ help:
 	@echo "  server         - Genereer Go server stubs (types+server)"
 	@echo "  types          - Genereer alleen Go types"
 	@echo "  allgen         - Genereer client, server en types"
-	@echo "  fmt            - go fmt over ./$(OUTPUT_DIR)"
+	@echo "  format         - go fmt over ./$(OUTPUT_DIR)"
 	@echo "  cli            - Build $(BIN) (hangt af van 'client')"
 	@echo "  run            - Run $(BIN) met default flags"
 	@echo "  install-cli    - go install van de CLI"
 	@echo "  clean          - Verwijder gen/ en $(BIN)"
 	@echo "  all            - (deze help)"
+
+
+.PHONY: format
+format:
+	@echo "🧹 Formatting Go code..."
+	@gofmt -s -w gen cmd pkg 2>/dev/null || true
+	@echo "✅ Go files formatted."
 
 # ===== Tooling =====
 .PHONY: install
@@ -53,29 +60,26 @@ client: install verify
 	@echo "Generating Go client..."
 	@mkdir -p $(OUTPUT_DIR)
 	oapi-codegen -generate types,client -o $(OUTPUT_DIR)/$(PACKAGE_NAME)_client.gen.go -package $(PACKAGE_NAME) $(OPENAPI_FILE)
-	$(MAKE) fmt
+	$(MAKE) format
 
 .PHONY: server
 server: install verify
 	@echo "Generating Go server stubs..."
 	@mkdir -p $(OUTPUT_DIR)
 	oapi-codegen -generate types,server -o $(OUTPUT_DIR)/$(PACKAGE_NAME)_server.gen.go -package $(PACKAGE_NAME) $(OPENAPI_FILE)
-	$(MAKE) fmt
+	$(MAKE) format
 
 .PHONY: types
 types: install verify
 	@echo "Generating Go types..."
 	@mkdir -p $(OUTPUT_DIR)
 	oapi-codegen -generate types -o $(OUTPUT_DIR)/$(PACKAGE_NAME)_types.gen.go -package $(PACKAGE_NAME) $(OPENAPI_FILE)
-	$(MAKE) fmt
+	$(MAKE) format
 
 .PHONY: allgen
 allgen: client server types
 	@echo "✅ All code generated in ./$(OUTPUT_DIR)"
 
-.PHONY: fmt
-fmt:
-	@if [ -d "$(OUTPUT_DIR)" ]; then go fmt ./$(OUTPUT_DIR); fi
 
 # ===== CLI =====
 .PHONY: cli
@@ -100,3 +104,14 @@ clean:
 	@echo "Cleaning..."
 	rm -rf $(OUTPUT_DIR) $(BIN)
 	@echo "🧹 Done."
+
+.PHONY: fmt-check
+fmt-check:
+	@echo "🔍 Checking Go formatting..."
+	@if [ -n "$$(gofmt -l gen cmd)" ]; then \
+		echo "❌ Some files need formatting:"; \
+		gofmt -l gen cmd pkg; \
+		exit 1; \
+	else \
+		echo "✅ All Go files are properly formatted."; \
+	fi

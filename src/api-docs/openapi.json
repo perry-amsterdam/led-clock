@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "LED Clock REST API",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "description": "REST API voor ESP32 LED Clock. Bevat ping, reboot, tijdzone endpoints en een compacte tijdzones-lijst."
   },
   "servers": [
@@ -107,7 +107,7 @@
           "Time"
         ],
         "summary": "Haal de ingestelde tijdzone op",
-        "description": "Geeft de huidige IANA tijdzone en berekende UTC-offset (sec) terug.",
+        "description": "Geeft de huidige IANA tijdzone terug plus afzonderlijke offsets in seconden: `gmtoffset` (UTC-basisoOffset) en `dstoffset` (zomertijd).",
         "responses": {
           "200": {
             "description": "Tijdzone-informatie ontvangen",
@@ -117,17 +117,23 @@
                   "type": "object",
                   "required": [
                     "timezone",
-                    "utc_offset_sec"
+                    "gmtoffset",
+                    "dstoffset"
                   ],
                   "properties": {
                     "timezone": {
                       "type": "string",
                       "example": "Europe/Amsterdam"
                     },
-                    "utc_offset_sec": {
+                    "gmtoffset": {
                       "type": "integer",
-                      "description": "Offset t.o.v. UTC in seconden (inclusief DST indien actief).",
-                      "example": 7200
+                      "description": "Vaste offset t.o.v. UTC in seconden (zonder DST).",
+                      "example": 3600
+                    },
+                    "dstoffset": {
+                      "type": "integer",
+                      "description": "Zomertijd-offset in seconden (meestal 0 of 3600).",
+                      "example": 3600
                     }
                   }
                 }
@@ -212,9 +218,14 @@
                       "description": "Actieve tijdzone na reset (standaard of automatisch)",
                       "example": "Etc/UTC"
                     },
-                    "utc_offset_sec": {
+                    "gmtoffset": {
                       "type": "integer",
-                      "description": "Offset t.o.v. UTC in seconden",
+                      "description": "Vaste offset t.o.v. UTC in seconden na reset.",
+                      "example": 0
+                    },
+                    "dstoffset": {
+                      "type": "integer",
+                      "description": "Zomertijd-offset in seconden na reset.",
                       "example": 0
                     }
                   }
