@@ -13,7 +13,7 @@ struct ChristmasConfig
 // Sensible defaults for a cozy Xmas look
 static constexpr ChristmasConfig kChristmas =
 {
-	40,							 // brightness
+	80,						 // brightness
 	true,						 // hour ticks
 	true,						 // minute ticks
 	32,							 // twinkle

@@ -99,6 +99,23 @@ static inline uint8_t qmul8(uint8_t a, uint8_t b){ return uint8_t((uint16_t(a)*u
 #define COLOR_WHITE_B 160
 #endif
 
+
+// ---------------------------------------------------
+// Achtergrondkleur voor gedimde kerstverlichting (warm wit/geel)
+// De achtergrondkleur baseert zich op de warme wit‑waarden hierboven en
+// wordt flink gedimd (1/10e) om subtiele gloed te geven zonder het
+// kerstontwerp te overheersen. Pas de deling aan voor meer of minder
+// intensiteit.
+#ifndef BACKGROUND_DIM_R
+#define BACKGROUND_DIM_R (255 / 20)
+#endif
+#ifndef BACKGROUND_DIM_G
+#define BACKGROUND_DIM_G (197 / 20)
+#endif
+#ifndef BACKGROUND_DIM_B
+#define BACKGROUND_DIM_B (143 / 20)
+#endif
+
 // --------- Forward declarations ---------
 static void beginChristmas();
 static void updateChristmas(const tm& now, time_t epoch);
@@ -111,6 +128,8 @@ static void updateChristmas(const tm& now, time_t epoch);
 // temporarily override the normal Christmas theme and display a solid
 // warm white across the clock.
 static void fillWarmWhite();
+
+static void drawBackgroundDim();
 
 // --------- Internal state ---------
 static ChristmasConfig g_cfg = kChristmas;
@@ -246,7 +265,8 @@ static void updateChristmas(const tm& now, time_t epoch)
 	(void)epoch;
 	ledhwClearAll();
 
-	fillWarmWhite();
+	//fillWarmWhite();
+	drawBackgroundDim();
 
 	// current second/minute/hour positions on 60 ring
 	int sec = now.tm_sec % 60;
@@ -299,6 +319,25 @@ static void fillWarmWhite()
     {
         // map logical position to hardware index and add warm white
         ledhwSet24(ring24Index(i), COLOR_WHITE_R, COLOR_WHITE_G, COLOR_WHITE_B);
+    }
+}
+
+
+// Vul beide ringen met een gedimde achtergrondkleur.
+// Deze functie gebruikt de gedefinieerde BACKGROUND_DIM_* waarden om
+// een warme geel/witte gloed op alle LEDs te zetten. Daarna kunnen
+// twinkles, ticks en wijzers eroverheen getekend worden.
+static void drawBackgroundDim()
+{
+    // 60‑LED buitenring
+    for(int i=0; i<60; i++)
+    {
+        ledhwSet60(ring60Index(i), BACKGROUND_DIM_R, BACKGROUND_DIM_G, BACKGROUND_DIM_B);
+    }
+    // 24‑LED binnenring
+    for(int i=0; i<24; i++)
+    {
+        ledhwSet24(ring24Index(i), BACKGROUND_DIM_R, BACKGROUND_DIM_G, BACKGROUND_DIM_B);
     }
 }
 
