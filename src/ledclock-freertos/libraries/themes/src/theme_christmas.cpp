@@ -310,7 +310,7 @@ static void showStatus(ThemeStatus status)
 			// groen
 			for (int i=0; i<24; i+=6) ledhwSet24(i, 0,32,0);
 			break;
-		case ThemeStatus::TimeReady:
+		case ThemeStatus::TimeNotReady:
 			// wit
 			for (int i=0; i<24; i+=6) ledhwSet24(i, 16,16,16);
 			break;

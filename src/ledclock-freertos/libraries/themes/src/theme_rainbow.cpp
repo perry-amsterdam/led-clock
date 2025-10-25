@@ -198,7 +198,7 @@ static void showStatus(ThemeStatus status)
 		case ThemeStatus::PortalActive:
 			renderRainbow(h*2, 48);
 			break;
-		case ThemeStatus::TimeReady:
+		case ThemeStatus::TimeNotReady:
 			for (int i=0;i<60;i+=5) ledhwAdd60(i, 24,24,24);
 			break;
 	}

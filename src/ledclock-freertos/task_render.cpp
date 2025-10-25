@@ -30,7 +30,7 @@ void task_render(void*)
 		else if (!(bits & EVT_TIME_READY))
 		{
 			// WiFi verbonden, maar tijd nog niet gesynchroniseerd  groen pulse
-			themeShowStatus(ThemeStatus::TimeReady);
+			themeShowStatus(ThemeStatus::TimeNotReady);
 		}
 
 		hal_delay_ms(500);

@@ -116,7 +116,7 @@ static void showStatus(ThemeStatus status)
 		case ThemeStatus::PortalActive:
 			ledhwAdd60((hal_millis()/40) % 60, 16, 32, 16);
 			break;
-		case ThemeStatus::TimeReady:
+		case ThemeStatus::TimeNotReady:
 			for (int i=0; i<60; i+=5) ledhwAdd60(i, 12,12,12);
 			break;
 	}

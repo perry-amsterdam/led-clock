@@ -6,6 +6,7 @@ enum class ThemeStatus : uint8_t
 	WifiNotConnected,
 	PortalActive,
 	TimeReady,
+	TimeNotReady,
 };
 
 struct Theme
