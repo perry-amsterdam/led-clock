@@ -103,6 +103,15 @@ static inline uint8_t qmul8(uint8_t a, uint8_t b){ return uint8_t((uint16_t(a)*u
 static void beginChristmas();
 static void updateChristmas(const tm& now, time_t epoch);
 
+// New helper to paint both rings in a warm white hue.  This fills all 60
+// LEDs on the outer ring and all 24 LEDs on the inner ring with a
+// slightly yellow‐tinted white, leveraging the configured warm white
+// constants defined above (COLOR_WHITE_R/G/B).  It also respects the
+// currently configured global brightness.  This function can be used to
+// temporarily override the normal Christmas theme and display a solid
+// warm white across the clock.
+static void fillWarmWhite();
+
 // --------- Internal state ---------
 static ChristmasConfig g_cfg = kChristmas;
 
@@ -112,13 +121,13 @@ static uint32_t frameRand;
 // ------------- Helpers -------------
 static inline void add60(int idx, uint8_t r, uint8_t g, uint8_t b)
 {
-	ledhwAdd60(ring60Index(idx%60), r, g, b);
+	ledhwSet60(ring60Index(idx%60), r, g, b);
 }
 
 
 static inline void add24(int idx, uint8_t r, uint8_t g, uint8_t b)
 {
-	ledhwAdd24(ring24Index(idx%24), r, g, b);
+	ledhwSet24(ring24Index(idx%24), r, g, b);
 }
 
 
@@ -130,7 +139,7 @@ static void drawTicks()
 	{
 		for (int m=0; m<60; m+=5)
 		{
-			ledhwAdd60(ring60Index(m), TICK_MIN_R, TICK_MIN_G, TICK_MIN_B);
+			ledhwSet60(ring60Index(m), TICK_MIN_R, TICK_MIN_G, TICK_MIN_B);
 		}
 	}
 
@@ -138,29 +147,43 @@ static void drawTicks()
 	{
 		for (int h=0; h<12; h+=3)
 		{
-			ledhwAdd24(ring24Index(h*2), TICK_HOUR_R, TICK_HOUR_G, TICK_HOUR_B);
+			ledhwSet24(ring24Index(h*2), TICK_HOUR_R, TICK_HOUR_G, TICK_HOUR_B);
 		}
 	}
 }
 
 
-static void drawCandyCaneBand(int start, int length)
-{
-	// Red/white stripes around the minute hand
-	for(int k=0;k<length;k++)
-	{
-		int i = (start + k) % 60;
-		bool red = ((k/2)%2)==0; // 2-pixel wide stripes
-		if(red)
-		{
-			add60(i, 180, 20, 20);
-		}
-		else
-		{
-			add60(i, 160, 140, 120);
-		}
-	}
-}
+//// Vervang je bestaande drawTwinkles(...) door deze versie
+//static void drawTwinkles(uint32_t seed, uint8_t level)
+//{
+//    if(level==0) return;
+//
+//    // Twinkles op BEIDE ringen. 24-ring wat spaarzamer om clutter te voorkomen.
+//    int count60 = 1 + (level/16);      // oorspronkelijke dichtheid 60-ring
+//    int count24 = max(1, level/32);    // iets minder voor 24-ring
+//
+//    uint32_t s = seed ^ 0xA5A5BEEF;
+//
+//    // 60-ring twinkles (wit, 16..79)
+//    for(int n=0; n<count60; n++)
+//    {
+//        s = 1664525u*s + 1013904223u;
+//        int pos = (s>>24)%60;
+//        s = 1664525u*s + 1013904223u;
+//        uint8_t br = 16 + ((s>>24)&0x3F); // 16..79
+//        add60(pos, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
+//    }
+//
+//    // 24-ring twinkles (ook wit, iets gedimder: 12..63)
+//    for(int n=0; n<count24; n++)
+//    {
+//        s = 1664525u*s + 1013904223u;
+//        int pos = (s>>24)%24;
+//        s = 1664525u*s + 1013904223u;
+//        uint8_t br = 12 + ((s>>24)&0x33); // 12..63
+//        add24(pos, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
+//    }
+//}
 
 
 static void drawTwinkles(uint32_t seed, uint8_t level, uint8_t speed)
@@ -169,7 +192,7 @@ static void drawTwinkles(uint32_t seed, uint8_t level, uint8_t speed)
 
 	// Hoe hoger speed, hoe vaker de twinkles wisselen.
 	// Gebruik speed om de random seed per frame te variren.
-								 // hogere speed => sneller wisselen
+	// hogere speed => sneller wisselen
 	uint32_t divisor = (uint32_t)((64 - speed) ? (64 - speed) : 1);
 	uint32_t frameSeed = seed + (hal_millis() / divisor);
 
@@ -200,15 +223,15 @@ static void drawTwinkles(uint32_t seed, uint8_t level, uint8_t speed)
 }
 
 
-// Smooth tails for hands
-static void drawHandWithTail60(int head, uint8_t r, uint8_t g, uint8_t b, int tailLen, uint8_t falloff)
-{
-	for(int d=0; d<=tailLen; d++)
-	{
-		uint8_t f = (d==0)? 255 : (uint8_t)max(0, 255 - d*falloff);
-		add60((head - d + 60)%60, qmul8(r,f), qmul8(g,f), qmul8(b,f));
-	}
-}
+//// Smooth tails for hands
+//static void drawHandWithTail60(int head, uint8_t r, uint8_t g, uint8_t b, int tailLen, uint8_t falloff)
+//{
+//	for(int d=0; d<=tailLen; d++)
+//	{
+//		uint8_t f = (d==0)? 255 : (uint8_t)max(0, 255 - d*falloff);
+//		add60((head - d + 60)%60, qmul8(r,f), qmul8(g,f), qmul8(b,f));
+//	}
+//}
 
 
 // ---------------- Theme API ----------------
@@ -223,13 +246,12 @@ static void updateChristmas(const tm& now, time_t epoch)
 	(void)epoch;
 	ledhwClearAll();
 
+	fillWarmWhite();
+
 	// current second/minute/hour positions on 60 ring
 	int sec = now.tm_sec % 60;
 	int min = now.tm_min % 60;
 	int hour12 = now.tm_hour % 12;
-
-	// Candy cane band centered on minute hand
-	//drawCandyCaneBand((min - 4 + 60)%60, 9);
 
 	g_cfg.twinkleLevel = 64;	 // gematigde snelheid
 	g_cfg.twinkleSpeed = 10;	 // gematigde snelheid
@@ -245,11 +267,39 @@ static void updateChristmas(const tm& now, time_t epoch)
 	const int m = now.tm_min % 60;
 	const int h = now.tm_hour % 12;
 
-	ledhwAdd60(ring60Index(sec), COLOR_SEC_R, COLOR_SEC_G, COLOR_SEC_B);
-	ledhwAdd60(ring60Index(min), COLOR_MIN_R, COLOR_MIN_G, COLOR_MIN_B);
-	ledhwAdd24(ring24Index(hour12*2), COLOR_HOUR_R, COLOR_HOUR_G, COLOR_HOUR_B);
+	ledhwSet60(ring60Index(sec), COLOR_SEC_R, COLOR_SEC_G, COLOR_SEC_B);
+	ledhwSet60(ring60Index(min), COLOR_MIN_R, COLOR_MIN_G, COLOR_MIN_B);
+	ledhwSet24(ring24Index(hour12*2), COLOR_HOUR_R, COLOR_HOUR_G, COLOR_HOUR_B);
 
 	ledhwShow();
+}
+
+//------------------------------------------------------------------------------
+// fillWarmWhite
+//
+// Paint the entire clock in a warm white tone.  This helper clears any
+// existing LED state, applies the current global brightness, and then
+// iterates over every LED in both the 60‑LED outer ring and the 24‑LED
+// inner ring.  For each LED it adds the warm white colour defined by
+// COLOR_WHITE_R/G/B.  Finally it refreshes the LEDs with ledhwShow().
+//
+// Calling this function will result in a uniform, slightly yellow‑tinted
+// white across all LEDs, useful for a calm ambient glow or debugging.
+static void fillWarmWhite()
+{
+    // Outer ring: 60 LEDs
+    for (int i = 0; i < 60; ++i)
+    {
+        // map logical position to hardware index and add warm white
+        ledhwSet60(ring60Index(i), COLOR_WHITE_R, COLOR_WHITE_G, COLOR_WHITE_B);
+    }
+
+    // Inner ring: 24 LEDs
+    for (int i = 0; i < 24; ++i)
+    {
+        // map logical position to hardware index and add warm white
+        ledhwSet24(ring24Index(i), COLOR_WHITE_R, COLOR_WHITE_G, COLOR_WHITE_B);
+    }
 }
 
 
@@ -259,16 +309,16 @@ static void showStatus(ThemeStatus status)
 	switch (status)
 	{
 		case ThemeStatus::WifiNotConnected:
-								 // rood
-			ledhwAdd24(0, 32, 0, 0);
+			// rood
+			for (int i=0; i<24; i+=6) ledhwSet24(i, 32,0,0);
 			break;
 		case ThemeStatus::PortalActive:
-								 // groen
-			ledhwAdd24(6, 0, 32, 0);
+			// groen
+			for (int i=0; i<24; i+=6) ledhwSet24(i, 0,32,0);
 			break;
 		case ThemeStatus::TimeReady:
-								 // wit
-			for (int i=0; i<24; i+=6) ledhwAdd24(i, 16,16,16);
+			// wit
+			for (int i=0; i<24; i+=6) ledhwSet24(i, 16,16,16);
 			break;
 	}
 	ledhwShow();
@@ -277,7 +327,7 @@ static void showStatus(ThemeStatus status)
 
 static uint16_t frameDelayMs()
 {
-	return 40;					 // iets sneller dan classic
+	return 500;					 // iets sneller dan classic
 }
 
 
