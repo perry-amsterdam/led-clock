@@ -1,4 +1,4 @@
-#include <Arduino.h>
+``:wq!#include <Arduino.h>
 #include "theme.h"
 #include "theme_registry.h"
 #include "hal_time_freertos.h"
@@ -128,7 +128,6 @@ static void updateChristmas(const tm& now, time_t epoch);
 // temporarily override the normal Christmas theme and display a solid
 // warm white across the clock.
 static void fillWarmWhite();
-
 static void drawBackgroundDim();
 
 // --------- Internal state ---------
@@ -172,39 +171,6 @@ static void drawTicks()
 }
 
 
-//// Vervang je bestaande drawTwinkles(...) door deze versie
-//static void drawTwinkles(uint32_t seed, uint8_t level)
-//{
-//    if(level==0) return;
-//
-//    // Twinkles op BEIDE ringen. 24-ring wat spaarzamer om clutter te voorkomen.
-//    int count60 = 1 + (level/16);      // oorspronkelijke dichtheid 60-ring
-//    int count24 = max(1, level/32);    // iets minder voor 24-ring
-//
-//    uint32_t s = seed ^ 0xA5A5BEEF;
-//
-//    // 60-ring twinkles (wit, 16..79)
-//    for(int n=0; n<count60; n++)
-//    {
-//        s = 1664525u*s + 1013904223u;
-//        int pos = (s>>24)%60;
-//        s = 1664525u*s + 1013904223u;
-//        uint8_t br = 16 + ((s>>24)&0x3F); // 16..79
-//        add60(pos, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
-//    }
-//
-//    // 24-ring twinkles (ook wit, iets gedimder: 12..63)
-//    for(int n=0; n<count24; n++)
-//    {
-//        s = 1664525u*s + 1013904223u;
-//        int pos = (s>>24)%24;
-//        s = 1664525u*s + 1013904223u;
-//        uint8_t br = 12 + ((s>>24)&0x33); // 12..63
-//        add24(pos, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
-//    }
-//}
-
-
 static void drawTwinkles(uint32_t seed, uint8_t level, uint8_t speed)
 {
 	if(level==0) return;
@@ -240,17 +206,6 @@ static void drawTwinkles(uint32_t seed, uint8_t level, uint8_t speed)
 		add24(pos, qmul8(COLOR_WHITE_R, br), qmul8(COLOR_WHITE_G, br), qmul8(COLOR_WHITE_B, br));
 	}
 }
-
-
-//// Smooth tails for hands
-//static void drawHandWithTail60(int head, uint8_t r, uint8_t g, uint8_t b, int tailLen, uint8_t falloff)
-//{
-//	for(int d=0; d<=tailLen; d++)
-//	{
-//		uint8_t f = (d==0)? 255 : (uint8_t)max(0, 255 - d*falloff);
-//		add60((head - d + 60)%60, qmul8(r,f), qmul8(g,f), qmul8(b,f));
-//	}
-//}
 
 
 // ---------------- Theme API ----------------
