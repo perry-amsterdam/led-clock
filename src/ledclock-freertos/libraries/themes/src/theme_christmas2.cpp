@@ -99,10 +99,9 @@ static inline uint8_t qmul8(uint8_t a, uint8_t b){ return uint8_t((uint16_t(a)*u
 #define COLOR_WHITE_B 160
 #endif
 
-
 // ---------------------------------------------------
 // Achtergrondkleur voor gedimde kerstverlichting (warm wit/geel)
-// De achtergrondkleur baseert zich op de warme wit‑waarden hierboven en
+// De achtergrondkleur baseert zich op de warme witwaarden hierboven en
 // wordt flink gedimd (1/10e) om subtiele gloed te geven zonder het
 // kerstontwerp te overheersen. Pas de deling aan voor meer of minder
 // intensiteit.
@@ -122,7 +121,7 @@ static void updateChristmas(const tm& now, time_t epoch);
 
 // New helper to paint both rings in a warm white hue.  This fills all 60
 // LEDs on the outer ring and all 24 LEDs on the inner ring with a
-// slightly yellow‐tinted white, leveraging the configured warm white
+// slightly yellowtinted white, leveraging the configured warm white
 // constants defined above (COLOR_WHITE_R/G/B).  It also respects the
 // currently configured global brightness.  This function can be used to
 // temporarily override the normal Christmas theme and display a solid
@@ -249,32 +248,33 @@ static void updateChristmas(const tm& now, time_t epoch)
 	ledhwShow();
 }
 
+
 //------------------------------------------------------------------------------
 // fillWarmWhite
 //
 // Paint the entire clock in a warm white tone.  This helper clears any
 // existing LED state, applies the current global brightness, and then
-// iterates over every LED in both the 60‑LED outer ring and the 24‑LED
+// iterates over every LED in both the 60LED outer ring and the 24LED
 // inner ring.  For each LED it adds the warm white colour defined by
 // COLOR_WHITE_R/G/B.  Finally it refreshes the LEDs with ledhwShow().
 //
-// Calling this function will result in a uniform, slightly yellow‑tinted
+// Calling this function will result in a uniform, slightly yellowtinted
 // white across all LEDs, useful for a calm ambient glow or debugging.
 static void fillWarmWhite()
 {
-    // Outer ring: 60 LEDs
-    for (int i = 0; i < 60; ++i)
-    {
-        // map logical position to hardware index and add warm white
-        ledhwSet60(ring60Index(i), COLOR_WHITE_R, COLOR_WHITE_G, COLOR_WHITE_B);
-    }
+	// Outer ring: 60 LEDs
+	for (int i = 0; i < 60; ++i)
+	{
+		// map logical position to hardware index and add warm white
+		ledhwSet60(ring60Index(i), COLOR_WHITE_R, COLOR_WHITE_G, COLOR_WHITE_B);
+	}
 
-    // Inner ring: 24 LEDs
-    for (int i = 0; i < 24; ++i)
-    {
-        // map logical position to hardware index and add warm white
-        ledhwSet24(ring24Index(i), COLOR_WHITE_R, COLOR_WHITE_G, COLOR_WHITE_B);
-    }
+	// Inner ring: 24 LEDs
+	for (int i = 0; i < 24; ++i)
+	{
+		// map logical position to hardware index and add warm white
+		ledhwSet24(ring24Index(i), COLOR_WHITE_R, COLOR_WHITE_G, COLOR_WHITE_B);
+	}
 }
 
 
@@ -284,16 +284,16 @@ static void fillWarmWhite()
 // twinkles, ticks en wijzers eroverheen getekend worden.
 static void drawBackgroundDim()
 {
-    // 60‑LED buitenring
-    for(int i=0; i<60; i++)
-    {
-        ledhwSet60(ring60Index(i), BACKGROUND_DIM_R, BACKGROUND_DIM_G, BACKGROUND_DIM_B);
-    }
-    // 24‑LED binnenring
-    for(int i=0; i<24; i++)
-    {
-        ledhwSet24(ring24Index(i), BACKGROUND_DIM_R, BACKGROUND_DIM_G, BACKGROUND_DIM_B);
-    }
+	// 60LED buitenring
+	for(int i=0; i<60; i++)
+	{
+		ledhwSet60(ring60Index(i), BACKGROUND_DIM_R, BACKGROUND_DIM_G, BACKGROUND_DIM_B);
+	}
+	// 24LED binnenring
+	for(int i=0; i<24; i++)
+	{
+		ledhwSet24(ring24Index(i), BACKGROUND_DIM_R, BACKGROUND_DIM_G, BACKGROUND_DIM_B);
+	}
 }
 
 

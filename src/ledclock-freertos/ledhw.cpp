@@ -46,24 +46,24 @@ void ledhwInitOnce()
 }
 
 
-void ledhwSetGlobalBrightness(uint8_t b) 
-{ 
-	s60.setBrightness(b); 
-	s24.setBrightness(b); 
+void ledhwSetGlobalBrightness(uint8_t b)
+{
+	s60.setBrightness(b);
+	s24.setBrightness(b);
 }
 
 
-void ledhwClearAll() 
-{ 
-	s60.clear(); 
-	s24.clear(); 
+void ledhwClearAll()
+{
+	s60.clear();
+	s24.clear();
 }
 
 
-void ledhwShow()     
-{ 
-	s60.show();  
-	s24.show();  
+void ledhwShow()
+{
+	s60.show();
+	s24.show();
 }
 
 
@@ -83,6 +83,7 @@ uint16_t ring24Index(int raw)
 	x = (x + RING24_OFFSET) % 24;
 	return (uint16_t)x;
 }
+
 
 void ledhwSet60(uint16_t i, uint8_t r, uint8_t g, uint8_t b)
 {
