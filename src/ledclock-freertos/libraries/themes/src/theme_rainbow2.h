@@ -1,14 +1,14 @@
 #pragma once
 #include <stdint.h>
 
-struct RainbowConfig
+struct Rainbow2Config
 {
 	uint8_t brightness;
 	bool    showHourTicks;
 	bool    showMinuteTicks;
 };
 
-static constexpr RainbowConfig kRainbow =
+static constexpr Rainbow2Config kRainbow2 =
 {
 	64,
 	true,

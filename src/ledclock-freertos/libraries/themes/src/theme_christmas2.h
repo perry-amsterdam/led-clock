@@ -1,0 +1,21 @@
+#pragma once
+#include <stdint.h>
+
+struct ChristmasConfig
+{
+	uint8_t brightness;			 // 0..255
+	bool    showHourTicks;		 // show 12 markers on 60-ring
+	bool    showMinuteTicks;	 // show 60 faint markers on 60-ring
+	uint8_t twinkleLevel;		 // 0..255 how many/bright twinkles
+	uint8_t twinkleSpeed;		 // 0 = stilstaand, 255 = supersnel`
+};
+
+// Sensible defaults for a cozy Xmas look
+static constexpr ChristmasConfig kChristmas =
+{
+	80,						 // brightness
+	true,						 // hour ticks
+	true,						 // minute ticks
+	32,							 // twinkle
+	24							 // twinkleSpeed (0..255)
+};

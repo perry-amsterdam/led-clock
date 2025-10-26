@@ -326,7 +326,7 @@ static uint16_t frameDelayMs()
 
 
 // definitie (heeft externe linkage nodig)
-extern const Theme THEME_CHRISTMAS =
+extern const Theme THEME_CHRISTMAS2 =
 {
 	.id     = "christmas2",
 	.name   = "Christmas 2",
@@ -337,4 +337,4 @@ extern const Theme THEME_CHRISTMAS =
 };
 
 // Auto-registratie (selecteer eventueel als default met REGISTER_DEFAULT_THEME)
-REGISTER_THEME(THEME_CHRISTMAS)
+REGISTER_THEME(THEME_CHRISTMAS2)

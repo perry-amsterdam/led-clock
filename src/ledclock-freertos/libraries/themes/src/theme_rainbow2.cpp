@@ -78,7 +78,6 @@
 #include "ledhw.h"
 #include "theme_rainbow2.h"
 
-
 // ---- HSV  RGB helper -------------------------------------------------------
 // Snel integer-gebaseerde omzetting voor WS2812B (0..255 bereik)
 static inline void hsvToRgb(uint8_t h, uint8_t s, uint8_t v,
@@ -105,11 +104,11 @@ uint8_t& r, uint8_t& g, uint8_t& b)
 }
 
 
-// ---- Rainbow-renderer -------------------------------------------------------
+// ---- Rainbow2-renderer -------------------------------------------------------
 // Tekent een regenboog over beide ringen.
 // - hueOffset schuift het kleurenspectrum (0..255)
 // - brightness (0..255) bepaalt de intensiteit.
-void renderRainbow(uint8_t hueOffset, uint8_t brightness)
+static void renderRainbow2(uint8_t hueOffset, uint8_t brightness)
 {
 	ledhwClearAll();
 
@@ -133,24 +132,24 @@ void renderRainbow(uint8_t hueOffset, uint8_t brightness)
 }
 
 
-static void beginRainbow()
+static void beginRainbow2()
 {
-	ledhwSetGlobalBrightness(kRainbow.brightness);
+	ledhwSetGlobalBrightness(kRainbow2.brightness);
 	ledhwClearAll();
 	ledhwShow();
 }
 
 
-static void updateRainbow(const tm& now, time_t epoch)
+static void updateRainbow2(const tm& now, time_t epoch)
 {
 	(void)epoch;
 	ledhwClearAll();
 
 	static uint8_t hue = 0;
-	renderRainbow(hue, 8);		 // brightness = 5
+	renderRainbow2(hue, 4);		 // brightness = 5
 	hue += 1;					 // schuift de regenboog
 
-	if (kRainbow.showMinuteTicks)
+	if (kRainbow2.showMinuteTicks)
 	{
 		for (int m=0; m<60; m+=5)
 		{
@@ -158,7 +157,7 @@ static void updateRainbow(const tm& now, time_t epoch)
 		}
 	}
 
-	if (kRainbow.showHourTicks)
+	if (kRainbow2.showHourTicks)
 	{
 		for (int h=0; h<12; h+=3)
 		{
@@ -194,10 +193,10 @@ static void showStatus(ThemeStatus status)
 	switch (status)
 	{
 		case ThemeStatus::WifiNotConnected:
-			renderRainbow(h, 32);
+			renderRainbow2(h, 32);
 			break;
 		case ThemeStatus::PortalActive:
-			renderRainbow(h*2, 48);
+			renderRainbow2(h*2, 48);
 			break;
 		case ThemeStatus::TimeNotReady:
 			for (int i=0;i<60;i+=5) ledhwAdd60(i, 24,24,24);
@@ -209,20 +208,20 @@ static void showStatus(ThemeStatus status)
 
 static uint16_t frameDelayMs()
 {
-	return 33;	// ~30 FPS
+	return 33;					 // ~30 FPS
 }
 
 
 // definitie (heeft externe linkage nodig)
 extern const Theme THEME_RAINBOW2 =
 {
-	.id="rainbow2",
-	.name="rainbow2",
-	.begin  = beginRainbow,
-	.update = updateRainbow,
+	.id     = "rainbow2",
+	.name   = "Rainbow2",
+	.begin  = beginRainbow2,
+	.update = updateRainbow2,
 	.showStatus = showStatus,
 	.frameDelayMs = frameDelayMs,
 };
 
 // Auto-registratie + markeer als default (of gebruik REGISTER_THEME)
-REGISTER_THEME(theme_rainbow2);
+REGISTER_THEME(THEME_RAINBOW2)

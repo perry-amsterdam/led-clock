@@ -108,7 +108,7 @@ uint8_t& r, uint8_t& g, uint8_t& b)
 // Tekent een regenboog over beide ringen.
 // - hueOffset schuift het kleurenspectrum (0..255)
 // - brightness (0..255) bepaalt de intensiteit.
-void renderRainbow(uint8_t hueOffset, uint8_t brightness)
+static void renderRainbow(uint8_t hueOffset, uint8_t brightness)
 {
 	ledhwClearAll();
 
