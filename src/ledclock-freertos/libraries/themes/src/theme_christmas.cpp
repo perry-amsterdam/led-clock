@@ -328,8 +328,8 @@ static uint16_t frameDelayMs()
 // definitie (heeft externe linkage nodig)
 extern const Theme THEME_CHRISTMAS =
 {
-	.id     = "christmas2",
-	.name   = "Christmas 2",
+	.id     = "christmas1",
+	.name   = "Christmas 1",
 	.begin  = beginChristmas,
 	.update = updateChristmas,
 	.showStatus = showStatus,
