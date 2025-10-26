@@ -214,7 +214,7 @@ static uint16_t frameDelayMs()
 
 
 // definitie (heeft externe linkage nodig)
-extern const Theme THEME_RAINBOW =
+extern const Theme THEME_RAINBOW2 =
 {
 	.id="rainbow2",
 	.name="rainbow2",
