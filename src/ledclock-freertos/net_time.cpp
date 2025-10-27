@@ -159,9 +159,11 @@ static bool fetchFromWorldTimeAPI(const String& ianaTz, String& timezone, int& g
 	// veilig uitlezen als C-string, dan naar Arduino String
 	const char* tz = doc["timezone"] | "";
 
+
 	gmtOffsetSec      = (int)raw;
 	daylightOffsetSec = (int)dst;
 	timezone          = tz;
+
 
 	#ifdef DEBUG_TZ
 	Serial.printf("[TZ] '%s' raw=%d dst_off=%d\n", timezone.c_str(), gmtOffsetSec, daylightOffsetSec);
@@ -218,7 +220,7 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 
 	// **Belangrijk**: configureer SNTP inclusief offsets zodat tijd lokaal klopt
 	//  (werkt ook wanneer IANA TZ niet wordt ondersteund).
-	configTime(g_timezoneInfo.gmtOffsetSec, g_timezoneInfo.daylightSec, "europe.pool.ntp.org", "time.google.com", "pool.ntp.org");
+	configTime(g_timezoneInfo.gmtOffsetSec, g_timezoneInfo.daylightSec, NTP1, NTP2, NTP3);
 
 	Serial.print("Wachten op NTP sync");
 	struct tm timeinfo;

@@ -17,11 +17,13 @@ const char* AP_SSID  = "ESP32-Setup";
 const char* AP_PASS  = "configwifi";
 const byte  DNS_PORT = 53;
 const IPAddress AP_IP(192,168,4,1), AP_GW(192,168,4,1), AP_MASK(255,255,255,0);
+
 const char* URL_TIMEINFO = "https://worldtimeapi.org/api/ip";
 const char* URL_COUNTRY  = "https://ip-api.com/json";
-const char* NTP1 = "0.europe.pool.ntp.org";
-const char* NTP2 = "1.europe.pool.ntp.org";
-const char* NTP3 = "2.europe.pool.ntp.org";
+
+const char* NTP1 = "europe.pool.ntp.org";
+const char* NTP2 = "time.google.com";
+const char* NTP3 = "pool.ntp.org";
 
 // ===== Global objects =====
 Preferences prefs;
@@ -37,3 +39,4 @@ TimezoneInfo g_timezoneInfo = {
     0,    // gmtOffsetSec
     0     // daylightSec
 };
+
