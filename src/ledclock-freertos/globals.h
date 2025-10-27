@@ -53,10 +53,15 @@ extern DNSServer dns;
 
 // state
 extern String savedSsid, savedPass;
-extern String g_timezoneIANA;
-extern String g_countryCode;
-extern int    g_gmtOffsetSec;
-extern int    g_daylightSec;
-extern bool   g_timeReady;
-extern unsigned long lastPrintMs;
-#endif							 // GLOBALS_H
+
+// --- Tijdzone configuratie ---
+struct TimezoneInfo {
+    String iana;         // bijv. "Europe/Amsterdam"
+    String tzString;     // bijv. "CET-1CEST,M3.5.0,M10.5.0/3"
+    int gmtOffsetSec;    // offset in seconden t.o.v. UTC
+    int daylightSec;     // zomertijd offset in seconden
+};
+
+extern TimezoneInfo g_timezoneInfo;
+
+#endif	// GLOBALS_H

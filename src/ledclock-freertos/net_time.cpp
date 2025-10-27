@@ -175,10 +175,6 @@ static bool fetchFromWorldTimeAPI(const String& ianaTz, String& timezone, int& g
 // Configureer SNTP + TZ; Keert true terug als tijd plausibel gezet is
 bool setupTimeFromInternet(bool acceptAllHttps)
 {
-	String tzIana;
-	String timezone;
-	int gmtOffset = 0;
-	int dstOffset = 0;
 
 	// Bepaalt tzIana en offsets.
 	// 1) Als user-TZ gezet is: die gebruiken, offsets via WorldTimeAPI proberen (fallback 0/0).
@@ -186,42 +182,43 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 	String manualTz;
 	if (tz_user_is_set() && tz_user_get(manualTz) && manualTz.length() > 0)
 	{
-		tzIana = manualTz;
-	}  else
+		g_timezoneInfo.iana = manualTz;
+	}  
+	else
 	{
-		tzIana = "";
+		g_timezoneInfo.iana = "";
 	}
 
 	// Timezone en offsets via WorldTimeAPI.
-	if (!fetchFromWorldTimeAPI(tzIana, timezone, gmtOffset, dstOffset, acceptAllHttps))
+	if (!fetchFromWorldTimeAPI(g_timezoneInfo.iana, g_timezoneInfo.tzString, g_timezoneInfo.gmtOffsetSec, g_timezoneInfo.daylightSec, acceptAllHttps))
 	{
-		gmtOffset = 0;
-		dstOffset = 0;
-		timezone = "";
+		g_timezoneInfo.tzString = "";
+		g_timezoneInfo.gmtOffsetSec = 0;
+		g_timezoneInfo.daylightSec = 0;
 		#ifdef DEBUG_TZ
-		Serial.printf("[TZ] Using TZ without fetched offsets: %s\n", timezone.c_str());
+		Serial.printf("[TZ] Using TZ without fetched offsets: %s\n", g_timezoneInfo.tzString.c_str());
 		#endif
 	}
 	else
 	{
 		#ifdef DEBUG_TZ
-		Serial.printf("[TZ] Using TZ with fetched offsets: %s\n", timezone.c_str());
+		Serial.printf("[TZ] Using TZ with fetched offsets: %s\n", g_timezoneInfo.tzString.c_str());
 		#endif
 	}
 
 	// Probeer IANA TZ te zetten (voor wie dit ondersteunt)
-	if (timezone.length() > 0)
+	if (g_timezoneInfo.tzString.length() > 0)
 	{
-		setenv("TZ", timezone.c_str(), 1);
+		setenv("TZ", g_timezoneInfo.tzString.c_str(), 1);
 		tzset();
 		#ifdef DEBUG_TZ
-		Serial.printf("[TIME] TZ set to IANA: %s\n", timezone.c_str());
+		Serial.printf("[TIME] TZ set to IANA: %s\n", g_timezoneInfo.tzString.c_str());
 		#endif
 	}
 
 	// **Belangrijk**: configureer SNTP inclusief offsets zodat tijd lokaal klopt
 	//  (werkt ook wanneer IANA TZ niet wordt ondersteund).
-	configTime(gmtOffset, dstOffset, "europe.pool.ntp.org", "time.google.com", "pool.ntp.org");
+	configTime(g_timezoneInfo.gmtOffsetSec, g_timezoneInfo.daylightSec, "europe.pool.ntp.org", "time.google.com", "pool.ntp.org");
 
 	Serial.print("Wachten op NTP sync");
 	struct tm timeinfo;

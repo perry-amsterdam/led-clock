@@ -183,9 +183,9 @@ static void apiHandleTimezoneGet()
 		hal_delay_ms(250);
 	}
 
-	String tzString;
 
 	// Eerst proberen de gebruikers-TZ op te halen
+	String tzString;
 	if (tz_user_is_set() && tz_user_get(tzString) && tzString.length() > 0)
 	{
 		// OK, tzString bevat de user timezone
@@ -193,11 +193,10 @@ static void apiHandleTimezoneGet()
 	else
 	{
 		// Anders proberen de systeem TZ uit environment
-		const char* tzEnv = getenv("TZ");
-		if (tzEnv != nullptr)
+		if (g_timezoneInfo.tzString != "")
 		{
-			tzString = tzEnv;
-			Serial.printf("Huidige TZ: %s\n", tzEnv);
+			tzString = g_timezoneInfo.tzString;
+			Serial.printf("Huidige TZ: %s\n", g_timezoneInfo.tzString);
 		}
 		else
 		{
@@ -208,9 +207,9 @@ static void apiHandleTimezoneGet()
 
 	// Controleer of de offsetwaarden geldig zijn
 	long off = 0;
-	if (g_gmtOffsetSec != 0 || g_daylightSec != 0)
+	if (g_timezoneInfo.gmtOffsetSec != 0 || g_timezoneInfo.daylightSec != 0)
 	{
-		off = (long)g_gmtOffsetSec + (long)g_daylightSec;
+		off = (long)g_timezoneInfo.gmtOffsetSec + (long)g_timezoneInfo.daylightSec;
 	}
 	else
 	{
@@ -220,8 +219,8 @@ static void apiHandleTimezoneGet()
 	// JSON antwoord bouwen
 	String json = "{";
 	json += "\"timezone\":\"" + tzString + "\"";
-	json += ",\"gmtoffset\":" + String((int)g_gmtOffsetSec);
-	json += ",\"dstoffset\":" + String((int)g_daylightSec);
+	json += ",\"gmtoffset\":" + String((int)g_timezoneInfo.gmtOffsetSec);
+	json += ",\"dstoffset\":" + String((int)g_timezoneInfo.daylightSec);
 	json += "}";
 	sendJson(200, json);
 }

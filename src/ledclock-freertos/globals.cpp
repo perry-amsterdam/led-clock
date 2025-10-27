@@ -30,9 +30,10 @@ DNSServer dns;
 
 // ===== Global state =====
 String savedSsid, savedPass;
-String g_timezoneIANA = "";
-String g_countryCode  = "";
-int    g_gmtOffsetSec = 0;
-int    g_daylightSec  = 0;
-bool   g_timeReady    = false;
-unsigned long lastPrintMs = 0;
+
+TimezoneInfo g_timezoneInfo = {
+    "",   // iana
+    "",   // tzString
+    0,    // gmtOffsetSec
+    0     // daylightSec
+};
