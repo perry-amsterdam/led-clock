@@ -15,18 +15,8 @@ void task_time(void*)
 	LOG_STACK_WATERMARK("time:wifi");
 
 	// NTP & TZ setup
-	bool ok = false;
-	for (int i = 0; (!ok && i < 10) ; i++)
-	{
-		ok = setupTimeFromInternet(true);
-		if (ok)
-		{
-			xEventGroupSetBits(g_sysEvents, EVT_TIME_READY);
-			xEventGroupClearBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
-			LOG_STACK_WATERMARK("time:ntp");
-		}
-		hal_delay_ms(1000);
-	}
+	xEventGroupClearBits(g_sysEvents, EVT_TIME_READY);
+	xEventGroupSetBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
 
 	uint32_t last = 0;
 	uint32_t last_ms = hal_millis();
