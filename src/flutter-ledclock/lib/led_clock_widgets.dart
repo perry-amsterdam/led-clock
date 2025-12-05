@@ -43,6 +43,7 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
   List<ThemeItem> themes = const [];
   ActiveTheme? active;
   bool busy = false;
+  bool? powersave;
 
   @override
   void initState() {
@@ -70,6 +71,7 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
       tzList = await api.listTimezones();
       themes = await api.listThemes();
       active = await api.getActiveTheme();
+      powersave = await api.getPowersave();
       setState(() {});
     });
   }
@@ -125,6 +127,32 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
                       }),
                       icon: const Icon(Icons.restart_alt),
                       label: const Text('Reboot device'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Powersave', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    SwitchListTile(
+                      title: const Text('Powersave-modus'),
+                      subtitle: const Text('Schakel energiebesparing op de LED-clock in'),
+                      value: powersave ?? false,
+                      onChanged: (value) {
+                        _run(() async {
+                          final newValue = await api.setPowersave(value);
+                          setState(() {
+                            powersave = newValue;
+                          });
+                        });
+                      },
                     ),
                   ],
                 ),

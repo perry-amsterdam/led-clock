@@ -10,7 +10,7 @@
 // final ping = await api.ping();
 // print(ping.uptimeMs);
 //
-// Generated from: openapi.json (LED Clock REST API 1.5.0)
+// Generated from: openapi.json (LED Clock REST API 1.6.0)
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -112,6 +112,28 @@ class LedClockApi {
   Future<DeleteThemeResponse> clearThemeOverride() async {
     final r = await _client.delete(_uri('/api/theme'), headers: _jsonHeaders);
     return _handleJson(r, (j) => DeleteThemeResponse.fromJson(j as Map<String, dynamic>));
+  }
+
+  // ---------- Powersave ----------
+  /// GET /api/powersave
+  /// Returns whether powersave mode is currently enabled.
+  Future<bool> getPowersave() async {
+    final r = await _client.get(_uri('/api/powersave'), headers: _jsonHeaders);
+    return _handleJson(r, (j) {
+      final map = j as Map<String, dynamic>;
+      return map['enabled'] as bool? ?? false;
+    });
+  }
+
+  /// POST /api/powersave
+  /// Enables or disables powersave mode and returns the resulting state.
+  Future<bool> setPowersave(bool enabled) async {
+    final body = jsonEncode({'enabled': enabled});
+    final r = await _client.post(_uri('/api/powersave'), headers: _jsonHeaders, body: body);
+    return _handleJson(r, (j) {
+      final map = j as Map<String, dynamic>;
+      return map['enabled'] as bool? ?? enabled;
+    });
   }
 
   void close() => _client.close();
