@@ -2,6 +2,7 @@
 #include "rtos.h"
 #include <Adafruit_NeoPixel.h>
 #include "net_time.h"
+#include "ledhw.h"
 #include <time.h>
 #include "hal_time_freertos.h"
 #include <theme.h>
@@ -39,6 +40,14 @@ void task_render(void*)
 
 	for(;;)
 	{
+		if (isPowerSaveMode())
+		{
+			ledhwClearAll();
+			ledhwShow();
+			vTaskDelay(pdMS_TO_TICKS(1000));
+			continue;
+		}
+
 		LOG_STACK_WATERMARK("render:loop");
 		struct tm now;
 		time_t epoch = time(nullptr);

@@ -159,11 +159,9 @@ static bool fetchFromWorldTimeAPI(const String& ianaTz, String& timezone, int& g
 	// veilig uitlezen als C-string, dan naar Arduino String
 	const char* tz = doc["timezone"] | "";
 
-
 	gmtOffsetSec      = (int)raw;
 	daylightOffsetSec = (int)dst;
 	timezone          = tz;
-
 
 	#ifdef DEBUG_TZ
 	Serial.printf("[TZ] '%s' raw=%d dst_off=%d\n", timezone.c_str(), gmtOffsetSec, daylightOffsetSec);
@@ -185,7 +183,7 @@ bool setupTimeFromInternet(bool acceptAllHttps)
 	if (tz_user_is_set() && tz_user_get(manualTz) && manualTz.length() > 0)
 	{
 		g_timezoneInfo.iana = manualTz;
-	}  
+	}
 	else
 	{
 		g_timezoneInfo.iana = "";

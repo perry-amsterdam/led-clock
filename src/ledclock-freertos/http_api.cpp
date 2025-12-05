@@ -183,7 +183,6 @@ static void apiHandleTimezoneGet()
 		hal_delay_ms(250);
 	}
 
-
 	// Eerst proberen de gebruikers-TZ op te halen
 	String tzString;
 	if (tz_user_is_set() && tz_user_get(tzString) && tzString.length() > 0)

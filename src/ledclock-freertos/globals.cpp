@@ -33,10 +33,29 @@ DNSServer dns;
 // ===== Global state =====
 String savedSsid, savedPass;
 
-TimezoneInfo g_timezoneInfo = {
-    "",   // iana
-    "",   // tzString
-    0,    // gmtOffsetSec
-    0     // daylightSec
+TimezoneInfo g_timezoneInfo =
+{
+	"",							 // iana
+	"",							 // tzString
+	0,							 // gmtOffsetSec
+	0							 // daylightSec
 };
 
+std::atomic<bool> gPowerSaveMode { false };
+
+void enterPowerSaveMode()
+{
+	gPowerSaveMode = true;
+}
+
+
+void exitPowerSaveMode()
+{
+	gPowerSaveMode = false;
+}
+
+
+bool isPowerSaveMode()
+{
+	return gPowerSaveMode.load();
+}

@@ -2,6 +2,18 @@
 #define GLOBALS_H
 
 #pragma once
+#include <Adafruit_NeoPixel.h>
+#include <WebServer.h>
+#include <DNSServer.h>
+#include <Preferences.h>
+#include <WiFi.h>
+#include <atomic>
+
+extern std::atomic<bool> gPowerSaveMode;
+
+void enterPowerSaveMode();
+void exitPowerSaveMode();
+bool isPowerSaveMode();
 
 // ==== Configuration, debug flags, pins ====
 
@@ -33,14 +45,6 @@ extern const char* NTP1;
 extern const char* NTP2;
 extern const char* NTP3;
 
-// ---- From globals.h ----
-#pragma once
-#include <Adafruit_NeoPixel.h>
-#include <WebServer.h>
-#include <DNSServer.h>
-#include <Preferences.h>
-#include <WiFi.h>
-
 #if defined(ARDUINO)
 #define millis DO_NOT_USE_millis__use_hal_millis
 #define delay  DO_NOT_USE_delay__use_hal_delay_ms
@@ -55,13 +59,13 @@ extern DNSServer dns;
 extern String savedSsid, savedPass;
 
 // --- Tijdzone configuratie ---
-struct TimezoneInfo {
-    String iana;         // bijv. "Europe/Amsterdam"
-    String tzString;     // bijv. "CET-1CEST,M3.5.0,M10.5.0/3"
-    int gmtOffsetSec;    // offset in seconden t.o.v. UTC
-    int daylightSec;     // zomertijd offset in seconden
+struct TimezoneInfo
+{
+	String iana;				 // bijv. "Europe/Amsterdam"
+	String tzString;			 // bijv. "CET-1CEST,M3.5.0,M10.5.0/3"
+	int gmtOffsetSec;			 // offset in seconden t.o.v. UTC
+	int daylightSec;			 // zomertijd offset in seconden
 };
 
 extern TimezoneInfo g_timezoneInfo;
-
-#endif	// GLOBALS_H
+#endif							 // GLOBALS_H
