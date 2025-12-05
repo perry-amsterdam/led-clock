@@ -12,6 +12,7 @@ extern "C"
 }
 
 
+#include <ArduinoJson.h>
 #include "globals.h"
 #include "theme_registry.h"
 #include "theme_manager.h"
@@ -60,6 +61,14 @@ static void sendJson(WebServer& server, int code, const String& json)
 }
 
 
+static void sendJson(int code, const DynamicJsonDocument& doc)
+{
+	String out;
+	serializeJson(doc, out);
+	sendJson(code, out);
+}
+
+
 // ======================================================
 // /api/ping
 // ======================================================
@@ -93,6 +102,68 @@ static void apiHandleReboot()
 	},
 		"reboot_task", 2048, nullptr, tskIDLE_PRIORITY + 3, nullptr
 		);
+}
+
+
+// ======================================================
+// /api/powersave (GET)
+// ======================================================
+static void apiHandlePowersaveGet()
+{
+	DynamicJsonDocument doc(64);
+	doc["enabled"] = isPowerSaveMode();
+	sendJson(200, doc);
+}
+
+
+// ======================================================
+// /api/powersave (POST)
+// Body: JSON { "enabled": true/false }
+// ======================================================
+static void apiHandlePowersavePost()
+{
+	if (server.method() != HTTP_POST)
+	{
+		sendJson(405, "{\"success\":false,\"message\":\"Method Not Allowed\"}");
+		return;
+	}
+
+	if (!server.hasArg("plain"))
+	{
+		sendJson(400, "{\"success\":false,\"message\":\"Missing body\"}");
+		return;
+	}
+
+	const String body = server.arg("plain");
+
+	DynamicJsonDocument doc(256);
+	DeserializationError err = deserializeJson(doc, body);
+	if (err)
+	{
+		sendJson(400, "{\"success\":false,\"message\":\"Invalid JSON\"}");
+		return;
+	}
+
+	if (!doc.containsKey("enabled"))
+	{
+		sendJson(400, "{\"success\":false,\"message\":\"Missing field 'enabled'\"}");
+		return;
+	}
+
+	bool enabled = doc["enabled"].as<bool>();
+
+	if (enabled)
+	{
+		enterPowerSaveMode();
+	}
+	else
+	{
+		exitPowerSaveMode();
+	}
+
+	DynamicJsonDocument reply(64);
+	reply["enabled"] = enabled;
+	sendJson(200, reply);
 }
 
 
@@ -471,6 +542,10 @@ void startApi()
 	server.on("/api/theme",  HTTP_GET,  apiHandleThemeGet);
 	server.on("/api/theme",  HTTP_POST, apiHandleThemeSet);
 	server.on("/api/theme",  HTTP_DELETE, apiHandleThemeClear);
+
+	// Api powersave calls.
+	server.on("/api/powersave", HTTP_GET,  apiHandlePowersaveGet);
+	server.on("/api/powersave", HTTP_POST, apiHandlePowersavePost);
 
 	server.begin();
 	startHttpTask();
