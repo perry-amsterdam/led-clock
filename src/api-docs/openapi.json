@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "LED Clock REST API",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "description": "REST API voor ESP32 LED Clock. Bevat ping, reboot, tijdzone endpoints en een compacte tijdzones-lijst."
   },
   "servers": [
@@ -469,6 +469,81 @@
           }
         }
       }
+    },
+    "/api/powersave": {
+      "get": {
+        "tags": [
+          "Powersave"
+        ],
+        "summary": "Haal de huidige powersave-modus op",
+        "responses": {
+          "200": {
+            "description": "Status ontvangen",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Powersave"
+        ],
+        "summary": "Schakel powersave-modus in of uit",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "enabled"
+                ],
+                "properties": {
+                  "enabled": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Powersave-modus gewijzigd",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or missing fields"
+          },
+          "405": {
+            "description": "Method Not Allowed"
+          }
+        }
+      }
     }
   },
   "tags": [
@@ -487,6 +562,10 @@
     {
       "name": "Themes",
       "description": "Thema-overzicht en selectie"
+    },
+    {
+      "name": "Powersave",
+      "description": "Energiebesparing / powersave functionaliteit"
     }
   ]
 }

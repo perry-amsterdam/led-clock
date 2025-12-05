@@ -276,3 +276,48 @@ curl http://ledclock.local/api/timezones
 ---
 
 *This API and documentation are licensed under the MIT License.*
+
+
+---
+
+## ⚡ `/api/powersave`
+
+Beheert de energiebesparingsmodus van de LED-clock.
+
+### **GET /api/powersave**
+
+**Doel:** opvragen of powersave actief is.
+
+**Response:**
+```json
+{ "enabled": true }
+```
+
+---
+
+### **POST /api/powersave**
+
+**Doel:** powersave in- of uitschakelen.
+
+**Body:**
+```json
+{ "enabled": true }
+```
+
+**Response:**
+```json
+{ "enabled": true }
+```
+
+**Mogelijke fouten:**
+- `400 Missing body`
+- `400 Invalid JSON`
+- `400 Missing field 'enabled'`
+- `405 Method Not Allowed`
+
+**Voorbeeld curl:**
+```bash
+curl -X POST http://ledclock.local/api/powersave \
+  -H "Content-Type: application/json" \
+  -d '{"enabled": true}'
+```
