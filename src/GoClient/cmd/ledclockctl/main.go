@@ -48,9 +48,16 @@ func main() {
 	defer cancel()
 
 	// Is er een expliciete actie?
-	opSelected := *getTZ || *listTZ || *reboot || (*setTZ != "") || *clearTZ ||
-		*listThemes || *getTheme || (*setTheme != "") || *clearTheme ||
-		*getPS || (*setPS != "") || *clearPS
+	opSelected := *getTZ ||
+		*listTZ ||
+		(*setTZ != "") ||
+		*clearTZ ||
+		*listThemes ||
+		*getTheme ||
+		(*setTheme != "") ||
+		*clearTheme ||
+		*getPS || (*setPS != "") || *clearPS ||
+		*reboot
 
 	// --- 0) Ping (alleen wanneer geen gerichte actie is gevraagd)
 	if !opSelected {
@@ -60,70 +67,87 @@ func main() {
 		}
 		if *showRaw && ping.Body != nil {
 			fmt.Println(string(ping.Body))
-		} else if ping.JSON200 != nil {
-			nowTime := time.UnixMilli(int64(ping.JSON200.Now)).In(time.Local)
-			uptime := time.Duration(ping.JSON200.UptimeMs) * time.Millisecond
-
-			fmt.Printf("Ping Result:\n-----------\n")
-			fmt.Printf("pong=%v\n", ping.JSON200.Pong)
-			fmt.Printf("now(ms)=%d (%s)\n", ping.JSON200.Now, nowTime.Format("2006-01-02 15:04:05 MST"))
-			fmt.Printf("uptime(ms)=%d (%s)\n", ping.JSON200.UptimeMs, formatDuration(uptime))
-			fmt.Printf("heap_free=%d\nwifi_mode=%s\n",
-				derefInt(ping.JSON200.HeapFree),
-				derefString(ping.JSON200.WifiMode),
-			)
+			return
 		}
+
+		if ping.JSON200 == nil {
+			log.Fatalf("ping faalde, geen JSON200 (status %s)", ping.Status())
+		}
+
+		p := ping.JSON200
+		fmt.Printf("Pong: %v\n", p.Pong)
+		fmt.Printf("Nu:   %d (ms since epoch)\n", p.Now)
+		fmt.Printf("Up:   %s\n", formatDuration(time.Duration(p.UptimeMs)*time.Millisecond))
+		if p.HeapFree != nil {
+			fmt.Printf("Free heap: %d bytes\n", *p.HeapFree)
+		}
+		if p.WifiMode != nil {
+			fmt.Printf("WiFi mode: %s\n", *p.WifiMode)
+		}
+		return
 	}
 
-	// --- 5) Optioneel: reboot
-	if *reboot {
-		res, err := c.PostApiSystemRebootWithResponse(ctx)
-		if err != nil {
-			log.Fatalf("POST /api/system/reboot: %v", err)
-		}
-		if *showRaw && res.Body != nil {
-			fmt.Println(string(res.Body))
-		}
-		if res.JSON200 != nil && derefBool(res.JSON200.Rebooting) {
-			fmt.Println("rebooting:", derefString(res.JSON200.Message))
-		} else {
-			fmt.Println("reboot request sent (check device)")
-		}
-	}
-
-	// 3) Optioneel: lijst tijdzones
+	// --- TIMEZONE: lijst tonen
 	if *listTZ {
-		ls, err := c.GetApiTimezonesWithResponse(ctx)
+		resp, err := c.GetApiTimezonesWithResponse(ctx)
 		if err != nil {
 			log.Fatalf("GET /api/timezones: %v", err)
 		}
-		if *showRaw && ls.Body != nil {
-			fmt.Println(string(ls.Body))
-		} else if ls.JSON200 != nil && ls.JSON200.Timezones != nil {
-			fmt.Println("supported timezones:")
-			for _, z := range *ls.JSON200.Timezones {
-				fmt.Println(" -", z)
-			}
+		if *showRaw && resp.Body != nil {
+			fmt.Println(string(resp.Body))
+			return
 		}
+		if resp.JSON200 == nil {
+			log.Fatalf("kon tijdzones niet ophalen (status %s)", resp.Status())
+		}
+		fmt.Println("Ondersteunde tijdzones:")
+		for _, tz := range *resp.JSON200.Timezones {
+			fmt.Printf(" - %s\n", tz)
+		}
+		return
 	}
 
-	// --- 1) Tijdzone zetten
+	// --- TIMEZONE: huidige tijdzone opvragen
+	if *getTZ {
+		resp, err := c.GetApiTimezoneWithResponse(ctx)
+		if err != nil {
+			log.Fatalf("GET /api/timezone: %v", err)
+		}
+		if *showRaw && resp.Body != nil {
+			fmt.Println(string(resp.Body))
+			return
+		}
+		if resp.JSON200 == nil {
+			log.Fatalf("kon tijdzone niet ophalen (status %s)", resp.Status())
+		}
+		tz := resp.JSON200
+		fmt.Printf("Huidige tijdzone: %s\n", tz.Timezone)
+		fmt.Printf("GMT offset:       %d s\n", tz.Gmtoffset)
+		fmt.Printf("DST offset:       %d s\n", tz.Dstoffset)
+		return
+	}
+
+	// --- TIMEZONE: nieuwe tijdzone instellen
 	if *setTZ != "" {
-		body := ledclock.PostApiTimezoneJSONRequestBody{Timezone: *setTZ}
+		body := ledclock.PostApiTimezoneJSONRequestBody{
+			Timezone: *setTZ,
+		}
 		res, err := c.PostApiTimezoneWithResponse(ctx, body)
 		if err != nil {
 			log.Fatalf("POST /api/timezone: %v", err)
 		}
+
 		if *showRaw && res.Body != nil {
 			fmt.Println(string(res.Body))
 		}
 		if res.JSON200 == nil || !derefBool(res.JSON200.Success) {
 			log.Fatalf("timezone update failed (status %s)", res.Status())
 		}
-		fmt.Println("timezone updated:", derefString(res.JSON200.Message))
+		fmt.Println("Tijdzone succesvol ingesteld.")
+		return
 	}
 
-	// --- 1b) Tijdzone verwijderen (reset)
+	// --- TIMEZONE: tijdzone resetten
 	if *clearTZ {
 		res, err := c.DeleteApiTimezoneWithResponse(ctx)
 		if err != nil {
@@ -131,38 +155,48 @@ func main() {
 		}
 		if *showRaw && res.Body != nil {
 			fmt.Println(string(res.Body))
-		} else if res.JSON200 != nil && derefBool(res.JSON200.Success) {
-			msg := derefString(res.JSON200.Message)
-			tz := derefString(res.JSON200.Timezone)
-			fmt.Printf("timezone cleared: %s\n", msg)
-			if tz != "" {
-				fmt.Printf("active timezone now: %s (gmtoffset=%d, dstoffset=%d) ",
-					tz, derefInt(res.JSON200.Gmtoffset), derefInt(res.JSON200.Dstoffset))
-			}
-		} else {
-			fmt.Println("timezone clear request sent (check device)")
+			return
 		}
+		if res.JSON200 == nil {
+			log.Fatalf("kon tijdzone niet resetten (status %s)", res.Status())
+		}
+		fmt.Println("Tijdzone gereset naar standaard.")
+		fmt.Printf("Actieve TZ: %s (gmtoffset=%d, dstoffset=%d)\n",
+			derefString(res.JSON200.Timezone),
+			derefInt(res.JSON200.Gmtoffset),
+			derefInt(res.JSON200.Dstoffset))
+		return
 	}
 
-	// --- Tijdzone: alleen huidige TZ opvragen
-	if *getTZ {
-		res, err := c.GetApiTimezoneWithResponse(ctx)
+	// --- THEMES: lijst tonen
+	if *listThemes {
+		res, err := c.GetApiThemesWithResponse(ctx)
 		if err != nil {
-			log.Fatalf("GET /api/timezone: %v", err)
+			log.Fatalf("GET /api/themes: %v", err)
 		}
 		if *showRaw && res.Body != nil {
 			fmt.Println(string(res.Body))
-		} else if res.JSON200 != nil {
-			fmt.Printf("Current timezone: %s\n", res.JSON200.Timezone)
-			fmt.Printf("  GMT offset: %d seconds\n", res.JSON200.Gmtoffset)
-			fmt.Printf("  DST offset: %d seconds\n", res.JSON200.Dstoffset)
-		} else {
-			fmt.Println("kon huidige tijdzone niet ophalen")
+			return
+		}
+		if res.JSON200 == nil {
+			log.Fatalf("kon themes niet ophalen (status %s)", res.Status())
+		}
+		fmt.Println("Beschikbare themes:")
+		for _, t := range *res.JSON200 {
+			active := ""
+			if t.IsActive {
+				active = " (actief)"
+			}
+			def := ""
+			if t.IsDefault {
+				def = " (default)"
+			}
+			fmt.Printf(" - %s (%s)%s%s\n", t.Id, t.Name, active, def)
 		}
 		return
 	}
 
-	// --- Theme: alleen huidige theme opvragen
+	// --- THEMES: actief theme opvragen
 	if *getTheme {
 		res, err := c.GetApiThemeWithResponse(ctx)
 		if err != nil {
@@ -170,70 +204,46 @@ func main() {
 		}
 		if *showRaw && res.Body != nil {
 			fmt.Println(string(res.Body))
-		} else if res.JSON200 != nil {
-			fmt.Printf("active theme: %s (%s)\n", res.JSON200.ActiveName, res.JSON200.ActiveId)
-			if res.JSON200.HasSavedOverride {
-				if res.JSON200.SavedOverrideId != nil {
-					fmt.Printf("saved override id: %s\n", *res.JSON200.SavedOverrideId)
-				} else {
-					fmt.Println("saved override aanwezig")
-				}
-			}
-			if res.JSON200.IsDefault {
-				fmt.Println("note: actief theme is het standaard theme")
-			}
+			return
+		}
+		if res.JSON200 == nil {
+			log.Fatalf("kon actief theme niet ophalen (status %s)", res.Status())
+		}
+		t := res.JSON200
+		fmt.Printf("Actief theme: %s (%s)\n", t.ActiveId, t.ActiveName)
+		if t.IsDefault {
+			fmt.Println("Dit is het default theme.")
 		} else {
-			fmt.Println("kon actief theme niet ophalen")
+			fmt.Println("Dit is een override theme.")
+		}
+		if t.HasSavedOverride {
+			fmt.Printf("Er is een opgeslagen override: %s\n", derefString(t.SavedOverrideId))
 		}
 		return
 	}
 
-	// --- 2) Themes: lijst tonen
-	if *listThemes {
-		ls, err := c.GetApiThemesWithResponse(ctx)
-		if err != nil {
-			log.Fatalf("GET /api/themes: %v", err)
-		}
-		if *showRaw && ls.Body != nil {
-			fmt.Println(string(ls.Body))
-		} else if ls.JSON200 != nil {
-			fmt.Println("themes:")
-			for _, t := range *ls.JSON200 {
-				activeMark := " "
-				if t.IsActive {
-					activeMark = "*"
-				}
-				defaultMark := " "
-				if t.IsDefault {
-					defaultMark = "d"
-				}
-				fmt.Printf("[%s %s] %s (id=%s)\n", activeMark, defaultMark, t.Name, t.Id)
-			}
-			fmt.Println("\nLegenda: * = actief, d = default")
-		} else {
-			fmt.Println("geen themes gevonden")
-		}
-	}
-
-	// --- 3) Theme zetten via id
+	// --- THEMES: theme instellen
 	if *setTheme != "" {
 		res, err := c.PostApiThemeWithResponse(ctx, &ledclock.PostApiThemeParams{Id: *setTheme})
 		if err != nil {
-			log.Fatalf("POST /api/theme?id=...: %v", err)
+			log.Fatalf("POST /api/theme: %v", err)
 		}
 		if *showRaw && res.Body != nil {
 			fmt.Println(string(res.Body))
-		} else if res.JSON200 != nil && res.JSON200.Ok {
-			fmt.Printf("theme set: %s (%s)\n", res.JSON200.ActiveName, res.JSON200.ActiveId)
-			if res.JSON200.IsDefault {
-				fmt.Println("actief theme is het standaard theme")
-			}
-		} else {
-			fmt.Println("kon theme niet zetten (controleer id)")
+			return
 		}
+		if res.JSON200 == nil || !res.JSON200.Ok {
+			log.Fatalf("kon theme niet instellen (status %s)", res.Status())
+		}
+		t := res.JSON200
+		fmt.Printf("Theme ingesteld: %s (%s)\n", t.ActiveId, t.ActiveName)
+		if t.IsDefault {
+			fmt.Println("Dit is nu het default theme.")
+		}
+		return
 	}
 
-	// --- 4) Theme resetten naar default
+	// --- THEMES: theme override verwijderen
 	if *clearTheme {
 		res, err := c.DeleteApiThemeWithResponse(ctx)
 		if err != nil {
@@ -241,11 +251,15 @@ func main() {
 		}
 		if *showRaw && res.Body != nil {
 			fmt.Println(string(res.Body))
-		} else if res.JSON200 != nil && res.JSON200.Ok {
-			fmt.Printf("theme reset naar default: %s (%s)\n", res.JSON200.ActiveName, res.JSON200.ActiveId)
-		} else {
-			fmt.Println("kon theme niet resetten")
+			return
 		}
+		if res.JSON200 == nil || !res.JSON200.Ok {
+			log.Fatalf("kon theme override niet verwijderen (status %s)", res.Status())
+		}
+		t := res.JSON200
+		fmt.Println("Theme override verwijderd; default theme actief.")
+		fmt.Printf("Actief theme: %s (%s)\n", t.ActiveId, t.ActiveName)
+		return
 	}
 
 	// --- POWERSAVE: huidige status opvragen
@@ -257,14 +271,21 @@ func main() {
 		if *showRaw && res.Body != nil {
 			fmt.Println(string(res.Body))
 		} else if res.JSON200 != nil {
-			fmt.Printf("Powersave enabled: %v\n", res.JSON200.Enabled)
+			status := "OFF"
+			if res.JSON200.Enabled {
+				status = "ON"
+			}
+			fmt.Printf("Powersave: %s\n", status)
+			if res.JSON200.Message != nil && *res.JSON200.Message != "" {
+				fmt.Printf("Message: %s\n", *res.JSON200.Message)
+			}
 		} else {
 			fmt.Println("kon powersave-status niet ophalen")
 		}
 		return
 	}
 
-	// --- POWERSAVE: instellen (on/off)
+	// --- POWERSAVE: powersave-modus zetten
 	if *setPS != "" {
 		var v bool
 		if *setPS == "on" {
@@ -283,8 +304,15 @@ func main() {
 
 		if *showRaw && res.Body != nil {
 			fmt.Println(string(res.Body))
-		} else if res.JSON200 != nil && res.JSON200.Success {
-			fmt.Printf("powersave updated: %v\n", v)
+		} else if res.JSON200 != nil {
+			status := "OFF"
+			if res.JSON200.Enabled {
+				status = "ON"
+			}
+			fmt.Printf("Powersave updated: %s\n", status)
+			if res.JSON200.Message != nil && *res.JSON200.Message != "" {
+				fmt.Printf("Message: %s\n", *res.JSON200.Message)
+			}
 		} else {
 			fmt.Println("powersave update failed")
 		}
@@ -299,8 +327,15 @@ func main() {
 
 		if *showRaw && res.Body != nil {
 			fmt.Println(string(res.Body))
-		} else if res.JSON200 != nil && res.JSON200.Success {
-			fmt.Println("powersave reset naar standaard")
+		} else if res.JSON200 != nil {
+			status := "OFF"
+			if res.JSON200.Enabled {
+				status = "ON"
+			}
+			fmt.Printf("powersave reset naar standaard (nu: %s)\n", status)
+			if res.JSON200.Message != nil && *res.JSON200.Message != "" {
+				fmt.Printf("Message: %s\n", *res.JSON200.Message)
+			}
 		} else {
 			fmt.Println("kon powersave niet resetten")
 		}
