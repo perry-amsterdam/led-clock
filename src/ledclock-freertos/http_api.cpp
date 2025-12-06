@@ -168,6 +168,32 @@ static void apiHandlePowersavePost()
 
 
 // ======================================================
+// /api/powersave (DELETE)
+// Reset powersave naar de standaardwaarde (uitgeschakeld).
+// ======================================================
+static void apiHandlePowersaveDelete()
+{
+	if (server.method() != HTTP_DELETE)
+	{
+		// Zelfde 405-stijl als de andere handlers
+		sendJson(405, "{\"success\":false,\"message\":\"Method Not Allowed\"}");
+		return;
+	}
+
+	// Reset powersave naar default (uit)
+	exitPowerSaveMode();
+
+	// Bouw JSON response volgens nieuwe OpenAPI:
+	// schema PowersaveStatus: { "enabled": bool, "message"?: string }
+	DynamicJsonDocument doc(128);
+								 // verwacht false na exitPowerSaveMode()
+	doc["enabled"] = isPowerSaveMode();
+	doc["message"] = "Powersave disabled and reset to default";
+	sendJson(200, doc);
+}
+
+
+// ======================================================
 // Compacte wereldlijst met veelgebruikte tijdzones
 // ======================================================
 static const char* kTimezones[] PROGMEM =
@@ -546,6 +572,7 @@ void startApi()
 	// Api powersave calls.
 	server.on("/api/powersave", HTTP_GET,  apiHandlePowersaveGet);
 	server.on("/api/powersave", HTTP_POST, apiHandlePowersavePost);
+	server.on("/api/powersave", HTTP_DELETE, apiHandlePowersaveDelete);
 
 	server.begin();
 	startHttpTask();

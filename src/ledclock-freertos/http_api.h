@@ -10,8 +10,15 @@ extern WebServer server;
 
 /**
  * Registreert alle API-routes en start de HTTP server + mDNS.
- *   Routes: /api/ping (GET), /api/system/reboot (POST), /api/timezone (GET/POST/DELETE)
- * - mDNS: ledclock.local (http service)
+ *   Routes:
+ *     /api/ping            (GET)
+ *     /api/system/reboot   (POST)
+ *     /api/timezone        (GET/POST/DELETE)
+ *     /api/timezones       (GET)
+ *     /api/themes          (GET)
+ *     /api/theme           (GET/POST/DELETE)
+ *     /api/powersave       (GET/POST/DELETE)
+ *   mDNS: ledclock.local (http service)
  */
 void startApi();
 
