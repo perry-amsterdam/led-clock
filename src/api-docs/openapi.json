@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "LED Clock REST API",
-    "version": "1.6.0",
+    "version": "1.6.1",
     "description": "REST API voor ESP32 LED Clock. Bevat ping, reboot, tijdzone endpoints en een compacte tijdzones-lijst."
   },
   "servers": [
@@ -19,9 +19,7 @@
   "paths": {
     "/api/ping": {
       "get": {
-        "tags": [
-          "Health"
-        ],
+        "tags": ["Health"],
         "summary": "Ping het device",
         "description": "Retourneert een pong met enkele statusvelden, voor health/latency checks.",
         "responses": {
@@ -31,16 +29,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "pong",
-                    "now",
-                    "uptime_ms"
-                  ],
+                  "required": ["pong", "now", "uptime_ms"],
                   "properties": {
-                    "pong": {
-                      "type": "boolean",
-                      "example": true
-                    },
+                    "pong": { "type": "boolean", "example": true },
                     "now": {
                       "type": "integer",
                       "format": "int64",
@@ -70,11 +61,10 @@
         }
       }
     },
+
     "/api/system/reboot": {
       "post": {
-        "tags": [
-          "System"
-        ],
+        "tags": ["System"],
         "summary": "Herstart het apparaat",
         "description": "Start de ESP32 opnieuw op.",
         "responses": {
@@ -85,10 +75,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "rebooting": {
-                      "type": "boolean",
-                      "example": true
-                    },
+                    "rebooting": { "type": "boolean", "example": true },
                     "message": {
                       "type": "string",
                       "example": "Rebooting system..."
@@ -101,13 +88,12 @@
         }
       }
     },
+
     "/api/timezone": {
       "get": {
-        "tags": [
-          "Time"
-        ],
+        "tags": ["Time"],
         "summary": "Haal de ingestelde tijdzone op",
-        "description": "Geeft de huidige IANA tijdzone terug plus afzonderlijke offsets in seconden: `gmtoffset` (UTC-basisoOffset) en `dstoffset` (zomertijd).",
+        "description": "Geeft de huidige IANA tijdzone terug plus offsets.",
         "responses": {
           "200": {
             "description": "Tijdzone-informatie ontvangen",
@@ -115,24 +101,17 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "timezone",
-                    "gmtoffset",
-                    "dstoffset"
-                  ],
+                  "required": ["timezone", "gmtoffset", "dstoffset"],
                   "properties": {
-                    "timezone": {
-                      "type": "string",
-                      "example": "Europe/Amsterdam"
-                    },
+                    "timezone": { "type": "string", "example": "Europe/Amsterdam" },
                     "gmtoffset": {
                       "type": "integer",
-                      "description": "Vaste offset t.o.v. UTC in seconden (zonder DST).",
+                      "description": "Vaste offset t.o.v. UTC",
                       "example": 3600
                     },
                     "dstoffset": {
                       "type": "integer",
-                      "description": "Zomertijd-offset in seconden (meestal 0 of 3600).",
+                      "description": "DST offset",
                       "example": 3600
                     }
                   }
@@ -143,24 +122,19 @@
         }
       },
       "post": {
-        "tags": [
-          "Time"
-        ],
+        "tags": ["Time"],
         "summary": "Stel de tijdzone in",
-        "description": "Past alleen de tijdzone (IANA) aan. De klok zelf blijft door NTP/RTC bepaald.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "timezone"
-                ],
+                "required": ["timezone"],
                 "properties": {
                   "timezone": {
                     "type": "string",
-                    "description": "Nieuwe tijdzone, bv. Europe/Amsterdam",
+                    "description": "Nieuwe tijdzone",
                     "example": "Europe/Amsterdam"
                   }
                 }
@@ -170,16 +144,13 @@
         },
         "responses": {
           "200": {
-            "description": "Tijdzone succesvol ingesteld",
+            "description": "Tijdzone ingesteld",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
+                    "success": { "type": "boolean", "example": true },
                     "message": {
                       "type": "string",
                       "example": "Timezone updated successfully"
@@ -192,42 +163,25 @@
         }
       },
       "delete": {
-        "tags": [
-          "Time"
-        ],
-        "summary": "Verwijder de ingestelde tijdzone (reset naar standaard)",
-        "description": "Verwijdert de door de gebruiker ingestelde IANA-tijdzone uit opslag (NVS). Het systeem valt terug op de standaardtijdzone of automatische offset. Idempotent.",
+        "tags": ["Time"],
+        "summary": "Verwijder de ingestelde tijdzone",
+        "description": "Reset naar standaardtijdzone.",
         "responses": {
           "200": {
-            "description": "Tijdzone verwijderd en teruggevallen op standaard",
+            "description": "Tijdzone verwijderd",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
+                    "success": { "type": "boolean", "example": true },
                     "message": {
                       "type": "string",
                       "example": "Timezone cleared; using default"
                     },
-                    "timezone": {
-                      "type": "string",
-                      "description": "Actieve tijdzone na reset (standaard of automatisch)",
-                      "example": "Etc/UTC"
-                    },
-                    "gmtoffset": {
-                      "type": "integer",
-                      "description": "Vaste offset t.o.v. UTC in seconden na reset.",
-                      "example": 0
-                    },
-                    "dstoffset": {
-                      "type": "integer",
-                      "description": "Zomertijd-offset in seconden na reset.",
-                      "example": 0
-                    }
+                    "timezone": { "type": "string", "example": "Etc/UTC" },
+                    "gmtoffset": { "type": "integer", "example": 0 },
+                    "dstoffset": { "type": "integer", "example": 0 }
                   }
                 }
               }
@@ -236,13 +190,11 @@
         }
       }
     },
+
     "/api/timezones": {
       "get": {
-        "tags": [
-          "Time"
-        ],
-        "summary": "Lijst van ondersteunde tijdzones",
-        "description": "Retourneert een verkorte lijst van IANA-tijdzones die het systeem ondersteunt. Kan later worden uitgebreid.",
+        "tags": ["Time"],
+        "summary": "Lijst van tijdzones",
         "responses": {
           "200": {
             "description": "Tijdzones ontvangen",
@@ -253,14 +205,7 @@
                   "properties": {
                     "timezones": {
                       "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "example": [
-                        "Europe/Amsterdam",
-                        "America/New_York",
-                        "Asia/Tokyo"
-                      ]
+                      "items": { "type": "string" }
                     }
                   }
                 }
@@ -270,45 +215,26 @@
         }
       }
     },
+
     "/api/themes": {
       "get": {
-        "tags": [
-          "Themes"
-        ],
-        "summary": "Lijst alle beschikbare thema's",
-        "description": "Retourneert een lijst met thema-objecten, inclusief welke actief en standaard is.",
+        "tags": ["Themes"],
+        "summary": "Lijst beschikbare thema's",
         "responses": {
           "200": {
-            "description": "Lijst van thema's",
+            "description": "Thema's",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "required": [
-                      "id",
-                      "name",
-                      "is_default",
-                      "is_active"
-                    ],
+                    "required": ["id", "name", "is_default", "is_active"],
                     "properties": {
-                      "id": {
-                        "type": "string",
-                        "example": "retro"
-                      },
-                      "name": {
-                        "type": "string",
-                        "example": "Retro"
-                      },
-                      "is_default": {
-                        "type": "boolean",
-                        "example": false
-                      },
-                      "is_active": {
-                        "type": "boolean",
-                        "example": true
-                      }
+                      "id": { "type": "string" },
+                      "name": { "type": "string" },
+                      "is_default": { "type": "boolean" },
+                      "is_active": { "type": "boolean" }
                     }
                   }
                 }
@@ -318,47 +244,25 @@
         }
       }
     },
+
     "/api/theme": {
       "get": {
-        "tags": [
-          "Themes"
-        ],
-        "summary": "Haal het actieve thema op",
+        "tags": ["Themes"],
+        "summary": "Haal actief thema op",
         "responses": {
           "200": {
-            "description": "Actief thema en status",
+            "description": "Actief thema",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "active_id",
-                    "active_name",
-                    "is_default",
-                    "has_saved_override"
-                  ],
+                  "required": ["active_id", "active_name", "is_default", "has_saved_override"],
                   "properties": {
-                    "active_id": {
-                      "type": "string",
-                      "example": "retro"
-                    },
-                    "active_name": {
-                      "type": "string",
-                      "example": "Retro"
-                    },
-                    "is_default": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "has_saved_override": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "saved_override_id": {
-                      "type": "string",
-                      "nullable": true,
-                      "example": "retro"
-                    }
+                    "active_id": { "type": "string" },
+                    "active_name": { "type": "string" },
+                    "is_default": { "type": "boolean" },
+                    "has_saved_override": { "type": "boolean" },
+                    "saved_override_id": { "type": "string", "nullable": true }
                   }
                 }
               }
@@ -367,101 +271,52 @@
         }
       },
       "post": {
-        "tags": [
-          "Themes"
-        ],
-        "summary": "Stel een thema in op basis van id",
-        "description": "Selecteert een thema als actief en slaat dit als override op in NVS.",
+        "tags": ["Themes"],
+        "summary": "Stel thema in",
         "parameters": [
           {
             "in": "query",
             "name": "id",
             "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Thema-id (zie /api/themes)"
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
           "200": {
-            "description": "Thema geactiveerd",
+            "description": "Thema ingesteld",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "ok",
-                    "active_id",
-                    "active_name",
-                    "is_default"
-                  ],
+                  "required": ["ok", "active_id", "active_name", "is_default"],
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "active_id": {
-                      "type": "string",
-                      "example": "retro"
-                    },
-                    "active_name": {
-                      "type": "string",
-                      "example": "Retro"
-                    },
-                    "is_default": {
-                      "type": "boolean",
-                      "example": false
-                    }
+                    "ok": { "type": "boolean" },
+                    "active_id": { "type": "string" },
+                    "active_name": { "type": "string" },
+                    "is_default": { "type": "boolean" }
                   }
                 }
               }
             }
-          },
-          "400": {
-            "description": "Ontbrekende of ongeldige id"
-          },
-          "404": {
-            "description": "Onbekend thema id"
           }
         }
       },
       "delete": {
-        "tags": [
-          "Themes"
-        ],
-        "summary": "Verwijder opgeslagen thema-override",
-        "description": "Verwijdert de user override en zet het standaardthema actief.",
+        "tags": ["Themes"],
+        "summary": "Verwijder thema override",
         "responses": {
           "200": {
-            "description": "Override verwijderd; standaard actief",
+            "description": "Override verwijderd",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "ok",
-                    "active_id",
-                    "active_name",
-                    "is_default"
-                  ],
+                  "required": ["ok", "active_id", "active_name", "is_default"],
                   "properties": {
-                    "ok": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "active_id": {
-                      "type": "string",
-                      "example": "default"
-                    },
-                    "active_name": {
-                      "type": "string",
-                      "example": "Default"
-                    },
-                    "is_default": {
-                      "type": "boolean",
-                      "example": true
-                    }
+                    "ok": { "type": "boolean" },
+                    "active_id": { "type": "string" },
+                    "active_name": { "type": "string" },
+                    "is_default": { "type": "boolean" }
                   }
                 }
               }
@@ -470,11 +325,10 @@
         }
       }
     },
+
     "/api/powersave": {
       "get": {
-        "tags": [
-          "Powersave"
-        ],
+        "tags": ["Powersave"],
         "summary": "Haal de huidige powersave-modus op",
         "responses": {
           "200": {
@@ -484,10 +338,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "enabled": {
-                      "type": "boolean",
-                      "example": true
-                    }
+                    "enabled": { "type": "boolean", "example": true }
                   }
                 }
               }
@@ -496,24 +347,17 @@
         }
       },
       "post": {
-        "tags": [
-          "Powersave"
-        ],
-        "summary": "Schakel powersave-modus in of uit",
+        "tags": ["Powersave"],
+        "summary": "Schakel powersave in/uit",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "enabled"
-                ],
+                "required": ["enabled"],
                 "properties": {
-                  "enabled": {
-                    "type": "boolean",
-                    "example": true
-                  }
+                  "enabled": { "type": "boolean", "example": true }
                 }
               }
             }
@@ -521,51 +365,52 @@
         },
         "responses": {
           "200": {
-            "description": "Powersave-modus gewijzigd",
+            "description": "Powersave gewijzigd",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "enabled": {
-                      "type": "boolean",
-                      "example": true
+                    "enabled": { "type": "boolean", "example": true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Powersave"],
+        "summary": "Reset powersave-modus naar standaardwaarde",
+        "description": "Zet powersave uit en reset naar default. Idempotent.",
+        "responses": {
+          "200": {
+            "description": "Powersave is uitgeschakeld",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": { "type": "boolean", "example": false },
+                    "message": {
+                      "type": "string",
+                      "example": "Powersave disabled and reset to default"
                     }
                   }
                 }
               }
             }
-          },
-          "400": {
-            "description": "Invalid or missing fields"
-          },
-          "405": {
-            "description": "Method Not Allowed"
           }
         }
       }
     }
   },
+
   "tags": [
-    {
-      "name": "Health",
-      "description": "Status en health-checks"
-    },
-    {
-      "name": "System",
-      "description": "Systeembeheer en device-acties"
-    },
-    {
-      "name": "Time",
-      "description": "Tijdzone-instellingen en tijdinformatie"
-    },
-    {
-      "name": "Themes",
-      "description": "Thema-overzicht en selectie"
-    },
-    {
-      "name": "Powersave",
-      "description": "Energiebesparing / powersave functionaliteit"
-    }
+    { "name": "Health", "description": "Status en health-checks" },
+    { "name": "System", "description": "Systeembeheer en device-acties" },
+    { "name": "Time", "description": "Tijdzone-instellingen en tijdinformatie" },
+    { "name": "Themes", "description": "Thema-overzicht en selectie" },
+    { "name": "Powersave", "description": "Energiebesparing / powersave functionaliteit" }
   ]
 }
