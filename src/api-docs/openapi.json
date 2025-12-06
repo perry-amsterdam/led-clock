@@ -2,8 +2,8 @@
   "openapi": "3.0.0",
   "info": {
     "title": "LED Clock REST API",
-    "version": "1.6.1",
-    "description": "REST API voor ESP32 LED Clock. Bevat ping, reboot, tijdzone endpoints en een compacte tijdzones-lijst."
+    "version": "1.7.0",
+    "description": "REST API voor ESP32 LED Clock. Bevat ping, reboot, tijdzone, thema en powersave endpoints."
   },
   "servers": [
     {
@@ -16,401 +16,644 @@
       }
     }
   ],
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Status en health-checks"
+    },
+    {
+      "name": "System",
+      "description": "Systeembeheer en device-acties"
+    },
+    {
+      "name": "Time",
+      "description": "Tijdzone-instellingen en tijdinformatie"
+    },
+    {
+      "name": "Themes",
+      "description": "Thema-overzicht en selectie"
+    },
+    {
+      "name": "Powersave",
+      "description": "Energiebesparing / powersave functionaliteit"
+    }
+  ],
   "paths": {
     "/api/ping": {
       "get": {
-        "tags": ["Health"],
+        "tags": [
+          "Health"
+        ],
         "summary": "Ping het device",
         "description": "Retourneert een pong met enkele statusvelden, voor health/latency checks.",
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["pong", "now", "uptime_ms"],
-                  "properties": {
-                    "pong": { "type": "boolean", "example": true },
-                    "now": {
-                      "type": "integer",
-                      "format": "int64",
-                      "description": "Unix epoch (ms)",
-                      "example": 1733246400000
-                    },
-                    "uptime_ms": {
-                      "type": "integer",
-                      "format": "int64",
-                      "example": 52341
-                    },
-                    "heap_free": {
-                      "type": "integer",
-                      "description": "Vrije heap in bytes",
-                      "example": 187264
-                    },
-                    "wifi_mode": {
-                      "type": "string",
-                      "description": "Huidige Wi-Fi modus",
-                      "example": "AP"
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/PingResponse"
           }
         }
       }
     },
-
     "/api/system/reboot": {
       "post": {
-        "tags": ["System"],
+        "tags": [
+          "System"
+        ],
         "summary": "Herstart het apparaat",
         "description": "Start de ESP32 opnieuw op.",
         "responses": {
           "200": {
-            "description": "Herstart wordt uitgevoerd",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "rebooting": { "type": "boolean", "example": true },
-                    "message": {
-                      "type": "string",
-                      "example": "Rebooting system..."
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/RebootResponse"
           }
         }
       }
     },
-
     "/api/timezone": {
       "get": {
-        "tags": ["Time"],
+        "tags": [
+          "Time"
+        ],
         "summary": "Haal de ingestelde tijdzone op",
-        "description": "Geeft de huidige IANA tijdzone terug plus offsets.",
+        "description": "Geeft de huidige IANA tijdzone terug plus afzonderlijke offsets in seconden: `gmtoffset` (UTC-basisoffset) en `dstoffset` (zomertijd).",
         "responses": {
           "200": {
-            "description": "Tijdzone-informatie ontvangen",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["timezone", "gmtoffset", "dstoffset"],
-                  "properties": {
-                    "timezone": { "type": "string", "example": "Europe/Amsterdam" },
-                    "gmtoffset": {
-                      "type": "integer",
-                      "description": "Vaste offset t.o.v. UTC",
-                      "example": 3600
-                    },
-                    "dstoffset": {
-                      "type": "integer",
-                      "description": "DST offset",
-                      "example": 3600
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/TimezoneGetResponse"
           }
         }
       },
       "post": {
-        "tags": ["Time"],
+        "tags": [
+          "Time"
+        ],
         "summary": "Stel de tijdzone in",
+        "description": "Past alleen de tijdzone (IANA) aan. De klok zelf blijft door NTP/RTC bepaald.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "required": ["timezone"],
-                "properties": {
-                  "timezone": {
-                    "type": "string",
-                    "description": "Nieuwe tijdzone",
-                    "example": "Europe/Amsterdam"
-                  }
-                }
+                "$ref": "#/components/schemas/TimezoneSetRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Tijdzone ingesteld",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean", "example": true },
-                    "message": {
-                      "type": "string",
-                      "example": "Timezone updated successfully"
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/TimezoneSetResponse"
           }
         }
       },
       "delete": {
-        "tags": ["Time"],
-        "summary": "Verwijder de ingestelde tijdzone",
-        "description": "Reset naar standaardtijdzone.",
+        "tags": [
+          "Time"
+        ],
+        "summary": "Verwijder de ingestelde tijdzone (reset naar standaard)",
+        "description": "Verwijdert de door de gebruiker ingestelde IANA-tijdzone uit opslag (NVS). Het systeem valt terug op de standaardtijdzone of automatische offset. Idempotent.",
         "responses": {
           "200": {
-            "description": "Tijdzone verwijderd",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean", "example": true },
-                    "message": {
-                      "type": "string",
-                      "example": "Timezone cleared; using default"
-                    },
-                    "timezone": { "type": "string", "example": "Etc/UTC" },
-                    "gmtoffset": { "type": "integer", "example": 0 },
-                    "dstoffset": { "type": "integer", "example": 0 }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/TimezoneDeleteResponse"
           }
         }
       }
     },
-
     "/api/timezones": {
       "get": {
-        "tags": ["Time"],
-        "summary": "Lijst van tijdzones",
+        "tags": [
+          "Time"
+        ],
+        "summary": "Lijst van ondersteunde tijdzones",
+        "description": "Retourneert een verkorte lijst van IANA-tijdzones die het systeem ondersteunt.",
         "responses": {
           "200": {
-            "description": "Tijdzones ontvangen",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "timezones": {
-                      "type": "array",
-                      "items": { "type": "string" }
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/TimezoneListResponse"
           }
         }
       }
     },
-
     "/api/themes": {
       "get": {
-        "tags": ["Themes"],
-        "summary": "Lijst beschikbare thema's",
+        "tags": [
+          "Themes"
+        ],
+        "summary": "Lijst alle beschikbare thema's",
+        "description": "Retourneert een lijst met thema-objecten, inclusief welke actief en standaard is.",
         "responses": {
           "200": {
-            "description": "Thema's",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "required": ["id", "name", "is_default", "is_active"],
-                    "properties": {
-                      "id": { "type": "string" },
-                      "name": { "type": "string" },
-                      "is_default": { "type": "boolean" },
-                      "is_active": { "type": "boolean" }
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/ThemeListResponse"
           }
         }
       }
     },
-
     "/api/theme": {
       "get": {
-        "tags": ["Themes"],
-        "summary": "Haal actief thema op",
+        "tags": [
+          "Themes"
+        ],
+        "summary": "Haal het actieve thema op",
         "responses": {
           "200": {
-            "description": "Actief thema",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["active_id", "active_name", "is_default", "has_saved_override"],
-                  "properties": {
-                    "active_id": { "type": "string" },
-                    "active_name": { "type": "string" },
-                    "is_default": { "type": "boolean" },
-                    "has_saved_override": { "type": "boolean" },
-                    "saved_override_id": { "type": "string", "nullable": true }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/ThemeActiveResponse"
           }
         }
       },
       "post": {
-        "tags": ["Themes"],
-        "summary": "Stel thema in",
+        "tags": [
+          "Themes"
+        ],
+        "summary": "Stel een thema in op basis van id",
+        "description": "Selecteert een thema als actief en slaat dit als override op in NVS.",
         "parameters": [
           {
             "in": "query",
             "name": "id",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            },
+            "description": "Thema-id (zie /api/themes)"
           }
         ],
         "responses": {
           "200": {
-            "description": "Thema ingesteld",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["ok", "active_id", "active_name", "is_default"],
-                  "properties": {
-                    "ok": { "type": "boolean" },
-                    "active_id": { "type": "string" },
-                    "active_name": { "type": "string" },
-                    "is_default": { "type": "boolean" }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/ThemeSetResponse"
+          },
+          "400": {
+            "description": "Ontbrekende of ongeldige id"
+          },
+          "404": {
+            "description": "Onbekend thema id"
           }
         }
       },
       "delete": {
-        "tags": ["Themes"],
-        "summary": "Verwijder thema override",
+        "tags": [
+          "Themes"
+        ],
+        "summary": "Verwijder opgeslagen thema-override",
+        "description": "Verwijdert de user override en zet het standaardthema actief.",
         "responses": {
           "200": {
-            "description": "Override verwijderd",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["ok", "active_id", "active_name", "is_default"],
-                  "properties": {
-                    "ok": { "type": "boolean" },
-                    "active_id": { "type": "string" },
-                    "active_name": { "type": "string" },
-                    "is_default": { "type": "boolean" }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/ThemeDeleteOverrideResponse"
           }
         }
       }
     },
-
     "/api/powersave": {
       "get": {
-        "tags": ["Powersave"],
+        "tags": [
+          "Powersave"
+        ],
         "summary": "Haal de huidige powersave-modus op",
         "responses": {
           "200": {
-            "description": "Status ontvangen",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "enabled": { "type": "boolean", "example": true }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/PowersaveStatusResponse"
           }
         }
       },
       "post": {
-        "tags": ["Powersave"],
-        "summary": "Schakel powersave in/uit",
+        "tags": [
+          "Powersave"
+        ],
+        "summary": "Schakel powersave-modus in of uit",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "required": ["enabled"],
-                "properties": {
-                  "enabled": { "type": "boolean", "example": true }
-                }
+                "$ref": "#/components/schemas/PowersaveSetRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Powersave gewijzigd",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "enabled": { "type": "boolean", "example": true }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/PowersaveStatusResponse"
+          },
+          "400": {
+            "description": "Invalid or missing fields"
+          },
+          "405": {
+            "description": "Method Not Allowed"
           }
         }
       },
       "delete": {
-        "tags": ["Powersave"],
-        "summary": "Reset powersave-modus naar standaardwaarde",
-        "description": "Zet powersave uit en reset naar default. Idempotent.",
+        "tags": [
+          "Powersave"
+        ],
+        "summary": "Zet powersave-modus terug naar de standaardwaarde",
+        "description": "Reset de powersave-instelling naar de standaardwaarde (bijv. uitgeschakeld). Idempotent.",
         "responses": {
           "200": {
-            "description": "Powersave is uitgeschakeld",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "enabled": { "type": "boolean", "example": false },
-                    "message": {
-                      "type": "string",
-                      "example": "Powersave disabled and reset to default"
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/components/responses/PowersaveStatusResponse"
           }
         }
       }
     }
   },
-
-  "tags": [
-    { "name": "Health", "description": "Status en health-checks" },
-    { "name": "System", "description": "Systeembeheer en device-acties" },
-    { "name": "Time", "description": "Tijdzone-instellingen en tijdinformatie" },
-    { "name": "Themes", "description": "Thema-overzicht en selectie" },
-    { "name": "Powersave", "description": "Energiebesparing / powersave functionaliteit" }
-  ]
+  "components": {
+    "schemas": {
+      "PingResponse": {
+        "type": "object",
+        "required": [
+          "pong",
+          "now",
+          "uptime_ms"
+        ],
+        "properties": {
+          "pong": {
+            "type": "boolean",
+            "example": true
+          },
+          "now": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix epoch (ms)",
+            "example": 1733246400000
+          },
+          "uptime_ms": {
+            "type": "integer",
+            "format": "int64",
+            "example": 52341
+          },
+          "heap_free": {
+            "type": "integer",
+            "description": "Vrije heap in bytes",
+            "example": 187264
+          },
+          "wifi_mode": {
+            "type": "string",
+            "description": "Huidige Wi-Fi modus",
+            "example": "AP"
+          }
+        }
+      },
+      "RebootResponse": {
+        "type": "object",
+        "properties": {
+          "rebooting": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Rebooting system..."
+          }
+        }
+      },
+      "TimezoneInfo": {
+        "type": "object",
+        "required": [
+          "timezone",
+          "gmtoffset",
+          "dstoffset"
+        ],
+        "properties": {
+          "timezone": {
+            "type": "string",
+            "example": "Europe/Amsterdam"
+          },
+          "gmtoffset": {
+            "type": "integer",
+            "description": "Vaste offset t.o.v. UTC in seconden (zonder DST).",
+            "example": 3600
+          },
+          "dstoffset": {
+            "type": "integer",
+            "description": "Zomertijd-offset in seconden (meestal 0 of 3600).",
+            "example": 3600
+          }
+        }
+      },
+      "TimezoneSetRequest": {
+        "type": "object",
+        "required": [
+          "timezone"
+        ],
+        "properties": {
+          "timezone": {
+            "type": "string",
+            "description": "Nieuwe tijdzone, bv. Europe/Amsterdam",
+            "example": "Europe/Amsterdam"
+          }
+        }
+      },
+      "TimezoneSetResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Timezone updated successfully"
+          }
+        }
+      },
+      "TimezoneDeleteResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Timezone cleared; using default"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "Actieve tijdzone na reset (standaard of automatisch)",
+            "example": "Etc/UTC"
+          },
+          "gmtoffset": {
+            "type": "integer",
+            "description": "Vaste offset t.o.v. UTC in seconden na reset.",
+            "example": 0
+          },
+          "dstoffset": {
+            "type": "integer",
+            "description": "Zomertijd-offset in seconden na reset.",
+            "example": 0
+          }
+        }
+      },
+      "TimezoneListResponse": {
+        "type": "object",
+        "properties": {
+          "timezones": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Europe/Amsterdam",
+              "America/New_York",
+              "Asia/Tokyo"
+            ]
+          }
+        }
+      },
+      "ThemeListItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "is_default",
+          "is_active"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "retro"
+          },
+          "name": {
+            "type": "string",
+            "example": "Retro"
+          },
+          "is_default": {
+            "type": "boolean",
+            "example": false
+          },
+          "is_active": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "ThemeListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ThemeListItem"
+        }
+      },
+      "ThemeActiveResponse": {
+        "type": "object",
+        "required": [
+          "active_id",
+          "active_name",
+          "is_default",
+          "has_saved_override"
+        ],
+        "properties": {
+          "active_id": {
+            "type": "string",
+            "example": "retro"
+          },
+          "active_name": {
+            "type": "string",
+            "example": "Retro"
+          },
+          "is_default": {
+            "type": "boolean",
+            "example": false
+          },
+          "has_saved_override": {
+            "type": "boolean",
+            "example": true
+          },
+          "saved_override_id": {
+            "type": "string",
+            "nullable": true,
+            "example": "retro"
+          }
+        }
+      },
+      "ThemeSetResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "active_id",
+          "active_name",
+          "is_default"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "example": true
+          },
+          "active_id": {
+            "type": "string",
+            "example": "retro"
+          },
+          "active_name": {
+            "type": "string",
+            "example": "Retro"
+          },
+          "is_default": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "ThemeDeleteOverrideResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "active_id",
+          "active_name",
+          "is_default"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "example": true
+          },
+          "active_id": {
+            "type": "string",
+            "example": "default"
+          },
+          "active_name": {
+            "type": "string",
+            "example": "Default"
+          },
+          "is_default": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "PowersaveStatus": {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "description": "Optioneel bericht, voornamelijk gebruikt bij DELETE of statuswijziging.",
+            "example": "Powersave disabled and reset to default"
+          }
+        }
+      },
+      "PowersaveSetRequest": {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      }
+    },
+    "responses": {
+      "PingResponse": {
+        "description": "Ping response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PingResponse"
+            }
+          }
+        }
+      },
+      "RebootResponse": {
+        "description": "Herstart wordt uitgevoerd",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/RebootResponse"
+            }
+          }
+        }
+      },
+      "TimezoneGetResponse": {
+        "description": "Tijdzone-informatie ontvangen",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TimezoneInfo"
+            }
+          }
+        }
+      },
+      "TimezoneSetResponse": {
+        "description": "Tijdzone succesvol ingesteld",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TimezoneSetResponse"
+            }
+          }
+        }
+      },
+      "TimezoneDeleteResponse": {
+        "description": "Tijdzone verwijderd en teruggevallen op standaard",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TimezoneDeleteResponse"
+            }
+          }
+        }
+      },
+      "TimezoneListResponse": {
+        "description": "Tijdzones ontvangen",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TimezoneListResponse"
+            }
+          }
+        }
+      },
+      "ThemeListResponse": {
+        "description": "Lijst van thema's",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ThemeListResponse"
+            }
+          }
+        }
+      },
+      "ThemeActiveResponse": {
+        "description": "Actief thema en status",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ThemeActiveResponse"
+            }
+          }
+        }
+      },
+      "ThemeSetResponse": {
+        "description": "Thema geactiveerd",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ThemeSetResponse"
+            }
+          }
+        }
+      },
+      "ThemeDeleteOverrideResponse": {
+        "description": "Override verwijderd; standaard actief",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ThemeDeleteOverrideResponse"
+            }
+          }
+        }
+      },
+      "PowersaveStatusResponse": {
+        "description": "Powersave status",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PowersaveStatus"
+            }
+          }
+        }
+      }
+    }
+  }
 }
