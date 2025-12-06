@@ -16,20 +16,133 @@ import (
 	"github.com/oapi-codegen/runtime"
 )
 
+// PingResponse defines model for PingResponse.
+type PingResponse struct {
+	// HeapFree Vrije heap in bytes
+	HeapFree *int `json:"heap_free,omitempty"`
+
+	// Now Unix epoch (ms)
+	Now      int64 `json:"now"`
+	Pong     bool  `json:"pong"`
+	UptimeMs int64 `json:"uptime_ms"`
+
+	// WifiMode Huidige Wi-Fi modus
+	WifiMode *string `json:"wifi_mode,omitempty"`
+}
+
+// PowersaveSetRequest defines model for PowersaveSetRequest.
+type PowersaveSetRequest struct {
+	Enabled bool `json:"enabled"`
+}
+
+// PowersaveStatus defines model for PowersaveStatus.
+type PowersaveStatus struct {
+	Enabled bool `json:"enabled"`
+
+	// Message Optioneel bericht, voornamelijk gebruikt bij DELETE of statuswijziging.
+	Message *string `json:"message,omitempty"`
+}
+
+// RebootResponse defines model for RebootResponse.
+type RebootResponse struct {
+	Message   *string `json:"message,omitempty"`
+	Rebooting *bool   `json:"rebooting,omitempty"`
+}
+
+// ThemeActiveResponse defines model for ThemeActiveResponse.
+type ThemeActiveResponse struct {
+	ActiveId         string  `json:"active_id"`
+	ActiveName       string  `json:"active_name"`
+	HasSavedOverride bool    `json:"has_saved_override"`
+	IsDefault        bool    `json:"is_default"`
+	SavedOverrideId  *string `json:"saved_override_id"`
+}
+
+// ThemeDeleteOverrideResponse defines model for ThemeDeleteOverrideResponse.
+type ThemeDeleteOverrideResponse struct {
+	ActiveId   string `json:"active_id"`
+	ActiveName string `json:"active_name"`
+	IsDefault  bool   `json:"is_default"`
+	Ok         bool   `json:"ok"`
+}
+
+// ThemeListItem defines model for ThemeListItem.
+type ThemeListItem struct {
+	Id        string `json:"id"`
+	IsActive  bool   `json:"is_active"`
+	IsDefault bool   `json:"is_default"`
+	Name      string `json:"name"`
+}
+
+// ThemeListResponse defines model for ThemeListResponse.
+type ThemeListResponse = []ThemeListItem
+
+// ThemeSetResponse defines model for ThemeSetResponse.
+type ThemeSetResponse struct {
+	ActiveId   string `json:"active_id"`
+	ActiveName string `json:"active_name"`
+	IsDefault  bool   `json:"is_default"`
+	Ok         bool   `json:"ok"`
+}
+
+// TimezoneDeleteResponse defines model for TimezoneDeleteResponse.
+type TimezoneDeleteResponse struct {
+	// Dstoffset Zomertijd-offset in seconden na reset.
+	Dstoffset *int `json:"dstoffset,omitempty"`
+
+	// Gmtoffset Vaste offset t.o.v. UTC in seconden na reset.
+	Gmtoffset *int    `json:"gmtoffset,omitempty"`
+	Message   *string `json:"message,omitempty"`
+	Success   *bool   `json:"success,omitempty"`
+
+	// Timezone Actieve tijdzone na reset (standaard of automatisch)
+	Timezone *string `json:"timezone,omitempty"`
+}
+
+// TimezoneInfo defines model for TimezoneInfo.
+type TimezoneInfo struct {
+	// Dstoffset Zomertijd-offset in seconden (meestal 0 of 3600).
+	Dstoffset int `json:"dstoffset"`
+
+	// Gmtoffset Vaste offset t.o.v. UTC in seconden (zonder DST).
+	Gmtoffset int    `json:"gmtoffset"`
+	Timezone  string `json:"timezone"`
+}
+
+// TimezoneListResponse defines model for TimezoneListResponse.
+type TimezoneListResponse struct {
+	Timezones *[]string `json:"timezones,omitempty"`
+}
+
+// TimezoneSetRequest defines model for TimezoneSetRequest.
+type TimezoneSetRequest struct {
+	// Timezone Nieuwe tijdzone, bv. Europe/Amsterdam
+	Timezone string `json:"timezone"`
+}
+
+// TimezoneSetResponse defines model for TimezoneSetResponse.
+type TimezoneSetResponse struct {
+	Message *string `json:"message,omitempty"`
+	Success *bool   `json:"success,omitempty"`
+}
+
+// PowersaveStatusResponse defines model for PowersaveStatusResponse.
+type PowersaveStatusResponse = PowersaveStatus
+
+// TimezoneGetResponse defines model for TimezoneGetResponse.
+type TimezoneGetResponse = TimezoneInfo
+
 // PostApiThemeParams defines parameters for PostApiTheme.
 type PostApiThemeParams struct {
 	// Id Thema-id (zie /api/themes)
 	Id string `form:"id" json:"id"`
 }
 
-// PostApiTimezoneJSONBody defines parameters for PostApiTimezone.
-type PostApiTimezoneJSONBody struct {
-	// Timezone Nieuwe tijdzone, bv. Europe/Amsterdam
-	Timezone string `json:"timezone"`
-}
+// PostApiPowersaveJSONRequestBody defines body for PostApiPowersave for application/json ContentType.
+type PostApiPowersaveJSONRequestBody = PowersaveSetRequest
 
 // PostApiTimezoneJSONRequestBody defines body for PostApiTimezone for application/json ContentType.
-type PostApiTimezoneJSONRequestBody PostApiTimezoneJSONBody
+type PostApiTimezoneJSONRequestBody = TimezoneSetRequest
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -107,6 +220,17 @@ type ClientInterface interface {
 	// GetApiPing request
 	GetApiPing(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// DeleteApiPowersave request
+	DeleteApiPowersave(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetApiPowersave request
+	GetApiPowersave(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostApiPowersaveWithBody request with any body
+	PostApiPowersaveWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostApiPowersave(ctx context.Context, body PostApiPowersaveJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// PostApiSystemReboot request
 	PostApiSystemReboot(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -139,6 +263,54 @@ type ClientInterface interface {
 
 func (c *Client) GetApiPing(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetApiPingRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteApiPowersave(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteApiPowersaveRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetApiPowersave(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetApiPowersaveRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostApiPowersaveWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostApiPowersaveRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostApiPowersave(ctx context.Context, body PostApiPowersaveJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostApiPowersaveRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -292,6 +464,100 @@ func NewGetApiPingRequest(server string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewDeleteApiPowersaveRequest generates requests for DeleteApiPowersave
+func NewDeleteApiPowersaveRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/powersave")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetApiPowersaveRequest generates requests for GetApiPowersave
+func NewGetApiPowersaveRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/powersave")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostApiPowersaveRequest calls the generic PostApiPowersave builder with application/json body
+func NewPostApiPowersaveRequest(server string, body PostApiPowersaveJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostApiPowersaveRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostApiPowersaveRequestWithBody generates requests for PostApiPowersave with any type of body
+func NewPostApiPowersaveRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/powersave")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -616,6 +882,17 @@ type ClientWithResponsesInterface interface {
 	// GetApiPingWithResponse request
 	GetApiPingWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetApiPingResponse, error)
 
+	// DeleteApiPowersaveWithResponse request
+	DeleteApiPowersaveWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*DeleteApiPowersaveResponse, error)
+
+	// GetApiPowersaveWithResponse request
+	GetApiPowersaveWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetApiPowersaveResponse, error)
+
+	// PostApiPowersaveWithBodyWithResponse request with any body
+	PostApiPowersaveWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostApiPowersaveResponse, error)
+
+	PostApiPowersaveWithResponse(ctx context.Context, body PostApiPowersaveJSONRequestBody, reqEditors ...RequestEditorFn) (*PostApiPowersaveResponse, error)
+
 	// PostApiSystemRebootWithResponse request
 	PostApiSystemRebootWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*PostApiSystemRebootResponse, error)
 
@@ -649,18 +926,7 @@ type ClientWithResponsesInterface interface {
 type GetApiPingResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		// HeapFree Vrije heap in bytes
-		HeapFree *int `json:"heap_free,omitempty"`
-
-		// Now Unix epoch (ms)
-		Now      int64 `json:"now"`
-		Pong     bool  `json:"pong"`
-		UptimeMs int64 `json:"uptime_ms"`
-
-		// WifiMode Huidige Wi-Fi modus
-		WifiMode *string `json:"wifi_mode,omitempty"`
-	}
+	JSON200      *PingResponse
 }
 
 // Status returns HTTPResponse.Status
@@ -679,13 +945,76 @@ func (r GetApiPingResponse) StatusCode() int {
 	return 0
 }
 
+type DeleteApiPowersaveResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *PowersaveStatusResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteApiPowersaveResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteApiPowersaveResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetApiPowersaveResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *PowersaveStatusResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetApiPowersaveResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetApiPowersaveResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostApiPowersaveResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *PowersaveStatusResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PostApiPowersaveResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostApiPowersaveResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type PostApiSystemRebootResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		Message   *string `json:"message,omitempty"`
-		Rebooting *bool   `json:"rebooting,omitempty"`
-	}
+	JSON200      *RebootResponse
 }
 
 // Status returns HTTPResponse.Status
@@ -707,12 +1036,7 @@ func (r PostApiSystemRebootResponse) StatusCode() int {
 type DeleteApiThemeResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		ActiveId   string `json:"active_id"`
-		ActiveName string `json:"active_name"`
-		IsDefault  bool   `json:"is_default"`
-		Ok         bool   `json:"ok"`
-	}
+	JSON200      *ThemeDeleteOverrideResponse
 }
 
 // Status returns HTTPResponse.Status
@@ -734,13 +1058,7 @@ func (r DeleteApiThemeResponse) StatusCode() int {
 type GetApiThemeResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		ActiveId         string  `json:"active_id"`
-		ActiveName       string  `json:"active_name"`
-		HasSavedOverride bool    `json:"has_saved_override"`
-		IsDefault        bool    `json:"is_default"`
-		SavedOverrideId  *string `json:"saved_override_id"`
-	}
+	JSON200      *ThemeActiveResponse
 }
 
 // Status returns HTTPResponse.Status
@@ -762,12 +1080,7 @@ func (r GetApiThemeResponse) StatusCode() int {
 type PostApiThemeResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		ActiveId   string `json:"active_id"`
-		ActiveName string `json:"active_name"`
-		IsDefault  bool   `json:"is_default"`
-		Ok         bool   `json:"ok"`
-	}
+	JSON200      *ThemeSetResponse
 }
 
 // Status returns HTTPResponse.Status
@@ -789,12 +1102,7 @@ func (r PostApiThemeResponse) StatusCode() int {
 type GetApiThemesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *[]struct {
-		Id        string `json:"id"`
-		IsActive  bool   `json:"is_active"`
-		IsDefault bool   `json:"is_default"`
-		Name      string `json:"name"`
-	}
+	JSON200      *ThemeListResponse
 }
 
 // Status returns HTTPResponse.Status
@@ -816,18 +1124,7 @@ func (r GetApiThemesResponse) StatusCode() int {
 type DeleteApiTimezoneResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		// Dstoffset Zomertijd-offset in seconden na reset.
-		Dstoffset *int `json:"dstoffset,omitempty"`
-
-		// Gmtoffset Vaste offset t.o.v. UTC in seconden na reset.
-		Gmtoffset *int    `json:"gmtoffset,omitempty"`
-		Message   *string `json:"message,omitempty"`
-		Success   *bool   `json:"success,omitempty"`
-
-		// Timezone Actieve tijdzone na reset (standaard of automatisch)
-		Timezone *string `json:"timezone,omitempty"`
-	}
+	JSON200      *TimezoneDeleteResponse
 }
 
 // Status returns HTTPResponse.Status
@@ -849,14 +1146,7 @@ func (r DeleteApiTimezoneResponse) StatusCode() int {
 type GetApiTimezoneResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		// Dstoffset Zomertijd-offset in seconden (meestal 0 of 3600).
-		Dstoffset int `json:"dstoffset"`
-
-		// Gmtoffset Vaste offset t.o.v. UTC in seconden (zonder DST).
-		Gmtoffset int    `json:"gmtoffset"`
-		Timezone  string `json:"timezone"`
-	}
+	JSON200      *TimezoneGetResponse
 }
 
 // Status returns HTTPResponse.Status
@@ -878,10 +1168,7 @@ func (r GetApiTimezoneResponse) StatusCode() int {
 type PostApiTimezoneResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		Message *string `json:"message,omitempty"`
-		Success *bool   `json:"success,omitempty"`
-	}
+	JSON200      *TimezoneSetResponse
 }
 
 // Status returns HTTPResponse.Status
@@ -903,9 +1190,7 @@ func (r PostApiTimezoneResponse) StatusCode() int {
 type GetApiTimezonesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		Timezones *[]string `json:"timezones,omitempty"`
-	}
+	JSON200      *TimezoneListResponse
 }
 
 // Status returns HTTPResponse.Status
@@ -931,6 +1216,41 @@ func (c *ClientWithResponses) GetApiPingWithResponse(ctx context.Context, reqEdi
 		return nil, err
 	}
 	return ParseGetApiPingResponse(rsp)
+}
+
+// DeleteApiPowersaveWithResponse request returning *DeleteApiPowersaveResponse
+func (c *ClientWithResponses) DeleteApiPowersaveWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*DeleteApiPowersaveResponse, error) {
+	rsp, err := c.DeleteApiPowersave(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteApiPowersaveResponse(rsp)
+}
+
+// GetApiPowersaveWithResponse request returning *GetApiPowersaveResponse
+func (c *ClientWithResponses) GetApiPowersaveWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetApiPowersaveResponse, error) {
+	rsp, err := c.GetApiPowersave(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetApiPowersaveResponse(rsp)
+}
+
+// PostApiPowersaveWithBodyWithResponse request with arbitrary body returning *PostApiPowersaveResponse
+func (c *ClientWithResponses) PostApiPowersaveWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostApiPowersaveResponse, error) {
+	rsp, err := c.PostApiPowersaveWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostApiPowersaveResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostApiPowersaveWithResponse(ctx context.Context, body PostApiPowersaveJSONRequestBody, reqEditors ...RequestEditorFn) (*PostApiPowersaveResponse, error) {
+	rsp, err := c.PostApiPowersave(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostApiPowersaveResponse(rsp)
 }
 
 // PostApiSystemRebootWithResponse request returning *PostApiSystemRebootResponse
@@ -1037,18 +1357,85 @@ func ParseGetApiPingResponse(rsp *http.Response) (*GetApiPingResponse, error) {
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			// HeapFree Vrije heap in bytes
-			HeapFree *int `json:"heap_free,omitempty"`
-
-			// Now Unix epoch (ms)
-			Now      int64 `json:"now"`
-			Pong     bool  `json:"pong"`
-			UptimeMs int64 `json:"uptime_ms"`
-
-			// WifiMode Huidige Wi-Fi modus
-			WifiMode *string `json:"wifi_mode,omitempty"`
+		var dest PingResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
 		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteApiPowersaveResponse parses an HTTP response from a DeleteApiPowersaveWithResponse call
+func ParseDeleteApiPowersaveResponse(rsp *http.Response) (*DeleteApiPowersaveResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteApiPowersaveResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest PowersaveStatusResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetApiPowersaveResponse parses an HTTP response from a GetApiPowersaveWithResponse call
+func ParseGetApiPowersaveResponse(rsp *http.Response) (*GetApiPowersaveResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetApiPowersaveResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest PowersaveStatusResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostApiPowersaveResponse parses an HTTP response from a PostApiPowersaveWithResponse call
+func ParsePostApiPowersaveResponse(rsp *http.Response) (*PostApiPowersaveResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostApiPowersaveResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest PowersaveStatusResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1074,10 +1461,7 @@ func ParsePostApiSystemRebootResponse(rsp *http.Response) (*PostApiSystemRebootR
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Message   *string `json:"message,omitempty"`
-			Rebooting *bool   `json:"rebooting,omitempty"`
-		}
+		var dest RebootResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1103,12 +1487,7 @@ func ParseDeleteApiThemeResponse(rsp *http.Response) (*DeleteApiThemeResponse, e
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			ActiveId   string `json:"active_id"`
-			ActiveName string `json:"active_name"`
-			IsDefault  bool   `json:"is_default"`
-			Ok         bool   `json:"ok"`
-		}
+		var dest ThemeDeleteOverrideResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1134,13 +1513,7 @@ func ParseGetApiThemeResponse(rsp *http.Response) (*GetApiThemeResponse, error) 
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			ActiveId         string  `json:"active_id"`
-			ActiveName       string  `json:"active_name"`
-			HasSavedOverride bool    `json:"has_saved_override"`
-			IsDefault        bool    `json:"is_default"`
-			SavedOverrideId  *string `json:"saved_override_id"`
-		}
+		var dest ThemeActiveResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1166,12 +1539,7 @@ func ParsePostApiThemeResponse(rsp *http.Response) (*PostApiThemeResponse, error
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			ActiveId   string `json:"active_id"`
-			ActiveName string `json:"active_name"`
-			IsDefault  bool   `json:"is_default"`
-			Ok         bool   `json:"ok"`
-		}
+		var dest ThemeSetResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1197,12 +1565,7 @@ func ParseGetApiThemesResponse(rsp *http.Response) (*GetApiThemesResponse, error
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []struct {
-			Id        string `json:"id"`
-			IsActive  bool   `json:"is_active"`
-			IsDefault bool   `json:"is_default"`
-			Name      string `json:"name"`
-		}
+		var dest ThemeListResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1228,18 +1591,7 @@ func ParseDeleteApiTimezoneResponse(rsp *http.Response) (*DeleteApiTimezoneRespo
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			// Dstoffset Zomertijd-offset in seconden na reset.
-			Dstoffset *int `json:"dstoffset,omitempty"`
-
-			// Gmtoffset Vaste offset t.o.v. UTC in seconden na reset.
-			Gmtoffset *int    `json:"gmtoffset,omitempty"`
-			Message   *string `json:"message,omitempty"`
-			Success   *bool   `json:"success,omitempty"`
-
-			// Timezone Actieve tijdzone na reset (standaard of automatisch)
-			Timezone *string `json:"timezone,omitempty"`
-		}
+		var dest TimezoneDeleteResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1265,14 +1617,7 @@ func ParseGetApiTimezoneResponse(rsp *http.Response) (*GetApiTimezoneResponse, e
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			// Dstoffset Zomertijd-offset in seconden (meestal 0 of 3600).
-			Dstoffset int `json:"dstoffset"`
-
-			// Gmtoffset Vaste offset t.o.v. UTC in seconden (zonder DST).
-			Gmtoffset int    `json:"gmtoffset"`
-			Timezone  string `json:"timezone"`
-		}
+		var dest TimezoneGetResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1298,10 +1643,7 @@ func ParsePostApiTimezoneResponse(rsp *http.Response) (*PostApiTimezoneResponse,
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Message *string `json:"message,omitempty"`
-			Success *bool   `json:"success,omitempty"`
-		}
+		var dest TimezoneSetResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1327,9 +1669,7 @@ func ParseGetApiTimezonesResponse(rsp *http.Response) (*GetApiTimezonesResponse,
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Timezones *[]string `json:"timezones,omitempty"`
-		}
+		var dest TimezoneListResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

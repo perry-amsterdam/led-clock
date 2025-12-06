@@ -26,6 +26,11 @@ func main() {
 	setTheme := flag.String("set-theme", "", "Activeer theme via id (zie --list-themes)")
 	clearTheme := flag.Bool("clear-theme", false, "Herstel naar het standaard theme")
 
+	// Powersave
+	getPS := flag.Bool("get-powersave", false, "Toon de huidige powersave-status")
+	setPS := flag.String("set-powersave", "", "Zet powersave: on/off")
+	clearPS := flag.Bool("clear-powersave", false, "Reset powersave naar standaard")
+
 	// Overig
 	reboot := flag.Bool("reboot", false, "Reboot het device")
 	timeout := flag.Duration("timeout", 5*time.Second, "HTTP timeout")
@@ -43,7 +48,9 @@ func main() {
 	defer cancel()
 
 	// Is er een expliciete actie?
-	opSelected := *getTZ || *listTZ || *reboot || (*setTZ != "") || *clearTZ || *listThemes || *getTheme || (*setTheme != "") || *clearTheme
+	opSelected := *getTZ || *listTZ || *reboot || (*setTZ != "") || *clearTZ ||
+		*listThemes || *getTheme || (*setTheme != "") || *clearTheme ||
+		*getPS || (*setPS != "") || *clearPS
 
 	// --- 0) Ping (alleen wanneer geen gerichte actie is gevraagd)
 	if !opSelected {
@@ -129,7 +136,8 @@ func main() {
 			tz := derefString(res.JSON200.Timezone)
 			fmt.Printf("timezone cleared: %s\n", msg)
 			if tz != "" {
-				fmt.Printf("active timezone now: %s (gmtoffset=%d, dstoffset=%d) ", tz, derefInt(res.JSON200.Gmtoffset), derefInt(res.JSON200.Dstoffset))
+				fmt.Printf("active timezone now: %s (gmtoffset=%d, dstoffset=%d) ",
+					tz, derefInt(res.JSON200.Gmtoffset), derefInt(res.JSON200.Dstoffset))
 			}
 		} else {
 			fmt.Println("timezone clear request sent (check device)")
@@ -199,7 +207,6 @@ func main() {
 				if t.IsDefault {
 					defaultMark = "d"
 				}
-				// Voorbeeld: [* d] clock_classic (id=clock_classic)
 				fmt.Printf("[%s %s] %s (id=%s)\n", activeMark, defaultMark, t.Name, t.Id)
 			}
 			fmt.Println("\nLegenda: * = actief, d = default")
@@ -238,6 +245,64 @@ func main() {
 			fmt.Printf("theme reset naar default: %s (%s)\n", res.JSON200.ActiveName, res.JSON200.ActiveId)
 		} else {
 			fmt.Println("kon theme niet resetten")
+		}
+	}
+
+	// --- POWERSAVE: huidige status opvragen
+	if *getPS {
+		res, err := c.GetApiPowersaveWithResponse(ctx)
+		if err != nil {
+			log.Fatalf("GET /api/powersave: %v", err)
+		}
+		if *showRaw && res.Body != nil {
+			fmt.Println(string(res.Body))
+		} else if res.JSON200 != nil {
+			fmt.Printf("Powersave enabled: %v\n", res.JSON200.Enabled)
+		} else {
+			fmt.Println("kon powersave-status niet ophalen")
+		}
+		return
+	}
+
+	// --- POWERSAVE: instellen (on/off)
+	if *setPS != "" {
+		var v bool
+		if *setPS == "on" {
+			v = true
+		} else if *setPS == "off" {
+			v = false
+		} else {
+			log.Fatalf("--set-powersave verwacht 'on' of 'off'")
+		}
+
+		body := ledclock.PostApiPowersaveJSONRequestBody{Enabled: v}
+		res, err := c.PostApiPowersaveWithResponse(ctx, body)
+		if err != nil {
+			log.Fatalf("POST /api/powersave: %v", err)
+		}
+
+		if *showRaw && res.Body != nil {
+			fmt.Println(string(res.Body))
+		} else if res.JSON200 != nil && res.JSON200.Success {
+			fmt.Printf("powersave updated: %v\n", v)
+		} else {
+			fmt.Println("powersave update failed")
+		}
+	}
+
+	// --- POWERSAVE: resetten
+	if *clearPS {
+		res, err := c.DeleteApiPowersaveWithResponse(ctx)
+		if err != nil {
+			log.Fatalf("DELETE /api/powersave: %v", err)
+		}
+
+		if *showRaw && res.Body != nil {
+			fmt.Println(string(res.Body))
+		} else if res.JSON200 != nil && res.JSON200.Success {
+			fmt.Println("powersave reset naar standaard")
+		} else {
+			fmt.Println("kon powersave niet resetten")
 		}
 	}
 }
