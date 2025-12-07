@@ -73,6 +73,7 @@ void task_time(void*)
 			if (ok)
 			{
 				xEventGroupClearBits(g_sysEvents, EVT_TIME_UPDATE_RETRY);
+				xEventGroupSetBits(g_sysEvents, EVT_TIME_READY);
 			}
 		}
 

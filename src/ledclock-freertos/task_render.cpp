@@ -8,12 +8,15 @@
 #include <theme.h>
 #include <theme_manager.h>
 
+extern std::atomic<bool> gPowerSaveMode;
+
 void task_render(void*)
 {
 	vTaskDelay(pdMS_TO_TICKS(50));
 	LOG_STACK_WATERMARK("render:init");
 
-	int direction = 0;
+	bool ps = gPowerSaveMode.load();
+	Serial.printf("PowerSaveMode = %s\n", ps ? "true" : "false");
 
 	EventBits_t bits = xEventGroupGetBits(g_sysEvents);
 	while (!(bits & EVT_TIME_READY))

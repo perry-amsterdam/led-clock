@@ -48,12 +48,10 @@ void enterPowerSaveMode()
 	gPowerSaveMode = true;
 }
 
-
 void exitPowerSaveMode()
 {
 	gPowerSaveMode = false;
 }
-
 
 bool isPowerSaveMode()
 {
