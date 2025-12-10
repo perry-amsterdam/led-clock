@@ -92,7 +92,7 @@ class _LedClockControlPanelState extends State<LedClockControlPanel> {
   Widget build(BuildContext context) {
     return AbsorbPointer(
       absorbing: busy,
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
