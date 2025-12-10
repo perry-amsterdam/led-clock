@@ -69,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          body: LedClockControlPanel(host: host),
+          body: SafeArea(child: LedClockControlPanel(host: host)),
         );
       },
     );
