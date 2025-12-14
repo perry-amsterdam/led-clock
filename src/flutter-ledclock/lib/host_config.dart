@@ -50,10 +50,7 @@ class HostConfig {
       final addresses = await InternetAddress.lookup(defaultHost);
       if (addresses.isEmpty) return;
 
-      final ip = addresses.firstWhere(
-        (a) => a.type == InternetAddressType.IPv4,
-        orElse: () => addresses.first,
-      );
+      final ip = addresses.firstWhere((a) => a.type == InternetAddressType.IPv4, orElse: () => addresses.first);
 
       _resolvedIp = ip.address;
 
@@ -93,4 +90,3 @@ class HostConfig {
     }
   }
 }
-
