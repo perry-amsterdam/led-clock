@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'splash_screen.dart';
 import 'host_config.dart';
 import 'led_clock_api.dart';
-import 'led_clock_widgets.dart'; // of waar LedClockControlPanel staat
+import 'led_clock_widgets.dart';
+import 'widgets/device_time_bar.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,7 +70,15 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          body: SafeArea(child: LedClockControlPanel(host: host)),
+          body: SafeArea(
+            child: Column(
+              children: [
+                DeviceTimeBar(host: host, height: 64, blinkColon: false),
+                const Divider(height: 1),
+                Expanded(child: LedClockControlPanel(host: host)),
+              ],
+            ),
+          ),
         );
       },
     );
