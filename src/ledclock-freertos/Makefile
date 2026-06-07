@@ -5,6 +5,9 @@ UPLOAD_SPEED  ?= 921600
 MONITOR_BAUD  ?= 115200
 BUILD_DIR     ?= build
 LIBS_FILE     ?= libs.txt
+# Extra libraries to install when libs.txt is missing or incomplete.
+# Keep names with spaces quoted in the shell loop below.
+LIB_DEPS      ?= "Adafruit NeoPixel" "ArduinoJson"
 ARDUINO_CLI = arduino-cli
 SKETCH_DIR ?= $(CURDIR)
 LIBRARIES_DIR ?= $(CURDIR)/libraries
@@ -29,14 +32,23 @@ FQBN_BASE     ?= $(CORE_ID):$(BOARD_BASE)
 all: build
 
 # ----- Dependencies (core + optional libs) -----
-deps: ## Install ESP32 core and libraries from $(LIBS_FILE) if present
-	arduino-cli core update-index
-	arduino-cli core install $(CORE_ID)
+deps: ## Install ESP32 core and required libraries
+	$(ARDUINO_CLI) core update-index
+	$(ARDUINO_CLI) core install $(CORE_ID)
+	@echo "Installing default libraries: $(LIB_DEPS)"; \
+	for lib in $(LIB_DEPS); do \
+		echo "Installing $$lib"; \
+		$(ARDUINO_CLI) lib install "$$lib"; \
+	done
 	@if [ -f "$(LIBS_FILE)" ]; then \
-		echo "Installing libraries from $(LIBS_FILE)..."; \
-		arduino-cli lib install $$(tr '\n' ' ' < "$(LIBS_FILE)"); \
+		echo "Installing extra libraries from $(LIBS_FILE)..."; \
+		while IFS= read -r lib || [ -n "$$lib" ]; do \
+			case "$$lib" in ""|\#*) continue ;; esac; \
+			echo "Installing $$lib"; \
+			$(ARDUINO_CLI) lib install "$$lib"; \
+		done < "$(LIBS_FILE)"; \
 	else \
-		echo "No $(LIBS_FILE) found. Skipping library install."; \
+		echo "No $(LIBS_FILE) found. Only default libraries were installed."; \
 	fi
 
 # ----- Inspect available board options for your installed core -----
@@ -45,13 +57,19 @@ board-details: ## Show board menu options for $(FQBN_BASE)
 
 # ----- Build -----
 build: ## Compile the sketch into $(BUILD_DIR)
+	@for lib in "Adafruit NeoPixel" "ArduinoJson"; do \
+		if ! $(ARDUINO_CLI) lib list | grep -q "$$lib"; then \
+			echo "Missing library: $$lib. Run: make deps"; \
+			exit 1; \
+		fi; \
+	done
 	@mkdir -p "$(BUILD_DIR)"
 	@echo "Building for FQBN: $(FQBN)"
 	$(ARDUINO_CLI) compile --libraries "$(LIBRARIES_DIR)" --fqbn "$(FQBN)" --build-path "$(BUILD_DIR)" "$(SKETCH)"
 
 # ----- Upload/Flash (reuses artifacts from BUILD_DIR) -----
 flash: build ## Upload (flash) prebuilt artifacts from $(BUILD_DIR)
-	$(ARDUINO_CLI) upload -p $(PORT) -p "$(PORT)" --fqbn "$(FQBN)" --input-dir "$(BUILD_DIR)"
+	$(ARDUINO_CLI) upload -p "$(PORT)" --fqbn "$(FQBN)" --input-dir "$(BUILD_DIR)"
 
 upload: flash ## Alias for flash
 	@true
@@ -114,4 +132,4 @@ check: lint cppcheck
 
 .PHONY: verbose
 verbose:
-	$(ARDUINO_CLI) compile -v --libraries "$(LIBRARIES_DIR)" --build-path "$(BUILD_DIR)" "$(SKETCH_DIR)"
+	$(ARDUINO_CLI) compile -v --libraries "$(LIBRARIES_DIR)" --fqbn "$(FQBN)" --build-path "$(BUILD_DIR)" "$(SKETCH_DIR)"
